@@ -378,12 +378,49 @@ test.describe("估算核心流程", () => {
     await expect(
       page.locator('.trace-list [data-math-renderer="text"]'),
     ).toHaveCount(0);
-    expect(
-      await page.evaluate(
-        () =>
+    const overflowDiagnostics = await page.evaluate(() => {
+      const viewportWidth = document.documentElement.clientWidth;
+      const overflowingElements = Array.from(
+        document.querySelectorAll<HTMLElement>("body *"),
+      )
+        .map((element) => {
+          const rect = element.getBoundingClientRect();
+          const style = window.getComputedStyle(element);
+
+          return {
+            selector: [
+              element.tagName.toLowerCase(),
+              element.id ? `#${element.id}` : "",
+              ...Array.from(element.classList, (name) => `.${name}`),
+            ].join(""),
+            clientWidth: element.clientWidth,
+            scrollWidth: element.scrollWidth,
+            left: Math.round(rect.left),
+            right: Math.round(rect.right),
+            overflowX: style.overflowX,
+            minWidth: style.minWidth,
+          };
+        })
+        .filter(
+          (element) =>
+            element.right > viewportWidth + 1 ||
+            element.left < -1 ||
+            element.scrollWidth > element.clientWidth + 1,
+        )
+        .slice(0, 20);
+
+      return {
+        clientWidth: viewportWidth,
+        hasPageOverflow:
           document.documentElement.scrollWidth >
           document.documentElement.clientWidth,
-      ),
+        overflowingElements,
+        scrollWidth: document.documentElement.scrollWidth,
+      };
+    });
+    expect(
+      overflowDiagnostics.hasPageOverflow,
+      `Horizontal overflow diagnostics: ${JSON.stringify(overflowDiagnostics)}`,
     ).toBe(false);
     await expectNoSeriousAccessibilityIssues(page);
 
