@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { MathFormula } from "@/components/content/math-formula";
 import { Callout } from "@/components/layout/callout";
 import { PageHeader } from "@/components/layout/page-header";
 import { publicDemoParameterSet } from "@/config/parameter-sets/public-demo";
 import { createPublicPageMetadata } from "@/config/site";
+import { METHODOLOGY_MATH } from "@/features/estimation/domain";
 
 export const metadata: Metadata = createPublicPageMetadata({
   title: "公式與定義",
@@ -51,73 +53,73 @@ const tableOfContents = [
 
 const commonVariables: readonly VariableRow[] = [
   {
-    symbol: "qᵢ",
+    symbol: METHODOLOGY_MATH.symbols.quantity,
     name: "Quantity",
     definition: "第 i 個工作項目的數量。",
     unit: "item unit",
     range: "> 0",
   },
   {
-    symbol: "uᵢ",
+    symbol: METHODOLOGY_MATH.symbols.unitEffort,
     name: "Unit Effort",
     definition: "每單位基礎工時。",
     unit: "person-hour／unit",
     range: "≥ 0.25",
   },
   {
-    symbol: "cᵢ",
+    symbol: METHODOLOGY_MATH.symbols.complexityMultiplier,
     name: "Complexity Multiplier",
     definition: "第 i 個工作項目的複雜度乘數。",
     unit: "dimensionless",
   },
   {
-    symbol: "rᵢ,ₖ",
+    symbol: METHODOLOGY_MATH.symbols.riskMultiplier,
     name: "Risk Multiplier",
     definition: "第 k 個風險對工作項目 i 的乘數。",
     unit: "dimensionless",
   },
   {
-    symbol: "αₚ",
+    symbol: METHODOLOGY_MATH.symbols.phaseLoading,
     name: "Phase Loading",
     definition: "第 p 個 cross-cutting phase 的比例。",
     unit: "ratio",
   },
   {
-    symbol: "Hₘ",
+    symbol: METHODOLOGY_MATH.symbols.mostLikelyEffort,
     name: "Most-likely Effort",
     definition:
       "納入 implementation、cross-cutting 與固定工時後的最可能工作量。",
     unit: "person-hour",
   },
   {
-    symbol: "Hₒ／Hₚ",
+    symbol: METHODOLOGY_MATH.symbols.threePointBounds,
     name: "Optimistic／Pessimistic Effort",
     definition: "Three-point Estimate 的樂觀與悲觀工作量。",
     unit: "person-hour",
   },
   {
-    symbol: "Rₕ",
+    symbol: METHODOLOGY_MATH.symbols.hourlyRate,
     name: "Hourly Rate",
     definition: "Delivery labor 的基礎 blended hourly cost。",
     unit: "TWD／person-hour",
     range: "≥ 0",
   },
   {
-    symbol: "D",
+    symbol: METHODOLOGY_MATH.symbols.directCost,
     name: "Direct Cost",
     definition: "不隨工時變動的授權、設備、差旅等成本。",
     unit: "TWD",
     range: "≥ 0",
   },
   {
-    symbol: "o／m／t",
+    symbol: METHODOLOGY_MATH.symbols.commercialRates,
     name: "Overhead／Vendor Markup／Tax Rate",
     definition: "管銷間接成本、成本加成與稅率。",
     unit: "ratio",
     range: "≥ 0",
   },
   {
-    symbol: "V",
+    symbol: METHODOLOGY_MATH.symbols.vendorQuote,
     name: "Vendor Quote",
     definition: "正規化為未稅口徑後的乙方報價。",
     unit: "TWD",
@@ -127,10 +129,17 @@ const commonVariables: readonly VariableRow[] = [
 
 function Formula({ expression, description }: FormulaProps) {
   return (
-    <div className="formula-block" role="math" aria-label={description}>
-      <span aria-hidden="true">{expression}</span>
-    </div>
+    <MathFormula
+      className="formula-block"
+      display
+      expression={expression}
+      label={description}
+    />
   );
+}
+
+function InlineFormula({ expression, description }: FormulaProps) {
+  return <MathFormula expression={expression} label={description} />;
 }
 
 function VariableTable({
@@ -162,7 +171,10 @@ function VariableTable({
           {rows.map((row) => (
             <tr key={row.symbol}>
               <th scope="row">
-                <code>{row.symbol}</code>
+                <MathFormula
+                  expression={row.symbol}
+                  label={`${row.name}：${row.definition}`}
+                />
               </th>
               <td>{row.name}</td>
               <td>{row.definition}</td>
@@ -331,11 +343,11 @@ export default function MethodologyPage() {
               implementation effort。
             </p>
             <Formula
-              expression="Hᵢ,base = qᵢ × uᵢ"
+              expression={METHODOLOGY_MATH.formulas.workItemBaseEffort}
               description="第 i 個工作項目的基礎工時，等於數量乘以每單位工時。"
             />
             <Formula
-              expression="Hbase = Σ Hᵢ,base"
+              expression={METHODOLOGY_MATH.formulas.aggregateBaseEffort}
               description="全部工作項目的基礎工時，等於各項目基礎工時總和。"
             />
             <VariableTable
@@ -344,7 +356,7 @@ export default function MethodologyPage() {
                 commonVariables[0]!,
                 commonVariables[1]!,
                 {
-                  symbol: "Hᵢ,base",
+                  symbol: METHODOLOGY_MATH.symbols.itemBaseEffort,
                   name: "Item Base Effort",
                   definition: "單一工作項目未套用複雜度與風險前的工時。",
                   unit: "person-hour",
@@ -355,7 +367,11 @@ export default function MethodologyPage() {
             <div className="worked-example">
               <h3>代入範例</h3>
               <p>
-                兩個 endpoint、每個 16 person-hours：<code>2 × 16 = 32</code>{" "}
+                兩個 endpoint、每個 16 person-hours：
+                <InlineFormula
+                  expression={METHODOLOGY_MATH.examples.baseEffort}
+                  description="二乘以十六等於三十二。"
+                />{" "}
                 person-hours。
               </p>
             </div>
@@ -380,7 +396,7 @@ export default function MethodologyPage() {
               反映單一工作項目的規則、狀態、角色、例外、整合與非功能要求，不等同於整體專案風險。
             </p>
             <Formula
-              expression="Hᵢ,complex = Hᵢ,base × cᵢ"
+              expression={METHODOLOGY_MATH.formulas.workItemComplexity}
               description="複雜度調整工時，等於項目基礎工時乘以複雜度乘數。"
             />
             <div
@@ -413,7 +429,11 @@ export default function MethodologyPage() {
               <h3>代入範例</h3>
               <p>
                 Base Effort 32 person-hours、High complexity 1.35：
-                <code>32 × 1.35 = 43.2</code> person-hours。
+                <InlineFormula
+                  expression={METHODOLOGY_MATH.examples.complexity}
+                  description="三十二乘以一點三五等於四十三點二。"
+                />{" "}
+                person-hours。
               </p>
             </div>
             <p>
@@ -431,11 +451,11 @@ export default function MethodologyPage() {
               影響的工作項目。多個乘數以乘法組合，讓每個來源仍能獨立追蹤。
             </p>
             <Formula
-              expression="Hᵢ,adj = Hᵢ,complex × ∏ rᵢ,ₖ"
+              expression={METHODOLOGY_MATH.formulas.workItemRiskAdjusted}
               description="調整後工時，等於複雜度調整工時乘以所有適用的風險乘數。"
             />
             <Formula
-              expression="Hadj = Σ Hᵢ,adj"
+              expression={METHODOLOGY_MATH.formulas.aggregateAdjustedEffort}
               description="全體調整後工時，等於各工作項目調整後工時總和。"
             />
             <div
@@ -481,7 +501,11 @@ export default function MethodologyPage() {
               <p>
                 43.2 person-hours 套用 scenario override Integration risk 1.20
                 時（此數值只為對齊 worked example，不是 canonical High 1.15）：
-                <code>43.2 × 1.20 = 51.84</code> person-hours。
+                <InlineFormula
+                  expression={METHODOLOGY_MATH.examples.risk}
+                  description="四十三點二乘以一點二零等於五十一點八四。"
+                />{" "}
+                person-hours。
               </p>
             </div>
             <p>
@@ -507,14 +531,28 @@ export default function MethodologyPage() {
             <p>
               Business Analysis、Architecture、Project Management、Quality
               Assurance、Deployment 與 Documentation 等活動，以 adjusted
-              implementation effort 為分母計算。
+              implementation effort 為基礎計算。對每個 phase{" "}
+              <InlineFormula
+                expression={METHODOLOGY_MATH.symbols.phase}
+                description="第 p 個 phase。"
+              />
+              ，
+              <InlineFormula
+                expression={METHODOLOGY_MATH.symbols.eligibleItemSet}
+                description="第 p 個 phase 尚未被工作項目涵蓋的 eligible item 集合。"
+              />{" "}
+              只包含尚未在工作項目內涵蓋該 phase 的 eligible items。
             </p>
             <Formula
-              expression="Hcross = Hadj × Σ αₚ"
-              description="Cross-cutting 工時，等於調整後實作工時乘以各 phase loading 比例總和。"
+              expression={METHODOLOGY_MATH.formulas.phaseCrossCutting}
+              description="第 p 個 Cross-cutting phase 工時，等於該 phase loading 比例乘以 eligible 工作項目的調整後工時總和。"
             />
             <Formula
-              expression="Hₘ = Hadj + Hcross + Hfixed"
+              expression={METHODOLOGY_MATH.formulas.aggregateCrossCutting}
+              description="Cross-cutting 總工時，等於各 phase 工時的總和。"
+            />
+            <Formula
+              expression={METHODOLOGY_MATH.formulas.mostLikelyEffort}
               description="最可能工作量，等於調整後實作工時、跨階段工時與固定額外工時的總和。"
             />
             <div
@@ -552,7 +590,11 @@ export default function MethodologyPage() {
               <h3>代入範例</h3>
               <p>
                 Adjusted effort 51.84、loading 合計 40%、無固定工時：
-                <code>51.84 × (1 + 0.40) = 72.576</code> person-hours。
+                <InlineFormula
+                  expression={METHODOLOGY_MATH.examples.crossCutting}
+                  description="五十一點八四乘以一加零點四零，等於七十二點五七六。"
+                />{" "}
+                person-hours。
               </p>
             </div>
             <p>
@@ -575,25 +617,25 @@ export default function MethodologyPage() {
               將最可能工作量轉為樂觀、最可能與悲觀三點。介面用風險描述協助選擇，不要求使用者具統計背景。
             </p>
             <Formula
-              expression="Hₒ = Hₘ × (1 − d)"
+              expression={METHODOLOGY_MATH.formulas.optimisticEffort}
               description="樂觀工作量，等於最可能工作量乘以下行情境比例。"
             />
             <Formula
-              expression="Hₚ = Hₘ × (1 + u)"
+              expression={METHODOLOGY_MATH.formulas.pessimisticEffort}
               description="悲觀工作量，等於最可能工作量乘以上行情境比例。"
             />
             <VariableTable
               caption="Three-point Estimate 變數"
               rows={[
                 {
-                  symbol: "d",
+                  symbol: METHODOLOGY_MATH.symbols.downsideRatio,
                   name: "Downside uncertainty",
                   definition: "相對於 Most-likely Effort 的樂觀下降比例。",
                   unit: "ratio",
                   range: "0 ≤ d ≤ 0.50",
                 },
                 {
-                  symbol: "u",
+                  symbol: METHODOLOGY_MATH.symbols.upsideRatio,
                   name: "Upside uncertainty",
                   definition: "相對於 Most-likely Effort 的悲觀增加比例。",
                   unit: "ratio",
@@ -636,8 +678,23 @@ export default function MethodologyPage() {
             <div className="worked-example">
               <h3>代入範例</h3>
               <p>
-                Hₘ = 72.576、d = 0.15、u = 0.30 時，Hₒ = 61.6896、Hₚ = 94.3488
-                person-hours，並保持 <code>0 ≤ Hₒ ≤ Hₘ ≤ Hₚ</code>。
+                <InlineFormula
+                  expression={METHODOLOGY_MATH.examples.threePointInputs}
+                  description="最可能工作量七十二點五七六、下行比例零點一五、上行比例零點三零。"
+                />{" "}
+                時，
+                <InlineFormula
+                  expression={METHODOLOGY_MATH.examples.threePointBounds}
+                  description="樂觀工作量六十一點六八九六、悲觀工作量九十四點三四八八。"
+                />{" "}
+                person-hours，並保持{" "}
+                <InlineFormula
+                  expression={
+                    METHODOLOGY_MATH.invariants.orderedThreePointEffort
+                  }
+                  description="樂觀工作量不大於最可能工作量，最可能工作量不大於悲觀工作量，且皆不小於零。"
+                />
+                。
               </p>
             </div>
             <CalculatorFieldLink href="/estimates/new#uncertainty">
@@ -651,26 +708,38 @@ export default function MethodologyPage() {
               approximation 產生 percentile。
             </p>
             <Formula
-              expression="μ = (Hₒ + 4Hₘ + Hₚ) ÷ 6"
+              expression={METHODOLOGY_MATH.formulas.pertMean}
               description="PERT 期望工作量，等於樂觀工時加四倍最可能工時再加悲觀工時，總和除以六。"
             />
             <Formula
-              expression="σ = (Hₚ − Hₒ) ÷ 6"
+              expression={METHODOLOGY_MATH.formulas.standardDeviation}
               description="標準差近似，等於悲觀與樂觀工時差除以六。"
             />
             <Formula
-              expression="HPₓ = max(0, μ + zₓσ)"
+              expression={METHODOLOGY_MATH.formulas.percentileEffort}
               description="指定 percentile 的工作量，等於期望值加上 z-score 乘以標準差，最低為零。"
             />
             <Formula
-              expression={`HP50 = μ　　HP80 = max(0, μ + ${publicDemoParameterSet.calculationPolicy.p80ZScore}σ)`}
-              description={`P50 等於 PERT 期望值；P80 使用 z-score ${publicDemoParameterSet.calculationPolicy.p80ZScore}。`}
+              expression={METHODOLOGY_MATH.formulas.p50Effort}
+              description="P50 等於 PERT 期望值。"
+            />
+            <Formula
+              expression={METHODOLOGY_MATH.formulas.p80Effort}
+              description={`P80 等於零與 PERT 期望值加上 z-score ${publicDemoParameterSet.calculationPolicy.p80ZScore} 乘以標準差兩者中的較大值。`}
             />
             <div className="worked-example">
               <h3>代入範例</h3>
               <p>
-                前述三點得到 P50 = 74.3904、σ = 5.4432；P80 約為
-                <code>74.3904 + 0.8416 × 5.4432 = 78.97139712</code>{" "}
+                前述三點得到{" "}
+                <InlineFormula
+                  expression={METHODOLOGY_MATH.examples.p50AndSigma}
+                  description="P50 為七十四點三九零四，標準差為五點四四三二。"
+                />
+                ；P80 約為{" "}
+                <InlineFormula
+                  expression={METHODOLOGY_MATH.examples.p80}
+                  description="七十四點三九零四加上零點八四一六乘以五點四四三二，等於七十八點九七一三九七一二。"
+                />{" "}
                 person-hours。畫面最後才顯示為 74.4 與 79.0 小時。
               </p>
             </div>
@@ -695,18 +764,18 @@ export default function MethodologyPage() {
               cost，再加入不隨工時變動的 direct cost。
             </p>
             <Formula
-              expression="Clabor,ₓ = HPₓ × Rₕ"
+              expression={METHODOLOGY_MATH.formulas.laborCost}
               description="指定 percentile 的人力成本，等於該 percentile 工時乘以每小時成本。"
             />
             <Formula
-              expression="Cdelivery,ₓ = Clabor,ₓ + D"
+              expression={METHODOLOGY_MATH.formulas.deliveryCost}
               description="交付成本，等於人力成本加上直接成本。"
             />
             <VariableTable
               caption="Engineering Cost 變數"
               rows={[
                 {
-                  symbol: "HPₓ",
+                  symbol: METHODOLOGY_MATH.symbols.percentileEffort,
                   name: "Percentile Effort",
                   definition: "P50 或 P80 person-hours。",
                   unit: "person-hour",
@@ -744,43 +813,43 @@ export default function MethodologyPage() {
               engineering cost 形成。
             </p>
             <Formula
-              expression="Cfull,ₓ = Cdelivery,ₓ × (1 + o) + W"
+              expression={METHODOLOGY_MATH.formulas.fullCost}
               description="完整成本，等於交付成本加上 overhead，再加固定 warranty 成本。"
             />
             <Formula
-              expression="QexTax,ₓ = Cfull,ₓ × (1 + m)"
+              expression={METHODOLOGY_MATH.formulas.quoteExTax}
               description="未稅模型參考報價，等於完整成本乘以一加 Vendor Markup。"
             />
             <Formula
-              expression="QincTax,ₓ = QexTax,ₓ × (1 + t)"
+              expression={METHODOLOGY_MATH.formulas.quoteIncTax}
               description="含稅模型參考報價，等於未稅參考報價乘以一加稅率。"
             />
             <VariableTable
               caption="商業加成變數"
               rows={[
                 {
-                  symbol: "o",
+                  symbol: METHODOLOGY_MATH.symbols.overheadRatio,
                   name: "Overhead Rate",
                   definition: "供應商管銷與間接成本比例。",
                   unit: "ratio",
                   range: "≥ 0",
                 },
                 {
-                  symbol: "W",
+                  symbol: METHODOLOGY_MATH.symbols.warrantyCost,
                   name: "Warranty Cost",
                   definition: "保固與 hypercare 的固定成本。",
                   unit: "TWD",
                   range: "≥ 0",
                 },
                 {
-                  symbol: "m",
+                  symbol: METHODOLOGY_MATH.symbols.markupRatio,
                   name: "Vendor Markup",
                   definition: "加在成本上的比例，不是 Gross Margin。",
                   unit: "ratio",
                   range: "≥ 0",
                 },
                 {
-                  symbol: "t",
+                  symbol: METHODOLOGY_MATH.symbols.taxRate,
                   name: "Tax Rate",
                   definition: "用於含稅顯示與報價正規化的稅率。",
                   unit: "ratio",
@@ -790,8 +859,21 @@ export default function MethodologyPage() {
             />
             <Callout title="Markup 不等於 Gross Margin" tone="warning">
               <p>
-                本模型使用 <code>C × (1 + m)</code>。若使用 Gross Margin
-                <code>g</code>，公式會是 <code>C ÷ (1 − g)</code>
+                本模型使用{" "}
+                <InlineFormula
+                  expression={METHODOLOGY_MATH.formulas.markup}
+                  description="成本乘以一加 markup。"
+                />
+                。若使用 Gross Margin{" "}
+                <InlineFormula
+                  expression={METHODOLOGY_MATH.symbols.grossMargin}
+                  description="Gross Margin g。"
+                />
+                ，公式會是{" "}
+                <InlineFormula
+                  expression={METHODOLOGY_MATH.formulas.grossMargin}
+                  description="成本除以一減 Gross Margin。"
+                />
                 ；MVP 不混用兩種定義，也不把 P80 uncertainty 再命名為 risk
                 reserve 後重複加價。
               </p>
@@ -810,18 +892,28 @@ export default function MethodologyPage() {
               模型與乙方報價預設都正規化成未稅口徑再比較，避免把含稅與未稅數字直接相減。
             </p>
             <Formula
-              expression="VexTax = VincTax ÷ (1 + t)"
+              expression={METHODOLOGY_MATH.formulas.normalizeTaxInclusiveQuote}
               description="含稅乙方報價的未稅金額，等於含稅金額除以一加稅率。"
             />
             <p>
-              若輸入本來就是未稅報價，則 <code>VexTax = V</code>
+              若輸入本來就是未稅報價，則{" "}
+              <InlineFormula
+                expression={
+                  METHODOLOGY_MATH.formulas.normalizeTaxExclusiveQuote
+                }
+                description="未稅乙方報價等於輸入報價。"
+              />
               。結果可另外顯示含稅數字，但 variance 使用相同未稅基準。
             </p>
             <div className="worked-example">
               <h3>代入範例</h3>
               <p>
                 含稅報價 105,000 TWD、tax rate 5%：未稅報價為
-                <code>105,000 ÷ 1.05 = 100,000</code> TWD。
+                <InlineFormula
+                  expression={METHODOLOGY_MATH.examples.normalizeTax}
+                  description="十萬五千除以一點零五，等於十萬。"
+                />{" "}
+                TWD。
               </p>
             </div>
             <p>
@@ -843,34 +935,38 @@ export default function MethodologyPage() {
               benchmark 為分母換算差異率與 ratio。
             </p>
             <Formula
-              expression="Δ50 = VexTax − QexTax,50"
+              expression={METHODOLOGY_MATH.formulas.vendorDifferenceP50}
               description="相對 P50 的金額差，等於乙方未稅報價減去 P50 未稅參考報價。"
             />
             <Formula
-              expression="Variance50 = Δ50 ÷ QexTax,50　（QexTax,50 > 0）"
+              expression={METHODOLOGY_MATH.formulas.vendorVarianceP50}
               description="相對 P50 的差異率，在 P50 參考報價大於零時，等於金額差除以 P50 參考報價。"
             />
             <Formula
-              expression="Δ80 = VexTax − QexTax,80"
+              expression={METHODOLOGY_MATH.formulas.vendorDifferenceP80}
               description="相對 P80 的金額差，等於乙方未稅報價減去 P80 未稅參考報價。"
             />
             <Formula
-              expression="Variance80 = Δ80 ÷ QexTax,80　（QexTax,80 > 0）"
+              expression={METHODOLOGY_MATH.formulas.vendorVarianceP80}
               description="相對 P80 的差異率，在 P80 參考報價大於零時，等於金額差除以 P80 參考報價。"
+            />
+            <Formula
+              expression={METHODOLOGY_MATH.formulas.vendorQuoteRatio}
+              description="指定 percentile 的報價比率，在參考報價大於零時，等於乙方未稅報價除以模型未稅參考報價。"
             />
             <VariableTable
               caption="Vendor Quote Variance 變數"
               rows={[
                 commonVariables[10]!,
                 {
-                  symbol: "QexTax,50／80",
+                  symbol: METHODOLOGY_MATH.symbols.benchmarkQuotes,
                   name: "Benchmark Quote Ex Tax",
                   definition: "模型 P50／P80 的未稅參考報價。",
                   unit: "TWD",
                   range: "≥ 0",
                 },
                 {
-                  symbol: "Variance50／80",
+                  symbol: METHODOLOGY_MATH.symbols.benchmarkVariances,
                   name: "Quote Variance",
                   definition: "乙方報價相對模型參考報價的差異率。",
                   unit: "ratio",

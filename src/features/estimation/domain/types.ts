@@ -312,6 +312,10 @@ export interface CalculationTraceNode {
   readonly id: string;
   readonly metric: string;
   readonly formulaId: string;
+  /**
+   * Stable snapshot text retained for export compatibility. Presentation
+   * resolves it to source-controlled LaTeX; the engine never evaluates it.
+   */
   readonly formula: string;
   readonly operands: readonly TraceOperand[];
   readonly result: CanonicalDecimalString;

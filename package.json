@@ -1,6 +1,6 @@
 {
   "name": "estimate-trace",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "private": true,
   "description": "Traceable software requirement cost estimation and vendor quote analysis for IT business analysts.",
   "license": "MIT",
@@ -24,6 +24,7 @@
   },
   "dependencies": {
     "decimal.js": "10.6.0",
+    "katex": "0.18.1",
     "next": "16.2.12",
     "react": "19.2.8",
     "react-dom": "19.2.8",

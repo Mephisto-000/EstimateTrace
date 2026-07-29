@@ -118,7 +118,7 @@ Next.js static rendering 需要 source-controlled inline bootstrap，因此目�
 | Threat                           | Primary controls                                                                     | Residual risk                                           |
 | -------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------- |
 | 使用者輸入敏感資料               | 全流程 warning、browser-only、無 analytics                                           | Shared device、extension、screenshot、export 仍可能洩漏 |
-| XSS／HTML injection              | React escaping、strict validation、no user HTML、CSP                                 | Production CSP 仍需 inline bootstrap；持續測試          |
+| XSS／HTML injection              | React escaping、strict validation、KaTeX `trust=false`、no user HTML、CSP            | Production CSP 仍需 inline bootstrap；持續測試          |
 | Malicious／oversized import      | 1 MB cap、strict schema、prototype guard、staged commit                              | Browser resource exhaustion 仍需 boundary tests         |
 | Corrupted local storage          | Validate-on-read、error isolation、in-memory fallback                                | Local data 可能無法復原                                 |
 | Formula tampering／silent drift  | Canonical parameters、model version、snapshot、trace、regression tests               | Public sample 不等於正式核價 control                    |

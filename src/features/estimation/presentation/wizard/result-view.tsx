@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import { MathFormula } from "@/components/content/math-formula";
 import type { EstimateCaseDocument } from "@/features/estimation/application/estimate-case";
+import { getCalculationFormulaPresentation } from "@/features/estimation/domain";
 import type {
   CalculationUnit,
   CostDriverId,
@@ -193,6 +195,9 @@ function TraceSection({ result }: { result: EstimateResult }) {
       <div className="trace-list">
         {result.calculationTrace.map((node) => {
           const formulaHref = formulaLinks[node.formulaId];
+          const formulaPresentation = getCalculationFormulaPresentation(
+            node.formula,
+          );
           return (
             <details key={node.id}>
               <summary>
@@ -210,10 +215,18 @@ function TraceSection({ result }: { result: EstimateResult }) {
                     <code>{node.formulaId}</code>
                   )}
                 </p>
-                <p>
+                <div className="trace-formula-row">
                   <strong>Formula：</strong>
-                  <code>{node.formula}</code>
-                </p>
+                  <MathFormula
+                    className="trace-formula"
+                    display
+                    expression={formulaPresentation?.latex ?? node.formula}
+                    label={
+                      formulaPresentation?.accessibleLabel ??
+                      `${node.metric} 的計算公式：${node.formula}`
+                    }
+                  />
+                </div>
                 <p>
                   <strong>Precision：</strong>
                   {node.precisionPolicy.decimalPrecision} significant digits；

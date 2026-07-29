@@ -92,9 +92,21 @@ Presentation 負責：
 - App Router pages、semantic forms、navigation、responsive layout 與 A4 print style。
 - Field label、description、error summary、focus management、live region 與 accessible table。
 - `TWD`、person-hour、person-day、person-month 與 ratio display formatting。
+- 以 KaTeX 顯示 domain formula registry 的 source-controlled LaTeX，並提供可
+  朗讀完整等式語意的中文 `aria-label`。
+- KaTeX stylesheet 由 root layout 載入為 hashed same-origin asset，確保 direct
+  load 與 App Router client navigation 都使用一致的數學字型、上下標與大型
+  運算子；非數學內容仍不執行 formula parsing。
 - Client hydration 後讀取 browser repository。
 
-Presentation 不得重寫公式、複製 canonical parameter magic number，或使用 unvalidated result。User-generated text 只能進入 escaped text node；不得用未清理的 `dangerouslySetInnerHTML`。
+Presentation 不得重寫或複製估算公式、複製 canonical parameter magic number，
+或使用 unvalidated result。Methodology 與 calculation trace 的 expression
+只能取自 `domain/formulas`；trace 先以 stable snapshot text 解析到對應的 LaTeX
+與完整中文文字替代。User-generated text 只能進入 escaped text node；唯一的
+`dangerouslySetInnerHTML` boundary 是 `MathFormula` 對 KaTeX
+`renderToString` 的輸出，固定使用 `trust=false`、bounded expansion／size，
+parse failure 則以 React escaped text fallback。Form、localStorage、JSON
+import 與 URL 都不得提供 LaTeX expression。
 
 ## Rendering strategy
 
@@ -125,7 +137,12 @@ complete parameterSnapshot
 validated estimate input
 ```
 
-輸出包含未格式化 result 與 calculation trace。Trace 每一步要有 formula identifier、代入值、中間結果、unit、parameter source 與 warning，使使用者能從 P50／P80 或 quote 追溯到工作項目。
+輸出包含未格式化 result 與 calculation trace。Trace 每一步要有 formula
+identifier、向後相容的 stable formula snapshot text、代入值、中間結果、
+unit、parameter source 與 warning，使使用者能從 P50／P80 或 quote
+追溯到工作項目。Presentation 由 domain registry 將 snapshot text 解析為
+source-controlled LaTeX 與中文等式語意；LaTeX 不寫入 result snapshot、不被
+engine evaluate，也不參與結果 identity。
 
 版本規則：
 
@@ -176,7 +193,8 @@ Export 包含 schema、model、parameter snapshot、input 與 result snapshot；
 
 - Response headers 集中在 `next.config.ts`，涵蓋 CSP、`nosniff`、Referrer、Permissions、COOP 與 frame protection。
 - Production CSP 不含 `unsafe-eval`；Development 才為 HMR 加入。
-- 不載入 remote font、remote script、tracker、chat widget 或 session replay。
+- 不載入 remote font、remote script、tracker、chat widget 或 session replay；
+  KaTeX CSS／font 是 build-time 打包的 same-origin asset。
 - `NEXT_PUBLIC_*` 只可包含可公開資訊。
 - Client error 不得送出 case payload；Production observability 限於 Vercel build／deployment log。
 - Platform secret scanning、push protection、branch rules 與 vulnerability reporting 必須由 owner 在 GitHub 實際啟用並驗證。

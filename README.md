@@ -21,6 +21,9 @@ NDA 保護內容或未公開報價；使用共享裝置時，其他使用者仍�
 - 計算 P50、P80 effort、engineering cost 與 benchmark quote。
 - 將含稅／未稅乙方報價正規化後比較。
 - 展開 formula、substitution、unit、source 與 parameter version。
+- 以全站 same-origin KaTeX stylesheet 排版公開公式與 Calculation trace；
+  display formula 使用 publication-style serif math、真正上下標與大型運算子，
+  並提供中文文字替代。
 - Browser-only 案件 CRUD、兩筆 fictional examples、JSON import/export。
 - A4 print report 與完整「公式與定義」專頁。
 - Storage failure 時保留目前 session，仍可計算與匯出備份。
@@ -33,7 +36,7 @@ NDA 保護內容或未公開報價；使用共享裝置時，其他使用者仍�
 - React `19.2.8`
 - TypeScript strict mode
 - Tailwind CSS 4
-- Zod、Decimal.js、Vitest、Playwright
+- Zod、Decimal.js、KaTeX、Vitest、Playwright
 
 所有 direct dependencies 使用 exact version，唯一 lock file 為
 `pnpm-lock.yaml`。pnpm store 與 Corepack cache 均設定在本 repository 內。
