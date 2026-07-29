@@ -4,6 +4,7 @@
 
 .estimate-page {
   display: grid;
+  min-width: 0;
   padding-block: clamp(2rem, 5vw, 4.5rem);
   gap: 1.5rem;
 }
@@ -44,6 +45,7 @@
 .form-stack,
 .result-stack {
   display: grid;
+  min-width: 0;
   gap: 1.25rem;
 }
 
@@ -122,6 +124,8 @@ fieldset > legend {
 }
 
 .wizard-progress {
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
   padding-block: 0.25rem;
 }
@@ -296,6 +300,8 @@ fieldset {
 }
 
 .table-region {
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
@@ -360,6 +366,8 @@ fieldset {
 }
 
 .trace-formula {
+  max-width: 100%;
+  overflow-x: auto;
   padding: 0.7rem 0.8rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
