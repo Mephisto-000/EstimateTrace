@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { EstimateCaseDocument } from "@/features/estimation/application/estimate-case";
 import type {
   CalculationUnit,
+  CostDriverId,
   EstimateResult,
   VendorComparisonBand,
 } from "@/features/estimation/domain";
@@ -20,6 +21,15 @@ const comparisonLabels: Record<VendorComparisonBand, string> = {
   NEAR_MODEL_REFERENCE_RANGE: "接近模型參考區間。",
   ABOVE_MODEL_P50: "高於模型 P50，請確認成本來源。",
   ABOVE_MODEL_P80: "高於模型 P80，建議要求工作量與風險明細。",
+};
+
+const costDriverLabels: Record<CostDriverId, string> = {
+  P50_LABOR_COST: "P50 labor cost",
+  P50_DIRECT_COST: "Direct cost",
+  P50_OVERHEAD_COST: "Overhead",
+  P50_WARRANTY_COST: "Warranty",
+  P50_VENDOR_MARKUP_COST: "Vendor markup",
+  P50_TAX_COST: "Tax",
 };
 
 const unitLabels: Record<CalculationUnit, string> = {
@@ -434,8 +444,8 @@ export function ResultView({ estimate, result, onExport }: ResultViewProps) {
 
       <section className="form-stack" aria-labelledby="drivers-title">
         <div>
-          <h2 id="drivers-title">主要 effort drivers</h2>
-          <p>依 contribution hours 由高至低排列。</p>
+          <h2 id="drivers-title">主要成本 drivers</h2>
+          <p>P50 benchmark quote 的前三大可加總成本構成；全部以 TWD 比較。</p>
         </div>
         <div
           className="table-region"
@@ -447,30 +457,21 @@ export function ResultView({ estimate, result, onExport }: ResultViewProps) {
             <caption>主要估算驅動因子</caption>
             <thead>
               <tr>
-                <th scope="col">來源</th>
-                <th scope="col">類型</th>
-                <th scope="col">貢獻</th>
+                <th scope="col">成本構成</th>
+                <th scope="col">Trace source</th>
+                <th scope="col">P50 contribution</th>
               </tr>
             </thead>
             <tbody>
-              {result.drivers.map((driver) => {
-                const item = estimate.input.workItems.find(
-                  (candidate) => candidate.id === driver.sourceId,
-                );
-                const phase =
-                  estimate.parameterSnapshot.phaseLoadingParameters.find(
-                    (candidate) => candidate.phase === driver.sourceId,
-                  );
-                return (
-                  <tr key={`${driver.kind}:${driver.sourceId}`}>
-                    <th scope="row">
-                      {item?.title ?? phase?.displayName ?? driver.sourceId}
-                    </th>
-                    <td>{driver.kind}</td>
-                    <td>{formatEffort(driver.contributionHours)}</td>
-                  </tr>
-                );
-              })}
+              {result.drivers.map((driver) => (
+                <tr key={`${driver.kind}:${driver.sourceId}`}>
+                  <th scope="row">{costDriverLabels[driver.sourceId]}</th>
+                  <td>
+                    <code>{driver.source.path}</code>
+                  </td>
+                  <td>{formatMoney(driver.contributionValue)}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

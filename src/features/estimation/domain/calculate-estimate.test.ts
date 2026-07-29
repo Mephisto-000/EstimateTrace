@@ -244,6 +244,38 @@ describe("calculateEstimate", () => {
       taxAmount: "5308.11220992",
       quoteIncTax: "111470.35640832",
     });
+    expect(result.drivers).toEqual([
+      {
+        kind: "COST",
+        sourceId: "P50_LABOR_COST",
+        contributionValue: "74390.4",
+        unit: "TWD",
+        source: {
+          kind: "derived",
+          path: "estimate:p50:labor-cost",
+        },
+      },
+      {
+        kind: "COST",
+        sourceId: "P50_VENDOR_MARKUP_COST",
+        contributionValue: "16685.888",
+        unit: "TWD",
+        source: {
+          kind: "derived",
+          path: "estimate:p50:vendor-markup-amount",
+        },
+      },
+      {
+        kind: "COST",
+        sourceId: "P50_OVERHEAD_COST",
+        contributionValue: "7539.04",
+        unit: "TWD",
+        source: {
+          kind: "derived",
+          path: "estimate:p50:overhead-amount",
+        },
+      },
+    ]);
     expect(result.calculationTrace.map(({ metric }) => metric)).toEqual(
       expect.arrayContaining([
         "complexityAdjustedEffortHours",
@@ -820,9 +852,9 @@ describe("calculateEstimate", () => {
 
     expect(reverse.drivers).toEqual(forward.drivers);
     expect(forward.drivers.map(({ sourceId }) => sourceId)).toEqual([
-      "item-a",
-      "item-b",
-      "ARCHITECTURE_DESIGN",
+      "P50_DIRECT_COST",
+      "P50_LABOR_COST",
+      "P50_OVERHEAD_COST",
     ]);
     expect(reverse.calculationTrace).toEqual(forward.calculationTrace);
     expect(

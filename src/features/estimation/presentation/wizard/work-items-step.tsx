@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { getPublicDemoWorkItemDefaults } from "@/config/parameter-sets/public-demo";
 import { browserRuntimeServices } from "@/features/estimation/application/estimate-case";
 import type {
   CrossCuttingPhase,
@@ -20,21 +21,6 @@ const phaseLabels: Record<CrossCuttingPhase, string> = {
   DEPLOYMENT_RELEASE: "Deployment／Release",
   DOCUMENTATION_TRAINING: "Documentation／Training",
 };
-
-function defaultIncludedPhases(
-  type: WorkItemType,
-): readonly CrossCuttingPhase[] {
-  switch (type) {
-    case "TESTING":
-      return ["QUALITY_ASSURANCE"];
-    case "DEPLOYMENT":
-      return ["DEPLOYMENT_RELEASE"];
-    case "DOCUMENTATION":
-      return ["DOCUMENTATION_TRAINING"];
-    default:
-      return [];
-  }
-}
 
 interface WorkItemCardProps {
   readonly item: WorkItemInput;
@@ -125,16 +111,13 @@ function WorkItemCard({
             value={item.type}
             onChange={(event) => {
               const type = event.currentTarget.value as WorkItemType;
-              const selected = catalog.find((entry) => entry.code === type);
-              if (!selected) {
-                return;
-              }
+              const defaults = getPublicDemoWorkItemDefaults(type);
               updateItem((current) => ({
                 ...current,
                 type,
-                unit: selected.unit,
-                unitHours: selected.defaultUnitHours,
-                includedCrossCuttingPhases: defaultIncludedPhases(type),
+                unit: defaults.unit,
+                unitHours: defaults.defaultUnitHours,
+                includedCrossCuttingPhases: defaults.includedCrossCuttingPhases,
               }));
             }}
           >
@@ -253,7 +236,11 @@ function WorkItemCard({
             }}
           />
           <span className="field__help" id={`item-unit-hours-${item.id}-help`}>
-            示範值，非市場標準。
+            示範值，非市場標準；預設只包含{" "}
+            {catalog
+              .find((entry) => entry.code === item.type)
+              ?.includedActivities.join("、") || "未指定活動"}
+            。
           </span>
           {errorFor(`item-unit-hours-${item.id}`) ? (
             <span
@@ -378,17 +365,18 @@ export function WorkItemsStep({
     if (!selectedCatalog) {
       return;
     }
+    const defaults = getPublicDemoWorkItemDefaults(selectedCatalog.code);
     const item: WorkItemInput = {
       id: browserRuntimeServices.createId(),
       type: selectedCatalog.code,
       title: selectedCatalog.displayName,
       description: selectedCatalog.description,
       quantity: "1",
-      unit: selectedCatalog.unit,
-      unitHours: selectedCatalog.defaultUnitHours,
+      unit: defaults.unit,
+      unitHours: defaults.defaultUnitHours,
       complexity: "MEDIUM",
       applicableRiskFactorIds: [],
-      includedCrossCuttingPhases: defaultIncludedPhases(selectedCatalog.code),
+      includedCrossCuttingPhases: defaults.includedCrossCuttingPhases,
       assumptions: ["示範 unit effort，需依實際 scope 與歷史資料校準。"],
     };
     updateEstimate((current) => ({

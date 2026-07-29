@@ -1,4 +1,6 @@
-export const CURRENT_MODEL_VERSION = "bottom-up-1.0.0";
+import { defineModelVersion } from "./value-objects";
+
+export const CURRENT_MODEL_VERSION = defineModelVersion("bottom-up-1.0.0");
 export const MODEL_DECIMAL_PRECISION = 48;
 export const MODEL_ROUNDING_MODE = "ROUND_HALF_UP";
 export const MODEL_INTERMEDIATE_ROUNDING = "NONE";

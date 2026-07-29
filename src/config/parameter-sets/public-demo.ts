@@ -2,6 +2,7 @@ import type {
   CrossCuttingPhase,
   ParameterSnapshot,
   RiskFactorId,
+  WorkItemType,
 } from "@/features/estimation/domain";
 import {
   MODEL_DECIMAL_PRECISION,
@@ -22,6 +23,62 @@ const commonRiskMultipliers = {
   HIGH: "1.15",
   VERY_HIGH: "1.3",
 } as const;
+
+interface PublicDemoWorkItemCoverage {
+  readonly includedActivities: readonly string[];
+  readonly includedCrossCuttingPhases: readonly CrossCuttingPhase[];
+}
+
+const publicDemoWorkItemCoverageByType = {
+  UI: {
+    includedActivities: ["implementation"],
+    includedCrossCuttingPhases: [],
+  },
+  REPORT: {
+    includedActivities: ["implementation"],
+    includedCrossCuttingPhases: [],
+  },
+  BUSINESS_LOGIC: {
+    includedActivities: ["implementation"],
+    includedCrossCuttingPhases: [],
+  },
+  DATABASE: {
+    includedActivities: ["implementation"],
+    includedCrossCuttingPhases: [],
+  },
+  INTEGRATION: {
+    includedActivities: ["implementation"],
+    includedCrossCuttingPhases: [],
+  },
+  BATCH: {
+    includedActivities: ["implementation"],
+    includedCrossCuttingPhases: [],
+  },
+  MIGRATION: {
+    includedActivities: ["implementation"],
+    includedCrossCuttingPhases: [],
+  },
+  AUTHORIZATION: {
+    includedActivities: ["implementation"],
+    includedCrossCuttingPhases: [],
+  },
+  TESTING: {
+    includedActivities: ["test-design", "test-execution"],
+    includedCrossCuttingPhases: ["QUALITY_ASSURANCE"],
+  },
+  DEPLOYMENT: {
+    includedActivities: ["deployment", "rollback-plan"],
+    includedCrossCuttingPhases: ["DEPLOYMENT_RELEASE"],
+  },
+  DOCUMENTATION: {
+    includedActivities: ["documentation"],
+    includedCrossCuttingPhases: ["DOCUMENTATION_TRAINING"],
+  },
+  CUSTOM: {
+    includedActivities: ["implementation"],
+    includedCrossCuttingPhases: [],
+  },
+} as const satisfies Record<WorkItemType, PublicDemoWorkItemCoverage>;
 
 function riskFactor(
   id: RiskFactorId,
@@ -63,7 +120,8 @@ export const publicDemoParameterSet = {
       description: "查詢、維護或審核畫面。",
       defaultUnitHours: "24",
       unit: "screen",
-      includedActivities: ["analysis", "implementation", "basic-test"],
+      includedActivities:
+        publicDemoWorkItemCoverageByType.UI.includedActivities,
       sourceNote: illustrativeSource,
     },
     {
@@ -72,7 +130,8 @@ export const publicDemoParameterSet = {
       description: "Excel、PDF 或監管報表。",
       defaultUnitHours: "24",
       unit: "report",
-      includedActivities: ["analysis", "implementation", "basic-test"],
+      includedActivities:
+        publicDemoWorkItemCoverageByType.REPORT.includedActivities,
       sourceNote: illustrativeSource,
     },
     {
@@ -81,7 +140,8 @@ export const publicDemoParameterSet = {
       description: "計算、規則或狀態流程。",
       defaultUnitHours: "16",
       unit: "rule",
-      includedActivities: ["analysis", "implementation", "basic-test"],
+      includedActivities:
+        publicDemoWorkItemCoverageByType.BUSINESS_LOGIC.includedActivities,
       sourceNote: illustrativeSource,
     },
     {
@@ -90,7 +150,8 @@ export const publicDemoParameterSet = {
       description: "Table、View 或 Stored Procedure。",
       defaultUnitHours: "8",
       unit: "object",
-      includedActivities: ["analysis", "implementation", "basic-test"],
+      includedActivities:
+        publicDemoWorkItemCoverageByType.DATABASE.includedActivities,
       sourceNote: illustrativeSource,
     },
     {
@@ -99,7 +160,8 @@ export const publicDemoParameterSet = {
       description: "REST API、SFTP 或 Message Queue。",
       defaultUnitHours: "24",
       unit: "endpoint",
-      includedActivities: ["analysis", "implementation", "basic-test"],
+      includedActivities:
+        publicDemoWorkItemCoverageByType.INTEGRATION.includedActivities,
       sourceNote: illustrativeSource,
     },
     {
@@ -108,7 +170,8 @@ export const publicDemoParameterSet = {
       description: "排程、日終或月結作業。",
       defaultUnitHours: "24",
       unit: "job",
-      includedActivities: ["analysis", "implementation", "basic-test"],
+      includedActivities:
+        publicDemoWorkItemCoverageByType.BATCH.includedActivities,
       sourceNote: illustrativeSource,
     },
     {
@@ -117,7 +180,8 @@ export const publicDemoParameterSet = {
       description: "資料清理、轉換與核對。",
       defaultUnitHours: "32",
       unit: "batch",
-      includedActivities: ["analysis", "implementation", "basic-test"],
+      includedActivities:
+        publicDemoWorkItemCoverageByType.MIGRATION.includedActivities,
       sourceNote: illustrativeSource,
     },
     {
@@ -126,7 +190,8 @@ export const publicDemoParameterSet = {
       description: "Role、Function 或 Data Permission。",
       defaultUnitHours: "16",
       unit: "permission-set",
-      includedActivities: ["analysis", "implementation", "basic-test"],
+      includedActivities:
+        publicDemoWorkItemCoverageByType.AUTHORIZATION.includedActivities,
       sourceNote: illustrativeSource,
     },
     {
@@ -135,7 +200,8 @@ export const publicDemoParameterSet = {
       description: "Regression、Performance 或 Security testing。",
       defaultUnitHours: "16",
       unit: "test-scope",
-      includedActivities: ["test-design", "test-execution"],
+      includedActivities:
+        publicDemoWorkItemCoverageByType.TESTING.includedActivities,
       sourceNote: illustrativeSource,
     },
     {
@@ -144,7 +210,8 @@ export const publicDemoParameterSet = {
       description: "SIT、UAT 或 Production deployment。",
       defaultUnitHours: "16",
       unit: "environment",
-      includedActivities: ["deployment", "rollback-plan"],
+      includedActivities:
+        publicDemoWorkItemCoverageByType.DEPLOYMENT.includedActivities,
       sourceNote: illustrativeSource,
     },
     {
@@ -153,7 +220,8 @@ export const publicDemoParameterSet = {
       description: "操作手冊、技術文件或訓練。",
       defaultUnitHours: "8",
       unit: "deliverable",
-      includedActivities: ["documentation"],
+      includedActivities:
+        publicDemoWorkItemCoverageByType.DOCUMENTATION.includedActivities,
       sourceNote: illustrativeSource,
     },
     {
@@ -162,7 +230,8 @@ export const publicDemoParameterSet = {
       description: "由使用者明確定義的其他可估算工作。",
       defaultUnitHours: "8",
       unit: "item",
-      includedActivities: [],
+      includedActivities:
+        publicDemoWorkItemCoverageByType.CUSTOM.includedActivities,
       sourceNote: illustrativeSource,
     },
   ],
@@ -411,3 +480,23 @@ export const publicDemoParameterSet = {
   ],
   sourceNotes: [illustrativeSource],
 } as const satisfies ParameterSnapshot;
+
+/**
+ * Returns the canonical catalog values and the matching double-counting guard.
+ * UI creation, fictional examples, and parameter reset must all use this seam.
+ */
+export function getPublicDemoWorkItemDefaults(type: WorkItemType) {
+  const catalog = publicDemoParameterSet.workItemCatalog.find(
+    (entry) => entry.code === type,
+  );
+
+  if (!catalog) {
+    throw new Error(`Missing canonical public demo work item: ${type}`);
+  }
+
+  return {
+    ...catalog,
+    includedCrossCuttingPhases:
+      publicDemoWorkItemCoverageByType[type].includedCrossCuttingPhases,
+  };
+}

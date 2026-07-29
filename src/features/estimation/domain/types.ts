@@ -1,6 +1,43 @@
+/**
+ * Editable and external decimal input. It is intentionally unbranded because a
+ * form can temporarily contain an incomplete value such as `1.`. Validation
+ * must promote it to a canonical value before calculation or persistence.
+ */
 export type DecimalString = string;
-export type ModelVersion = string;
-export type ParameterSetId = string;
+
+declare const canonicalDecimalBrand: unique symbol;
+declare const canonicalNonNegativeDecimalBrand: unique symbol;
+declare const effortHoursBrand: unique symbol;
+declare const moneyBrand: unique symbol;
+declare const ratioBrand: unique symbol;
+declare const quantityBrand: unique symbol;
+declare const modelVersionBrand: unique symbol;
+declare const parameterSetIdBrand: unique symbol;
+
+export type CanonicalDecimalString = string & {
+  readonly [canonicalDecimalBrand]: true;
+};
+export type CanonicalNonNegativeDecimalString = CanonicalDecimalString & {
+  readonly [canonicalNonNegativeDecimalBrand]: true;
+};
+export type EffortHours = CanonicalDecimalString & {
+  readonly [effortHoursBrand]: true;
+};
+export type Money = CanonicalDecimalString & {
+  readonly [moneyBrand]: true;
+};
+export type Ratio = CanonicalDecimalString & {
+  readonly [ratioBrand]: true;
+};
+export type Quantity = CanonicalNonNegativeDecimalString & {
+  readonly [quantityBrand]: true;
+};
+export type ModelVersion = string & {
+  readonly [modelVersionBrand]: true;
+};
+export type ParameterSetId = string & {
+  readonly [parameterSetIdBrand]: true;
+};
 export type ParameterSetVersion = string;
 
 export type WorkItemType =
@@ -187,7 +224,11 @@ export interface VendorQuestionParameter {
 }
 
 export interface ParameterSnapshot {
-  readonly id: ParameterSetId;
+  /**
+   * Raw snapshots are untrusted at this boundary. The calculator promotes this
+   * value to ParameterSetId only after validation.
+   */
+  readonly id: string;
   readonly version: ParameterSetVersion;
   readonly displayName: string;
   readonly description: string;
@@ -204,7 +245,8 @@ export interface ParameterSnapshot {
 }
 
 export interface CalculationRequest {
-  readonly modelVersion: ModelVersion;
+  /** Raw boundary value; promoted to ModelVersion after validation. */
+  readonly modelVersion: string;
   readonly parameterSnapshot: ParameterSnapshot;
   readonly input: EstimateInput;
 }
@@ -261,7 +303,7 @@ export interface TraceSource {
 
 export interface TraceOperand {
   readonly name: string;
-  readonly value: DecimalString;
+  readonly value: CanonicalDecimalString;
   readonly unit: CalculationUnit;
   readonly source: TraceSource;
 }
@@ -272,7 +314,7 @@ export interface CalculationTraceNode {
   readonly formulaId: string;
   readonly formula: string;
   readonly operands: readonly TraceOperand[];
-  readonly result: DecimalString;
+  readonly result: CanonicalDecimalString;
   readonly unit: CalculationUnit;
   readonly sources: readonly TraceSource[];
   readonly precisionPolicy: CalculationPrecisionPolicy;
@@ -285,12 +327,22 @@ export interface CalculationPrecisionPolicy {
   readonly presentationRounding: "PRESENTATION_ONLY";
 }
 
-export type DriverKind = "WORK_ITEM" | "CROSS_CUTTING_PHASE";
+export type CostDriverId =
+  | "P50_LABOR_COST"
+  | "P50_DIRECT_COST"
+  | "P50_OVERHEAD_COST"
+  | "P50_WARRANTY_COST"
+  | "P50_VENDOR_MARKUP_COST"
+  | "P50_TAX_COST";
+
+export type DriverKind = "COST";
 
 export interface EstimateDriver {
   readonly kind: DriverKind;
-  readonly sourceId: string;
-  readonly contributionHours: DecimalString;
+  readonly sourceId: CostDriverId;
+  readonly contributionValue: Money;
+  readonly unit: "TWD";
+  readonly source: TraceSource;
 }
 
 export type VendorQuestionEvidence =
@@ -317,37 +369,37 @@ export interface VendorQuestion {
 }
 
 export interface VendorComparison {
-  readonly normalizedQuoteExTax: DecimalString;
-  readonly differenceFromP50: DecimalString;
-  readonly differenceFromP80: DecimalString;
-  readonly varianceFromP50: DecimalString | null;
-  readonly varianceFromP80: DecimalString | null;
-  readonly quoteToP50Ratio: DecimalString | null;
-  readonly quoteToP80Ratio: DecimalString | null;
+  readonly normalizedQuoteExTax: Money;
+  readonly differenceFromP50: Money;
+  readonly differenceFromP80: Money;
+  readonly varianceFromP50: Ratio | null;
+  readonly varianceFromP80: Ratio | null;
+  readonly quoteToP50Ratio: Ratio | null;
+  readonly quoteToP80Ratio: Ratio | null;
   readonly band: VendorComparisonBand;
   readonly questions: readonly VendorQuestion[];
 }
 
 export interface ComplexityAggregate {
-  readonly baseEffortHours: DecimalString;
-  readonly complexityAdjustedEffortHours: DecimalString;
-  readonly complexityAdjustmentHours: DecimalString;
-  readonly riskAdjustmentHours: DecimalString;
-  readonly effectiveMultiplier: DecimalString;
+  readonly baseEffortHours: EffortHours;
+  readonly complexityAdjustedEffortHours: EffortHours;
+  readonly complexityAdjustmentHours: EffortHours;
+  readonly riskAdjustmentHours: EffortHours;
+  readonly effectiveMultiplier: Ratio;
 }
 
 export interface CostWaterfall {
-  readonly laborCost: DecimalString;
-  readonly directCost: DecimalString;
-  readonly deliveryCost: DecimalString;
-  readonly overheadAmount: DecimalString;
-  readonly costAfterOverhead: DecimalString;
-  readonly warrantyCost: DecimalString;
-  readonly fullCost: DecimalString;
-  readonly vendorMarkupAmount: DecimalString;
-  readonly quoteExTax: DecimalString;
-  readonly taxAmount: DecimalString;
-  readonly quoteIncTax: DecimalString;
+  readonly laborCost: Money;
+  readonly directCost: Money;
+  readonly deliveryCost: Money;
+  readonly overheadAmount: Money;
+  readonly costAfterOverhead: Money;
+  readonly warrantyCost: Money;
+  readonly fullCost: Money;
+  readonly vendorMarkupAmount: Money;
+  readonly quoteExTax: Money;
+  readonly taxAmount: Money;
+  readonly quoteIncTax: Money;
 }
 
 export interface CostWaterfalls {
@@ -359,24 +411,24 @@ export interface EstimateResult {
   readonly modelVersion: ModelVersion;
   readonly parameterSetId: ParameterSetId;
   readonly parameterSetVersion: ParameterSetVersion;
-  readonly baseEffortHours: DecimalString;
-  readonly adjustedEffortHours: DecimalString;
-  readonly crossCuttingEffortHours: DecimalString;
-  readonly mostLikelyEffortHours: DecimalString;
-  readonly optimisticEffortHours: DecimalString;
-  readonly pessimisticEffortHours: DecimalString;
-  readonly p50EffortHours: DecimalString;
-  readonly p80EffortHours: DecimalString;
+  readonly baseEffortHours: EffortHours;
+  readonly adjustedEffortHours: EffortHours;
+  readonly crossCuttingEffortHours: EffortHours;
+  readonly mostLikelyEffortHours: EffortHours;
+  readonly optimisticEffortHours: EffortHours;
+  readonly pessimisticEffortHours: EffortHours;
+  readonly p50EffortHours: EffortHours;
+  readonly p80EffortHours: EffortHours;
   readonly p50PersonDays: DecimalString;
   readonly p80PersonDays: DecimalString;
   readonly p50PersonMonths: DecimalString;
   readonly p80PersonMonths: DecimalString;
-  readonly p50EngineeringCost: DecimalString;
-  readonly p80EngineeringCost: DecimalString;
-  readonly p50QuoteExTax: DecimalString;
-  readonly p80QuoteExTax: DecimalString;
-  readonly p50QuoteIncTax: DecimalString;
-  readonly p80QuoteIncTax: DecimalString;
+  readonly p50EngineeringCost: Money;
+  readonly p80EngineeringCost: Money;
+  readonly p50QuoteExTax: Money;
+  readonly p80QuoteExTax: Money;
+  readonly p50QuoteIncTax: Money;
+  readonly p80QuoteIncTax: Money;
   readonly complexityAggregate: ComplexityAggregate;
   readonly costWaterfall: CostWaterfalls;
   readonly vendorComparison: VendorComparison | null;

@@ -145,6 +145,26 @@ describe("ResultView", () => {
       ),
     ).toHaveLength(2);
 
+    const drivers = screen
+      .getByRole("heading", { name: "主要成本 drivers" })
+      .closest("section");
+    expect(drivers).not.toBeNull();
+    expect(within(drivers!).getByText("P50 labor cost")).toBeVisible();
+    expect(within(drivers!).getByText("$74,390")).toBeVisible();
+    expect(within(drivers!).getByText("estimate:p50:labor-cost")).toBeVisible();
+    expect(within(drivers!).getByText("Vendor markup")).toBeVisible();
+    expect(within(drivers!).getByText("$16,686")).toBeVisible();
+    expect(
+      within(drivers!).getByText("estimate:p50:vendor-markup-amount"),
+    ).toBeVisible();
+    expect(within(drivers!).getByText("Overhead")).toBeVisible();
+    expect(within(drivers!).getByText("$7,539")).toBeVisible();
+    expect(
+      within(drivers!).getByText(
+        "P50 benchmark quote 的前三大可加總成本構成；全部以 TWD 比較。",
+      ),
+    ).toBeVisible();
+
     const trace = screen
       .getByRole("heading", { name: "Calculation trace" })
       .closest("section");

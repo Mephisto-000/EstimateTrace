@@ -115,6 +115,43 @@ test.describe("公開內容", () => {
     ).toBeVisible();
     await expectNoSeriousAccessibilityIssues(page);
   });
+
+  test("鍵盤可操作錯誤摘要，且 200% reflow 等效寬度無水平溢位", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 640, height: 900 });
+    await page.goto("/estimates/new");
+
+    const submit = page.getByRole("button", { name: "建立並拆工作項目" });
+    await submit.focus();
+    await page.keyboard.press("Enter");
+
+    const errorSummary = page.locator("#new-estimate-errors");
+    await expect(errorSummary).toBeFocused();
+    await expect(errorSummary).toContainText("案件名稱為必填。");
+    await expect(errorSummary).toContainText("背景摘要與 scope 為必填。");
+    await expect(page.getByLabel("案件名稱")).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    await expect(page.getByLabel("背景摘要")).toHaveAttribute(
+      "aria-describedby",
+      /estimate-description-error/,
+    );
+
+    const nameErrorLink = page.getByRole("link", {
+      name: "案件名稱為必填。",
+    });
+    await nameErrorLink.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByLabel("案件名稱")).toBeFocused();
+
+    const hasHorizontalOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth,
+    );
+    expect(hasHorizontalOverflow).toBe(false);
+    await expectNoSeriousAccessibilityIssues(page);
+  });
 });
 
 test.describe("估算核心流程", () => {

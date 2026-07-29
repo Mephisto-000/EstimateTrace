@@ -1,7 +1,9 @@
-import { publicDemoParameterSet } from "@/config/parameter-sets/public-demo";
+import {
+  getPublicDemoWorkItemDefaults,
+  publicDemoParameterSet,
+} from "@/config/parameter-sets/public-demo";
 import {
   CURRENT_MODEL_VERSION,
-  type CrossCuttingPhase,
   type EstimateInput,
   type RiskFactorId,
   type RiskProfile,
@@ -112,19 +114,6 @@ export function createEmptyEstimateCase(
   };
 }
 
-function includedPhases(type: WorkItemType): readonly CrossCuttingPhase[] {
-  switch (type) {
-    case "TESTING":
-      return ["QUALITY_ASSURANCE"];
-    case "DEPLOYMENT":
-      return ["DEPLOYMENT_RELEASE"];
-    case "DOCUMENTATION":
-      return ["DOCUMENTATION_TRAINING"];
-    default:
-      return [];
-  }
-}
-
 function workItem(
   runtime: RuntimeServices,
   type: WorkItemType,
@@ -134,25 +123,19 @@ function workItem(
   applicableRiskFactorIds: readonly RiskFactorId[],
   assumption: string,
 ): WorkItemInput {
-  const catalog = publicDemoParameterSet.workItemCatalog.find(
-    (entry) => entry.code === type,
-  );
-
-  if (!catalog) {
-    throw new Error(`Missing canonical catalog item: ${type}`);
-  }
+  const defaults = getPublicDemoWorkItemDefaults(type);
 
   return {
     id: runtime.createId(),
     type,
     title,
-    description: `${catalog.displayName}的 fictional／illustrative 工作項目。`,
+    description: `${defaults.displayName}的 fictional／illustrative 工作項目。`,
     quantity,
-    unit: catalog.unit,
-    unitHours: catalog.defaultUnitHours,
+    unit: defaults.unit,
+    unitHours: defaults.defaultUnitHours,
     complexity,
     applicableRiskFactorIds,
-    includedCrossCuttingPhases: includedPhases(type),
+    includedCrossCuttingPhases: defaults.includedCrossCuttingPhases,
     assumptions: [assumption],
   };
 }
@@ -306,17 +289,13 @@ export function resetToPublicDemoParameters(
     input: {
       ...estimate.input,
       workItems: estimate.input.workItems.map((item) => {
-        const catalog = publicDemoParameterSet.workItemCatalog.find(
-          (entry) => entry.code === item.type,
-        );
-        return catalog
-          ? {
-              ...item,
-              unit: catalog.unit,
-              unitHours: catalog.defaultUnitHours,
-              includedCrossCuttingPhases: includedPhases(item.type),
-            }
-          : item;
+        const defaults = getPublicDemoWorkItemDefaults(item.type);
+        return {
+          ...item,
+          unit: defaults.unit,
+          unitHours: defaults.defaultUnitHours,
+          includedCrossCuttingPhases: defaults.includedCrossCuttingPhases,
+        };
       }),
       phaseLoading: defaults.phaseLoading,
       uncertainty: defaults.uncertainty,

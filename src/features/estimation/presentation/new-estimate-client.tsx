@@ -73,7 +73,9 @@ export function NewEstimateClient() {
     }
     if (nextIssues.length > 0) {
       setIssues(nextIssues);
-      document.querySelector<HTMLElement>("#new-estimate-errors")?.focus();
+      requestAnimationFrame(() => {
+        document.querySelector<HTMLElement>("#new-estimate-errors")?.focus();
+      });
       return;
     }
 

@@ -5,12 +5,14 @@ import {
   MODEL_DECIMAL_PRECISION,
 } from "./model-definition";
 import type {
+  CanonicalDecimalString,
   CalculationTraceNode,
   CalculationOutcome,
   CalculationPrecisionPolicy,
   CalculationRequest,
   CalculationUnit,
   CalculationWarning,
+  CostDriverId,
   CostWaterfall,
   EstimateDriver,
   TraceOperand,
@@ -20,6 +22,15 @@ import type {
   VendorQuestion,
   VendorQuestionEvidence,
 } from "./types";
+import {
+  asEffortHours,
+  asMoney,
+  asQuantity,
+  asRatio,
+  normalizeNonNegativeDecimal,
+  parseCanonicalDecimal,
+  parseParameterSetId,
+} from "./value-objects";
 import {
   CROSS_CUTTING_PHASES,
   RISK_FACTOR_IDS,
@@ -56,6 +67,22 @@ export function calculateEstimate(
     return { ok: false, issues };
   }
 
+  const parameterSetId = parseParameterSetId(request.parameterSnapshot.id);
+  if (parameterSetId === null) {
+    return {
+      ok: false,
+      issues: [
+        {
+          code: "INVALID_PARAMETER_SET",
+          path: "parameterSnapshot.id",
+          details: {
+            expected: "lowercase kebab-case parameter set identifier",
+          },
+        },
+      ],
+    };
+  }
+
   const Decimal = DecimalJs.clone({
     precision: MODEL_DECIMAL_PRECISION,
     rounding: DecimalJs.ROUND_HALF_UP,
@@ -64,10 +91,21 @@ export function calculateEstimate(
   });
   const zero = new Decimal(0);
   const decimal = (value: string) => new Decimal(value);
-  const canonical = (value: DecimalJs) => {
+  const canonical = (value: DecimalJs): CanonicalDecimalString => {
     const serialized = value.toFixed();
-    return serialized === "-0" ? "0" : serialized;
+    const parsed = parseCanonicalDecimal(
+      serialized === "-0" ? "0" : serialized,
+    );
+    if (parsed === null) {
+      throw new RangeError(
+        "Calculation produced a non-canonical or unsafe decimal.",
+      );
+    }
+    return parsed;
   };
+  const effortHours = (value: DecimalJs) => asEffortHours(canonical(value));
+  const money = (value: DecimalJs) => asMoney(canonical(value));
+  const ratio = (value: DecimalJs) => asRatio(canonical(value));
   const precisionPolicy: CalculationPrecisionPolicy = {
     decimalPrecision:
       request.parameterSnapshot.calculationPolicy.decimalPrecision,
@@ -148,10 +186,38 @@ export function calculateEstimate(
     ]),
   );
 
+  const quantities = new Map<string, ReturnType<typeof asQuantity>>();
+  const unitEfforts = new Map<string, ReturnType<typeof asEffortHours>>();
+  for (const [index, item] of request.input.workItems.entries()) {
+    const normalizedQuantity = normalizeNonNegativeDecimal(item.quantity);
+    const normalizedUnitEffort = normalizeNonNegativeDecimal(item.unitHours);
+    if (normalizedQuantity === null || normalizedUnitEffort === null) {
+      return {
+        ok: false,
+        issues: [
+          {
+            code: "INVALID_DECIMAL",
+            path:
+              normalizedQuantity === null
+                ? `input.workItems.${index}.quantity`
+                : `input.workItems.${index}.unitHours`,
+            details: {
+              expected: "canonical non-negative decimal string",
+            },
+          },
+        ],
+      };
+    }
+    quantities.set(item.id, asQuantity(normalizedQuantity));
+    unitEfforts.set(item.id, asEffortHours(normalizedUnitEffort));
+  }
+
   const calculatedItems = [...request.input.workItems]
     .sort((left, right) => compareStableText(left.id, right.id))
     .map((item) => {
-      const baseEffort = decimal(item.quantity).times(item.unitHours);
+      const baseEffort = decimal(quantities.get(item.id)!).times(
+        unitEfforts.get(item.id)!,
+      );
       const complexityMultiplier = decimal(
         complexityByLevel.get(item.complexity)!.multiplier,
       );
@@ -297,17 +363,17 @@ export function calculateEstimate(
   const serializeCost = (
     cost: ReturnType<typeof calculateCost>,
   ): CostWaterfall => ({
-    laborCost: canonical(cost.laborCost),
-    directCost: canonical(cost.directCost),
-    deliveryCost: canonical(cost.deliveryCost),
-    overheadAmount: canonical(cost.overheadAmount),
-    costAfterOverhead: canonical(cost.costAfterOverhead),
-    warrantyCost: canonical(cost.warrantyCost),
-    fullCost: canonical(cost.fullCost),
-    vendorMarkupAmount: canonical(cost.vendorMarkupAmount),
-    quoteExTax: canonical(cost.quoteExTax),
-    taxAmount: canonical(cost.taxAmount),
-    quoteIncTax: canonical(cost.quoteIncTax),
+    laborCost: money(cost.laborCost),
+    directCost: money(cost.directCost),
+    deliveryCost: money(cost.deliveryCost),
+    overheadAmount: money(cost.overheadAmount),
+    costAfterOverhead: money(cost.costAfterOverhead),
+    warrantyCost: money(cost.warrantyCost),
+    fullCost: money(cost.fullCost),
+    vendorMarkupAmount: money(cost.vendorMarkupAmount),
+    quoteExTax: money(cost.quoteExTax),
+    taxAmount: money(cost.taxAmount),
+    quoteIncTax: money(cost.quoteIncTax),
   });
 
   calculatedItems.forEach(
@@ -1310,84 +1376,99 @@ export function calculateEstimate(
     );
 
     vendorComparison = {
-      normalizedQuoteExTax: canonical(normalizedQuoteExTax),
-      differenceFromP50: canonical(differenceFromP50),
-      differenceFromP80: canonical(differenceFromP80),
-      varianceFromP50:
-        varianceFromP50 === null ? null : canonical(varianceFromP50),
-      varianceFromP80:
-        varianceFromP80 === null ? null : canonical(varianceFromP80),
-      quoteToP50Ratio:
-        quoteToP50Ratio === null ? null : canonical(quoteToP50Ratio),
-      quoteToP80Ratio:
-        quoteToP80Ratio === null ? null : canonical(quoteToP80Ratio),
+      normalizedQuoteExTax: money(normalizedQuoteExTax),
+      differenceFromP50: money(differenceFromP50),
+      differenceFromP80: money(differenceFromP80),
+      varianceFromP50: varianceFromP50 === null ? null : ratio(varianceFromP50),
+      varianceFromP80: varianceFromP80 === null ? null : ratio(varianceFromP80),
+      quoteToP50Ratio: quoteToP50Ratio === null ? null : ratio(quoteToP50Ratio),
+      quoteToP80Ratio: quoteToP80Ratio === null ? null : ratio(quoteToP80Ratio),
       band,
       questions: selectVendorQuestions(band),
     };
   }
 
   const driverCandidates: Array<{
-    driver: EstimateDriver;
+    sourceId: CostDriverId;
     contribution: DecimalJs;
+    source: TraceSource;
   }> = [
-    ...calculatedItems.map(({ item, adjustedEffort: contribution }) => ({
-      driver: {
-        kind: "WORK_ITEM" as const,
-        sourceId: item.id,
-        contributionHours: canonical(contribution),
-      },
-      contribution,
-    })),
-    ...phaseEfforts.map(({ phase, effort: contribution }) => ({
-      driver: {
-        kind: "CROSS_CUTTING_PHASE" as const,
-        sourceId: phase,
-        contributionHours: canonical(contribution),
-      },
-      contribution,
-    })),
+    {
+      sourceId: "P50_LABOR_COST",
+      contribution: p50Cost.laborCost,
+      source: source("derived", "estimate:p50:labor-cost"),
+    },
+    {
+      sourceId: "P50_DIRECT_COST",
+      contribution: p50Cost.directCost,
+      source: source("derived", "estimate:p50:direct-cost"),
+    },
+    {
+      sourceId: "P50_OVERHEAD_COST",
+      contribution: p50Cost.overheadAmount,
+      source: source("derived", "estimate:p50:overhead-amount"),
+    },
+    {
+      sourceId: "P50_WARRANTY_COST",
+      contribution: p50Cost.warrantyCost,
+      source: source("derived", "estimate:p50:warranty-cost"),
+    },
+    {
+      sourceId: "P50_VENDOR_MARKUP_COST",
+      contribution: p50Cost.vendorMarkupAmount,
+      source: source("derived", "estimate:p50:vendor-markup-amount"),
+    },
+    {
+      sourceId: "P50_TAX_COST",
+      contribution: p50Cost.taxAmount,
+      source: source("derived", "estimate:p50:tax-amount"),
+    },
   ];
-  const drivers = driverCandidates
-    .filter(({ contribution }) => contribution.greaterThan(0))
+  const drivers: readonly EstimateDriver[] = driverCandidates
     .sort(
       (left, right) =>
         right.contribution.comparedTo(left.contribution) ||
-        compareStableText(left.driver.kind, right.driver.kind) ||
-        compareStableText(left.driver.sourceId, right.driver.sourceId),
+        compareStableText(left.sourceId, right.sourceId),
     )
     .slice(0, 3)
-    .map(({ driver }) => driver);
+    .map(({ sourceId, contribution, source: driverSource }) => ({
+      kind: "COST",
+      sourceId,
+      contributionValue: money(contribution),
+      unit: "TWD",
+      source: driverSource,
+    }));
 
   return {
     ok: true,
     result: {
-      modelVersion: request.modelVersion,
-      parameterSetId: request.parameterSnapshot.id,
+      modelVersion: CURRENT_MODEL_VERSION,
+      parameterSetId,
       parameterSetVersion: request.parameterSnapshot.version,
-      baseEffortHours: canonical(baseEffort),
-      adjustedEffortHours: canonical(adjustedEffort),
-      crossCuttingEffortHours: canonical(crossCuttingEffort),
-      mostLikelyEffortHours: canonical(mostLikelyEffort),
-      optimisticEffortHours: canonical(optimisticEffort),
-      pessimisticEffortHours: canonical(pessimisticEffort),
-      p50EffortHours: canonical(p50Effort),
-      p80EffortHours: canonical(p80Effort),
+      baseEffortHours: effortHours(baseEffort),
+      adjustedEffortHours: effortHours(adjustedEffort),
+      crossCuttingEffortHours: effortHours(crossCuttingEffort),
+      mostLikelyEffortHours: effortHours(mostLikelyEffort),
+      optimisticEffortHours: effortHours(optimisticEffort),
+      pessimisticEffortHours: effortHours(pessimisticEffort),
+      p50EffortHours: effortHours(p50Effort),
+      p80EffortHours: effortHours(p80Effort),
       p50PersonDays: canonical(p50PersonDays),
       p80PersonDays: canonical(p80PersonDays),
       p50PersonMonths: canonical(p50PersonMonths),
       p80PersonMonths: canonical(p80PersonMonths),
-      p50EngineeringCost: canonical(p50Cost.deliveryCost),
-      p80EngineeringCost: canonical(p80Cost.deliveryCost),
-      p50QuoteExTax: canonical(p50Cost.quoteExTax),
-      p80QuoteExTax: canonical(p80Cost.quoteExTax),
-      p50QuoteIncTax: canonical(p50Cost.quoteIncTax),
-      p80QuoteIncTax: canonical(p80Cost.quoteIncTax),
+      p50EngineeringCost: money(p50Cost.deliveryCost),
+      p80EngineeringCost: money(p80Cost.deliveryCost),
+      p50QuoteExTax: money(p50Cost.quoteExTax),
+      p80QuoteExTax: money(p80Cost.quoteExTax),
+      p50QuoteIncTax: money(p50Cost.quoteIncTax),
+      p80QuoteIncTax: money(p80Cost.quoteIncTax),
       complexityAggregate: {
-        baseEffortHours: canonical(baseEffort),
-        complexityAdjustedEffortHours: canonical(complexityAdjustedEffort),
-        complexityAdjustmentHours: canonical(complexityAdjustment),
-        riskAdjustmentHours: canonical(riskAdjustment),
-        effectiveMultiplier: canonical(effectiveComplexityMultiplier),
+        baseEffortHours: effortHours(baseEffort),
+        complexityAdjustedEffortHours: effortHours(complexityAdjustedEffort),
+        complexityAdjustmentHours: effortHours(complexityAdjustment),
+        riskAdjustmentHours: effortHours(riskAdjustment),
+        effectiveMultiplier: ratio(effectiveComplexityMultiplier),
       },
       costWaterfall: {
         p50: serializeCost(p50Cost),

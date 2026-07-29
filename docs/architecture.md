@@ -55,6 +55,13 @@ Domain 不得 import：
 
 Money 與 ratio 的內部計算使用 decimal-safe strategy；formatting 只在 presentation boundary 發生，不能把顯示四捨五入回寫到 domain。
 
+Decimal boundary 由 domain `value-objects.ts` 集中定義。Form draft 可保留未完成
+字串；wizard 只正規化完整 plain decimal，storage schema 與 calculator 則共用
+strict canonical predicate。Validated output 以 `EffortHours`、`Money`、
+`Ratio`、`Quantity`、`ModelVersion` 與 `ParameterSetId` branded types
+區隔單位，避免 TWD、person-hour、比例與一般數量在 critical boundary
+任意混用。
+
 ### Application
 
 Application use case 協調：

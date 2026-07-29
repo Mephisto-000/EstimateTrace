@@ -93,4 +93,40 @@ describe("importEstimateJson", () => {
       expect(imported.result.p50EffortHours).not.toBe("999999");
     }
   });
+
+  it("拒絕過深的 dangerous-key traversal，不因 call stack overflow 拋出例外", () => {
+    const nested = '{"next":'.repeat(150) + "null" + "}".repeat(150);
+    const payload = `{"schemaVersion":"1.0.0","resultSnapshot":${nested}}`;
+
+    expect(importEstimateJson(payload)).toEqual({
+      ok: false,
+      code: "PAYLOAD_TOO_COMPLEX",
+      path: expect.stringMatching(/^\$\.resultSnapshot(?:\.next)+$/),
+    });
+  });
+
+  it("snapshot comparison 對深層 untrusted 結構回傳 typed error", () => {
+    const exported = exportEstimateJson(
+      createExample(),
+      "2026-07-29T09:00:00.000Z",
+    );
+    expect(exported.ok).toBe(true);
+    if (!exported.ok) {
+      return;
+    }
+
+    const payload = JSON.parse(exported.text) as {
+      resultSnapshot: unknown;
+    };
+    let nested: unknown = null;
+    for (let index = 0; index < 150; index += 1) {
+      nested = { next: nested };
+    }
+    payload.resultSnapshot = nested;
+
+    expect(importEstimateJson(JSON.stringify(payload))).toMatchObject({
+      ok: false,
+      code: "PAYLOAD_TOO_COMPLEX",
+    });
+  });
 });

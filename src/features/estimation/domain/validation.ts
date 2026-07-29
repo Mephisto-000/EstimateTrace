@@ -20,6 +20,10 @@ import type {
   VendorComparisonBand,
   WorkItemType,
 } from "./types";
+import {
+  isCanonicalNonNegativeDecimal,
+  parseParameterSetId,
+} from "./value-objects";
 
 const ValidationDecimal = DecimalJs.clone({
   precision: 80,
@@ -28,8 +32,6 @@ const ValidationDecimal = DecimalJs.clone({
   toExpPos: 1_000_000_000,
 });
 
-const canonicalNonNegativeDecimalPattern = /^(?:0|[1-9]\d*)(?:\.\d*[1-9])?$/;
-const maximumDecimalCharacters = 256;
 function compareStableText(left: string, right: string): number {
   return left < right ? -1 : left > right ? 1 : 0;
 }
@@ -124,11 +126,7 @@ function validateDecimal(
   issues: CalculationIssue[],
   range: DecimalRange = {},
 ): DecimalJs | undefined {
-  if (
-    typeof value !== "string" ||
-    value.length > maximumDecimalCharacters ||
-    !canonicalNonNegativeDecimalPattern.test(value)
-  ) {
+  if (!isCanonicalNonNegativeDecimal(value)) {
     addIssue(issues, "INVALID_DECIMAL", path, {
       expected: "canonical non-negative decimal string",
     });
@@ -183,6 +181,14 @@ function validateParameterSet(
 ): void {
   const { parameterSnapshot: parameters } = request;
   validateRequiredString(parameters.id, "parameterSnapshot.id", issues, 128);
+  if (
+    parameters.id.trim().length > 0 &&
+    parseParameterSetId(parameters.id) === null
+  ) {
+    addIssue(issues, "INVALID_PARAMETER_SET", "parameterSnapshot.id", {
+      expected: "lowercase kebab-case parameter set identifier",
+    });
+  }
   validateRequiredString(
     parameters.version,
     "parameterSnapshot.version",

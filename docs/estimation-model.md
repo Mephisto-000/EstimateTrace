@@ -21,6 +21,21 @@ MVP 使用 deterministic Bottom-up Parametric Model
 
 Canonical decimal string 不包含 exponent、前導 `+`、多餘前導零或多餘尾端零。
 
+Browser form 的 editable draft 可短暫保留 `1.` 等未完成字串，以便使用者修正；
+完整的 plain non-negative decimal 會在 wizard update boundary 正規化，例如
+`12.0 → 12`、`0.0 → 0`、`0012.3400 → 12.34`。Storage schema 與 domain
+calculation boundary 只接受 canonical form，因此不會出現 wizard
+validation 通過後才由 engine 拒絕的 contract drift。正規化不接受 sign、
+scientific notation、空白或隱式補值。
+
+`value-objects.ts` 是 decimal contract 與 unit promotion 的單一來源。
+Editable／external `DecimalString` 維持 unbranded；通過 validation 後，domain
+critical boundary 會升級為 `EffortHours`、`Money`、`Ratio`、`Quantity`、
+`ModelVersion` 與 `ParameterSetId` branded types。這些 type 在 runtime
+仍序列化為 string，但 TypeScript 不允許任意互換。Vendor difference 與
+variance 可能為負，因此 `Money`／`Ratio` 支援 signed canonical output；
+form input 與 `Quantity` 仍限定 non-negative。
+
 ## 1. Work Item Base Effort
 
 對工作項目 \(i\)：
@@ -31,7 +46,9 @@ H_base = Σ H_base,i
 ```
 
 `quantity > 0`，`unitHours >= 0.25`。Unit effort 是 fictional／illustrative
-起點，不代表市場標準。
+起點，不代表市場標準。公開示範 parameter set 的一般 catalog item 與
+`CUSTOM` 明確把 unit effort 定義為 implementation-only；analysis、QA、
+release 與 training 等 cross-cutting activities 不在該數值內。
 
 ## 2. Complexity
 
@@ -78,6 +95,17 @@ H_mostLikely = H_adjusted + H_cross + H_fixed
 
 例如 `TESTING` item 或已標記包含 `quality-assurance` 的 item，不會再成為完整
 QA loading 的分母。每個 phase 的 eligible base、ratio 與結果都寫入 trace。
+
+公開示範的 specialized item 有固定 coverage guard：
+
+- `TESTING` → `QUALITY_ASSURANCE`
+- `DEPLOYMENT` → `DEPLOYMENT_RELEASE`
+- `DOCUMENTATION` → `DOCUMENTATION_TRAINING`
+
+一般 implementation-only item 不預設排除上述 phase。Catalog
+`includedActivities` 與 item `includedCrossCuttingPhases` 由同一 typed mapping
+產生；若 unit effort 改為 end-to-end delivery effort，必須同步標記所有已包含
+phase，否則會 double count。
 
 ## 5. Three-point estimate
 
@@ -157,6 +185,13 @@ state，UI 顯示「無法計算」，不得輸出 `NaN` 或 `Infinity`。
 
 Trace、warnings、drivers 與 questions 使用固定 priority 與 stable tie-break
 排序，確保 JSON snapshot 可 exact compare。
+
+Top drivers 使用 P50 benchmark quote 的可加總成本構成（labor、direct、
+overhead、warranty、vendor markup、tax），全數正規化為 TWD 後才排序。結果
+保留 driver value、unit 與對應 P50 trace node source；不把 person-hour、
+ratio 與 TWD 混在同一 ranking，也不把 overlapping subtotal 當作獨立
+contribution。即使某些構成為 0，仍保留 deterministic top 3，讓零費率或零
+loading 的 scenario 也能解釋其成本假設。
 
 ## 11. Model limitations
 

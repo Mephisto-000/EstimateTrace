@@ -1,6 +1,18 @@
 import { defineConfig, devices } from "@playwright/test";
 
 const port = 3100;
+const externalBaseUrl = process.env.PLAYWRIGHT_BASE_URL;
+const baseURL = externalBaseUrl ?? `http://127.0.0.1:${port}`;
+const webServerOptions = externalBaseUrl
+  ? {}
+  : {
+      webServer: {
+        command: `./scripts/pnpm-local.sh start --port ${port}`,
+        url: baseURL,
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
+    };
 
 const ciOptions = process.env.CI
   ? {
@@ -20,7 +32,7 @@ export default defineConfig({
   fullyParallel: true,
   ...ciOptions,
   use: {
-    baseURL: `http://127.0.0.1:${port}`,
+    baseURL,
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
   },
@@ -34,10 +46,5 @@ export default defineConfig({
       use: { ...devices["Pixel 7"] },
     },
   ],
-  webServer: {
-    command: `./scripts/pnpm-local.sh start --port ${port}`,
-    url: `http://127.0.0.1:${port}`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  ...webServerOptions,
 });

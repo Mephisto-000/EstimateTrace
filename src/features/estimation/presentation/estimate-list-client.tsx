@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useReducer, useState } from "react";
+import { useMemo, useReducer, useState } from "react";
 
 import {
   browserRuntimeServices,
@@ -33,21 +33,35 @@ const storageWarningText: Record<StorageWarning, string> = {
 
 export function EstimateListClient() {
   const { hydrated, repository } = useBrowserEstimateRepository();
-  const [, refresh] = useReducer((version: number) => version + 1, 0);
+  const [repositoryVersion, refresh] = useReducer(
+    (version: number) => version + 1,
+    0,
+  );
   const [message, setMessage] = useState<string | null>(null);
-  const cases = hydrated ? repository.list() : [];
-  const storageWarning: StorageWarning | null = hydrated
-    ? (repository.checkHealth().warning ?? null)
-    : null;
-
-  const summaries = cases.map((estimate) => ({
-    estimate,
-    outcome: calculateEstimate({
-      modelVersion: estimate.modelVersion,
-      parameterSnapshot: estimate.parameterSnapshot,
-      input: estimate.input,
-    }),
-  }));
+  const repositorySnapshot = useMemo(() => {
+    // Repository mutations are synchronous and intentionally represented by
+    // this revision so message-only renders can reuse the calculated cases.
+    void repositoryVersion;
+    return {
+      cases: hydrated ? repository.list() : [],
+      storageWarning: hydrated
+        ? (repository.checkHealth().warning ?? null)
+        : null,
+    };
+  }, [hydrated, repository, repositoryVersion]);
+  const { cases, storageWarning } = repositorySnapshot;
+  const summaries = useMemo(
+    () =>
+      cases.map((estimate) => ({
+        estimate,
+        outcome: calculateEstimate({
+          modelVersion: estimate.modelVersion,
+          parameterSnapshot: estimate.parameterSnapshot,
+          input: estimate.input,
+        }),
+      })),
+    [cases],
+  );
 
   function persistAll(documents: readonly EstimateCaseDocument[]) {
     for (const document of documents) {
@@ -89,9 +103,13 @@ export function EstimateListClient() {
     ) {
       return;
     }
-    repository.delete(estimate.id);
+    const result = repository.delete(estimate.id);
     refresh();
-    setMessage("案件已從目前瀏覽器刪除。");
+    setMessage(
+      result.persisted
+        ? "案件已從目前瀏覽器刪除。"
+        : "案件僅從目前 session 移除；本機儲存失敗，重新開啟後可能恢復。",
+    );
   }
 
   function clearAll() {
@@ -102,9 +120,13 @@ export function EstimateListClient() {
     ) {
       return;
     }
-    repository.clear();
+    const result = repository.clear();
     refresh();
-    setMessage("本機案件已全部清除；內建範例仍可重新載入。");
+    setMessage(
+      result.persisted
+        ? "本機案件已全部清除；內建範例仍可重新載入。"
+        : "案件僅從目前 session 清除；本機儲存失敗，重新開啟後可能恢復。",
+    );
   }
 
   function exportEstimate(estimate: EstimateCaseDocument) {
@@ -138,6 +160,17 @@ export function EstimateListClient() {
       setMessage(
         `匯入失敗（${result.code}，${result.path}），既有案件未變更。`,
       );
+      return;
+    }
+
+    const existing = repository.getById(result.estimate.id);
+    if (
+      existing &&
+      !window.confirm(
+        `匯入檔的案件 ID 與「${existing.name}」相同。是否以匯入內容取代既有案件？`,
+      )
+    ) {
+      setMessage("匯入已取消，既有案件未變更。");
       return;
     }
 

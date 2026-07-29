@@ -9,7 +9,9 @@ import {
 
 class MemoryStorage implements Storage {
   readonly values = new Map<string, string>();
+  throwOnRead = false;
   throwOnWrite = false;
+  writeCount = 0;
 
   get length() {
     return this.values.size;
@@ -20,6 +22,9 @@ class MemoryStorage implements Storage {
   }
 
   getItem(key: string) {
+    if (this.throwOnRead) {
+      throw new DOMException("blocked", "SecurityError");
+    }
     return this.values.get(key) ?? null;
   }
 
@@ -35,6 +40,7 @@ class MemoryStorage implements Storage {
     if (this.throwOnWrite) {
       throw new DOMException("quota", "QuotaExceededError");
     }
+    this.writeCount += 1;
     this.values.set(key, value);
   }
 }
@@ -116,5 +122,87 @@ describe("LocalEstimateRepository", () => {
       warning: "STORAGE_DATA_CORRUPTED",
     });
     expect(storage.getItem(ESTIMATE_STORAGE_KEY)).toBe("{not-json");
+  });
+
+  it("corrupted store 的 session mutation 不覆寫原始內容，clear 可明確復原", () => {
+    const storage = new MemoryStorage();
+    storage.setItem(ESTIMATE_STORAGE_KEY, "{unknown-corrupted-data");
+    const originalWriteCount = storage.writeCount;
+    const repository = new LocalEstimateRepository(storage);
+    const document = estimate(
+      "00000000-0000-4000-8000-000000000004",
+      "2026-07-29T10:00:00.000Z",
+    );
+
+    expect(repository.save(document)).toEqual({
+      ok: true,
+      persisted: false,
+      warning: "STORAGE_DATA_CORRUPTED",
+    });
+    expect(repository.getById(document.id)).toEqual(document);
+    expect(repository.delete(document.id)).toEqual({
+      ok: true,
+      persisted: false,
+      warning: "STORAGE_DATA_CORRUPTED",
+    });
+    expect(storage.writeCount).toBe(originalWriteCount);
+    expect(storage.getItem(ESTIMATE_STORAGE_KEY)).toBe(
+      "{unknown-corrupted-data",
+    );
+
+    expect(repository.clear()).toEqual({ ok: true, persisted: true });
+    expect(storage.getItem(ESTIMATE_STORAGE_KEY)).toBe("[]");
+    expect(repository.checkHealth()).toEqual({ persistent: true });
+  });
+
+  it("read-failed store 的 session mutation 不覆寫未知資料，clear 可明確復原", () => {
+    const storage = new MemoryStorage();
+    storage.setItem(ESTIMATE_STORAGE_KEY, '[{"unknown":"document"}]');
+    const originalWriteCount = storage.writeCount;
+    storage.throwOnRead = true;
+    const repository = new LocalEstimateRepository(storage);
+    const document = estimate(
+      "00000000-0000-4000-8000-000000000005",
+      "2026-07-29T11:00:00.000Z",
+    );
+
+    expect(repository.list()).toEqual([]);
+    expect(repository.save(document)).toEqual({
+      ok: true,
+      persisted: false,
+      warning: "STORAGE_READ_FAILED",
+    });
+    expect(repository.getById(document.id)).toEqual(document);
+    expect(repository.delete(document.id)).toEqual({
+      ok: true,
+      persisted: false,
+      warning: "STORAGE_READ_FAILED",
+    });
+    expect(storage.writeCount).toBe(originalWriteCount);
+
+    expect(repository.clear()).toEqual({ ok: true, persisted: true });
+    storage.throwOnRead = false;
+    expect(storage.getItem(ESTIMATE_STORAGE_KEY)).toBe("[]");
+  });
+
+  it.each([
+    ["name", { name: " \t " }],
+    ["description", { description: "\n  " }],
+  ] as const)("拒絕只有空白的案件 %s", (_field, changes) => {
+    const repository = new LocalEstimateRepository(new MemoryStorage());
+    const document = {
+      ...estimate(
+        "00000000-0000-4000-8000-000000000006",
+        "2026-07-29T12:00:00.000Z",
+      ),
+      ...changes,
+    };
+
+    expect(repository.save(document)).toEqual({
+      ok: false,
+      persisted: false,
+      warning: "INVALID_DOCUMENT",
+    });
+    expect(repository.getById(document.id)).toBeNull();
   });
 });

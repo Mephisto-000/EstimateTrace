@@ -44,6 +44,7 @@ export class LocalEstimateRepository implements EstimateRepository {
   private readonly documents = new Map<string, EstimateCaseDocument>();
   private initialized = false;
   private health: RepositoryHealth;
+  private protectsUnknownStoredData = false;
 
   constructor(private readonly storage: Storage | null) {
     this.health = storage
@@ -87,7 +88,7 @@ export class LocalEstimateRepository implements EstimateRepository {
   clear(): RepositoryMutationResult {
     this.ensureLoaded();
     this.documents.clear();
-    return this.persist();
+    return this.persist({ allowRecovery: true });
   }
 
   checkHealth(): RepositoryHealth {
@@ -109,6 +110,7 @@ export class LocalEstimateRepository implements EstimateRepository {
     try {
       raw = this.storage.getItem(ESTIMATE_STORAGE_KEY);
     } catch {
+      this.protectsUnknownStoredData = true;
       this.health = {
         persistent: false,
         warning: "STORAGE_READ_FAILED",
@@ -139,6 +141,7 @@ export class LocalEstimateRepository implements EstimateRepository {
       }
     } catch {
       this.documents.clear();
+      this.protectsUnknownStoredData = true;
       this.health = {
         persistent: false,
         warning: "STORAGE_DATA_CORRUPTED",
@@ -146,7 +149,9 @@ export class LocalEstimateRepository implements EstimateRepository {
     }
   }
 
-  private persist(): RepositoryMutationResult {
+  private persist(
+    options: { readonly allowRecovery: boolean } = { allowRecovery: false },
+  ): RepositoryMutationResult {
     if (!this.storage) {
       return {
         ok: true,
@@ -155,11 +160,20 @@ export class LocalEstimateRepository implements EstimateRepository {
       };
     }
 
+    if (this.protectsUnknownStoredData && !options.allowRecovery) {
+      return {
+        ok: true,
+        persisted: false,
+        warning: this.health.warning ?? "STORAGE_READ_FAILED",
+      };
+    }
+
     try {
       this.storage.setItem(
         ESTIMATE_STORAGE_KEY,
         JSON.stringify([...this.documents.values()]),
       );
+      this.protectsUnknownStoredData = false;
       this.health = { persistent: true };
       return { ok: true, persisted: true };
     } catch {

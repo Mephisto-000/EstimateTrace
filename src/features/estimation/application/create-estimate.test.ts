@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { publicDemoParameterSet } from "@/config/parameter-sets/public-demo";
+import {
+  getPublicDemoWorkItemDefaults,
+  publicDemoParameterSet,
+} from "@/config/parameter-sets/public-demo";
 
 import {
   createEmptyEstimateCase,
@@ -72,6 +75,33 @@ describe("createFictionalExamples", () => {
     expect(
       examples.every((item) => item.description.includes("illustrative")),
     ).toBe(true);
+    expect(
+      examples[1]?.input.workItems.find(({ type }) => type === "TESTING")
+        ?.includedCrossCuttingPhases,
+    ).toEqual(["QUALITY_ASSURANCE"]);
+    expect(
+      examples[1]?.input.workItems.find(({ type }) => type === "DEPLOYMENT")
+        ?.includedCrossCuttingPhases,
+    ).toEqual(["DEPLOYMENT_RELEASE"]);
+  });
+
+  it("由單一 canonical mapping 套用 catalog activities 與 double-counting 預設", () => {
+    const implementationItem = getPublicDemoWorkItemDefaults("UI");
+    const testingItem = getPublicDemoWorkItemDefaults("TESTING");
+    const deploymentItem = getPublicDemoWorkItemDefaults("DEPLOYMENT");
+    const documentationItem = getPublicDemoWorkItemDefaults("DOCUMENTATION");
+
+    expect(implementationItem.includedActivities).toEqual(["implementation"]);
+    expect(implementationItem.includedCrossCuttingPhases).toEqual([]);
+    expect(testingItem.includedCrossCuttingPhases).toEqual([
+      "QUALITY_ASSURANCE",
+    ]);
+    expect(deploymentItem.includedCrossCuttingPhases).toEqual([
+      "DEPLOYMENT_RELEASE",
+    ]);
+    expect(documentationItem.includedCrossCuttingPhases).toEqual([
+      "DOCUMENTATION_TRAINING",
+    ]);
   });
 });
 
@@ -108,6 +138,34 @@ describe("resetToPublicDemoParameters", () => {
       "24",
       "16",
     ]);
+    expect(
+      reset.input.workItems.map((item) => item.includedCrossCuttingPhases),
+    ).toEqual([[], [], []]);
     expect(reset.parameterSnapshot).toBe(publicDemoParameterSet);
+  });
+
+  it("重設 specialized item 時恢復 canonical double-counting guard", () => {
+    const source = createFictionalExamples(deterministicRuntime)[1]!;
+    const modified = {
+      ...source,
+      input: {
+        ...source.input,
+        workItems: source.input.workItems.map((item) => ({
+          ...item,
+          includedCrossCuttingPhases: [],
+        })),
+      },
+    };
+
+    const reset = resetToPublicDemoParameters(modified);
+
+    expect(
+      reset.input.workItems.find(({ type }) => type === "TESTING")
+        ?.includedCrossCuttingPhases,
+    ).toEqual(["QUALITY_ASSURANCE"]);
+    expect(
+      reset.input.workItems.find(({ type }) => type === "DEPLOYMENT")
+        ?.includedCrossCuttingPhases,
+    ).toEqual(["DEPLOYMENT_RELEASE"]);
   });
 });

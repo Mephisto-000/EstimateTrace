@@ -1,4 +1,5 @@
 export { calculateEstimate } from "./calculate-estimate";
+export { normalizeEstimateInputDecimals } from "./normalize-estimate-input";
 export {
   CURRENT_MODEL_VERSION,
   MODEL_DECIMAL_PRECISION,
@@ -9,4 +10,15 @@ export {
   MODEL_PRESENTATION_ROUNDING,
   MODEL_ROUNDING_MODE,
 } from "./model-definition";
+export {
+  asEffortHours,
+  asMoney,
+  asQuantity,
+  asRatio,
+  isCanonicalNonNegativeDecimal,
+  normalizeNonNegativeDecimal,
+  parseCanonicalDecimal,
+  parseModelVersion,
+  parseParameterSetId,
+} from "./value-objects";
 export type * from "./types";

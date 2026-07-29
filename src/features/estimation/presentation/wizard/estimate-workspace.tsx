@@ -9,6 +9,10 @@ import {
   browserRuntimeServices,
   type EstimateCaseDocument,
 } from "@/features/estimation/application/estimate-case";
+import {
+  isCanonicalNonNegativeDecimal,
+  normalizeEstimateInputDecimals,
+} from "@/features/estimation/domain";
 import type {
   LocalEstimateRepository,
   StorageWarning,
@@ -44,15 +48,13 @@ function parseStep(value: string | null): StepId {
   return steps.some((step) => step.id === value) ? (value as StepId) : "scope";
 }
 
-const decimalPattern = /^(?:0|[1-9]\d*)(?:\.\d+)?$/u;
-
 function decimalInRange(
   value: string,
   minimum: string,
   maximum?: string,
   minimumExclusive = false,
 ): boolean {
-  if (!decimalPattern.test(value)) {
+  if (!isCanonicalNonNegativeDecimal(value)) {
     return false;
   }
   try {
@@ -314,8 +316,10 @@ export function EstimateWorkspace({
   const currentIndex = steps.findIndex((step) => step.id === currentStep);
 
   const updateEstimate: EstimateUpdater = (update) => {
+    const changed = update(estimate);
     const updated = {
-      ...update(estimate),
+      ...changed,
+      input: normalizeEstimateInputDecimals(changed.input),
       updatedAt: browserRuntimeServices.now(),
     };
     setEstimate(updated);

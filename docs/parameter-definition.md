@@ -16,23 +16,36 @@ src/config/parameter-sets/public-demo.ts
 
 ## Work item catalog
 
-| Code             | 類型       | Unit           | Demo unit hours | 預設包含                             |
-| ---------------- | ---------- | -------------- | --------------: | ------------------------------------ |
-| `UI`             | 畫面功能   | screen         |              24 | analysis、implementation、basic-test |
-| `REPORT`         | 報表       | report         |              24 | analysis、implementation、basic-test |
-| `BUSINESS_LOGIC` | 商業邏輯   | rule           |              16 | analysis、implementation、basic-test |
-| `DATABASE`       | 資料庫     | object         |               8 | analysis、implementation、basic-test |
-| `INTEGRATION`    | 系統介接   | endpoint       |              24 | analysis、implementation、basic-test |
-| `BATCH`          | 批次處理   | job            |              24 | analysis、implementation、basic-test |
-| `MIGRATION`      | 資料轉置   | batch          |              32 | analysis、implementation、basic-test |
-| `AUTHORIZATION`  | 權限       | permission-set |              16 | analysis、implementation、basic-test |
-| `TESTING`        | 額外測試   | test-scope     |              16 | test-design、test-execution          |
-| `DEPLOYMENT`     | 部署       | environment    |              16 | deployment、rollback-plan            |
-| `DOCUMENTATION`  | 文件與教育 | deliverable    |               8 | documentation                        |
-| `CUSTOM`         | 自訂       | item           |               8 | 無預設假設                           |
+| Code             | 類型       | Unit           | Demo unit hours | 預設包含                    |
+| ---------------- | ---------- | -------------- | --------------: | --------------------------- |
+| `UI`             | 畫面功能   | screen         |              24 | implementation              |
+| `REPORT`         | 報表       | report         |              24 | implementation              |
+| `BUSINESS_LOGIC` | 商業邏輯   | rule           |              16 | implementation              |
+| `DATABASE`       | 資料庫     | object         |               8 | implementation              |
+| `INTEGRATION`    | 系統介接   | endpoint       |              24 | implementation              |
+| `BATCH`          | 批次處理   | job            |              24 | implementation              |
+| `MIGRATION`      | 資料轉置   | batch          |              32 | implementation              |
+| `AUTHORIZATION`  | 權限       | permission-set |              16 | implementation              |
+| `TESTING`        | 額外測試   | test-scope     |              16 | test-design、test-execution |
+| `DEPLOYMENT`     | 部署       | environment    |              16 | deployment、rollback-plan   |
+| `DOCUMENTATION`  | 文件與教育 | deliverable    |               8 | documentation               |
+| `CUSTOM`         | 自訂       | item           |               8 | implementation              |
 
 實際數值以 canonical source 為準。每個 item 可覆寫 `unitHours`，但必須保留
 snapshot 與 trace。
+
+一般 catalog item 與 `CUSTOM` 的 demo unit hours 明確只代表
+implementation effort；Business Analysis、Architecture／Technical Design、
+Project Management、Quality Assurance、Deployment／Release 與
+Documentation／Training 由 phase loading 另行加入。這項定義刻意保留規格
+worked example 的計算語意，不能把 demo unit hours 解讀為 end-to-end delivery
+effort。
+
+`TESTING`、`DEPLOYMENT`、`DOCUMENTATION` 是專門交付項目，建立時會分別預設
+`QUALITY_ASSURANCE`、`DEPLOYMENT_RELEASE`、
+`DOCUMENTATION_TRAINING` 已包含；因此同一 item 不會再進入對應 phase loading
+的 eligible base。若使用者自行修改 unit effort 的包含範圍，必須同步調整
+item 的 `includedCrossCuttingPhases`。
 
 ## Complexity
 
@@ -75,6 +88,11 @@ warning，engine 不截斷結果。
 | Documentation／Training        |       0.05 |
 
 Item 若已包含同一 phase，該 item 不進入該 phase 分母。
+
+Catalog 的 `includedActivities` 與 item 的
+`includedCrossCuttingPhases` 由同一份 typed coverage mapping 產生，新增 item、
+fictional examples 與重設公開參數都使用相同 helper，避免 UI 與 engine
+預設漂移。
 
 ## Uncertainty defaults
 

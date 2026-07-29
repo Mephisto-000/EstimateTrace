@@ -1,10 +1,17 @@
 import { z } from "zod";
 
 import type { EstimateCaseDocument } from "@/features/estimation/application/estimate-case";
+import {
+  CURRENT_MODEL_VERSION,
+  isCanonicalNonNegativeDecimal,
+} from "@/features/estimation/domain";
 
 const decimalStringSchema = z
   .string()
-  .regex(/^(?:0|[1-9]\d*)(?:\.\d+)?$/, "必須是 canonical decimal string");
+  .refine(
+    (value) => isCanonicalNonNegativeDecimal(value),
+    "必須是 canonical non-negative decimal string",
+  );
 
 const workItemTypeSchema = z.enum([
   "UI",
@@ -274,9 +281,19 @@ export const estimateCaseSchema = z
   .object({
     id: z.uuid(),
     schemaVersion: z.literal("1.0.0"),
-    modelVersion: z.literal("bottom-up-1.0.0"),
-    name: z.string().min(1).max(200),
-    description: z.string().max(1000),
+    modelVersion: z
+      .literal("bottom-up-1.0.0")
+      .transform(() => CURRENT_MODEL_VERSION),
+    name: z
+      .string()
+      .min(1)
+      .max(200)
+      .refine((value) => value.trim().length > 0, "不得只有空白"),
+    description: z
+      .string()
+      .min(1)
+      .max(1000)
+      .refine((value) => value.trim().length > 0, "不得只有空白"),
     currency: z.literal("TWD"),
     input: estimateInputSchema,
     parameterSnapshot: parameterSnapshotSchema,
