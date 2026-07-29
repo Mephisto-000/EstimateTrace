@@ -364,7 +364,7 @@ fieldset {
 }
 
 .trace-formula .katex {
-  font-size: 1.02em;
+  font-size: clamp(1.35rem, 1.6vw, 1.65rem);
 }
 
 .empty-state {

@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { SkipLink } from "@/components/layout/skip-link";
 import { getSiteUrl, siteConfig } from "@/config/site";
 
+import "katex/dist/katex.min.css";
 import "./globals.css";
 
 export const metadata: Metadata = {

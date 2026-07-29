@@ -135,9 +135,8 @@ node_modules/katex` 與已安裝的 package metadata 實際查證。它只處理
 source-controlled LaTeX，`trust=false`，不接受 form、localStorage 或 JSON
 import 的 expression；CSS 與 font 由 Next.js 打包為 same-origin assets，
 不使用 CDN，也不需要放寬 CSP。移除時執行
-`./scripts/pnpm-local.sh remove katex`，並同步移除 `/methodology` page 與
-`/estimates` layout 的 route-scoped KaTeX CSS import、`MathFormula`
-component 與公式 rendering tests。
+`./scripts/pnpm-local.sh remove katex`，並同步移除 root layout 的 KaTeX CSS
+import、`MathFormula` component 與公式 rendering tests。
 
 ### KaTeX dependency decision
 
@@ -162,17 +161,17 @@ component 與公式 rendering tests。
   這是當次 advisory snapshot，不是永久保證。Renderer 固定
   `trust=false`、`strict="error"`、`maxExpand=1000`、`maxSize=10`，並有
   invalid expression 與 XSS corpus tests。
-- **Bundle／latency**：2026-07-29 production build 中，包含 KaTeX 的
-  estimates client chunk 為 318,464 bytes raw／90,924 bytes gzip；route-scoped
-  KaTeX CSS 為 25,283 bytes raw／4,164 bytes gzip；產出的 WOFF2 font files
-  合計 259,792 bytes，browser 只在 glyph／font face 被使用時同源載入。Client
-  chunk 同時含其他 estimates code，因此這些數字是觀察到的 asset 上限，不是
-  isolated KaTeX delta。`/methodology` 在 build 時完成 HTML rendering，不做
-  post-load formula parsing；estimates 的成本只發生在使用者進入計算 workflow
-  並顯示 trace 時。沒有 token、API latency、remote font 或 third-party
-  telemetry。
+- **Bundle／latency**：2026-07-29 v0.1.2 production build 中，root global
+  stylesheet（app CSS＋KaTeX）為 47,377 bytes raw／9,388 bytes gzip；其中
+  installed `katex.min.css` 單獨量測為 24,727 bytes raw／3,593 bytes gzip。
+  產出的 20 個 WOFF2 font files 合計 259,792 bytes，browser 只在 glyph／font
+  face 被使用時同源載入。Stylesheet 刻意由 root layout 載入，使 direct load
+  與 App Router client navigation 都具一致的數學排版；代價是沒有公式的 route
+  也會取得該 CSS。`/methodology` 在 build 時完成 HTML rendering，不做
+  post-load formula parsing；estimates 只在顯示 trace 時 render expression。
+  沒有 token、API latency、remote font 或 third-party telemetry。
 - **Removal／rollback**：執行 `./scripts/pnpm-local.sh remove katex`
-  後依前段清單移除 renderer、route CSS 與 tests，再用 Unicode escaped-text
+  後依前段清單移除 renderer、root CSS import 與 tests，再用 Unicode escaped-text
   fallback；rollback 不變更 schema、model、parameter snapshot 或 browser
   estimate data。
 

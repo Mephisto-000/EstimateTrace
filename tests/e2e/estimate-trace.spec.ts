@@ -75,6 +75,7 @@ test.describe("公開內容", () => {
   }) => {
     test.setTimeout(60_000);
     const consoleErrors: string[] = [];
+    const failedFontRequests: string[] = [];
     const pageErrors: string[] = [];
     page.on("console", (message) => {
       if (message.type() === "error") {
@@ -83,6 +84,11 @@ test.describe("公開內容", () => {
     });
     page.on("pageerror", (error) => {
       pageErrors.push(error.message);
+    });
+    page.on("requestfailed", (request) => {
+      if (request.resourceType() === "font") {
+        failedFontRequests.push(request.url());
+      }
     });
 
     const homeResponse = await page.goto("/");
@@ -121,7 +127,20 @@ test.describe("公開內容", () => {
     ).toBeVisible();
     await expectNoSeriousAccessibilityIssues(page);
 
-    await page.goto("/methodology");
+    await page.evaluate(() => {
+      (
+        window as Window & { __estimateTraceSoftNavProbe?: boolean }
+      ).__estimateTraceSoftNavProbe = true;
+    });
+    await page.locator('a[href="/methodology"]:visible').first().click();
+    await expect(page).toHaveURL(/\/methodology$/);
+    expect(
+      await page.evaluate(
+        () =>
+          (window as Window & { __estimateTraceSoftNavProbe?: boolean })
+            .__estimateTraceSoftNavProbe,
+      ),
+    ).toBe(true);
     await expect(
       page.getByRole("heading", {
         level: 1,
@@ -135,6 +154,74 @@ test.describe("公開內容", () => {
     expect(await methodologyMath.count()).toBeGreaterThanOrEqual(50);
     await expect(methodologyMath.first()).toBeVisible();
     await expect(methodologyMath.first().locator(".katex")).toBeVisible();
+    const displayMathTypography = await page
+      .locator(".formula-block .katex")
+      .first()
+      .evaluate(async (element) => {
+        await document.fonts.ready;
+        const verticalList = element.querySelector(".vlist-t");
+        const mathVariable = element.querySelector(".mathnormal");
+
+        return {
+          fontFamily: window.getComputedStyle(element).fontFamily,
+          fontSize: Number.parseFloat(
+            window.getComputedStyle(element).fontSize,
+          ),
+          fontLoaded: document.fonts.check('16px "KaTeX_Main"'),
+          mathFontFamily: mathVariable
+            ? window.getComputedStyle(mathVariable).fontFamily
+            : null,
+          mathFontStyle: mathVariable
+            ? window.getComputedStyle(mathVariable).fontStyle
+            : null,
+          verticalListDisplay: verticalList
+            ? window.getComputedStyle(verticalList).display
+            : null,
+        };
+      });
+    expect(displayMathTypography.fontFamily).toContain("KaTeX_Main");
+    expect(displayMathTypography.fontSize).toBeGreaterThanOrEqual(30);
+    expect(displayMathTypography.fontLoaded).toBe(true);
+    expect(displayMathTypography.mathFontFamily).toContain("KaTeX_Math");
+    expect(displayMathTypography.mathFontStyle).toBe("italic");
+    expect(displayMathTypography.verticalListDisplay).toBe("inline-table");
+    const displayFormulaFailures = await page
+      .locator(".formula-block")
+      .evaluateAll((elements) =>
+        elements.flatMap((element, index) => {
+          const renderedMath = element.querySelector(".katex");
+          const bounds = element.getBoundingClientRect();
+          const failures: string[] = [];
+
+          if (
+            !renderedMath ||
+            Number.parseFloat(window.getComputedStyle(renderedMath).fontSize) <
+              30
+          ) {
+            failures.push(`${index}:display-font`);
+          }
+          if (
+            /\\(?:frac|times|mathrm|sum|prod|sqrt)\b/.test(
+              element.textContent ?? "",
+            )
+          ) {
+            failures.push(`${index}:raw-latex`);
+          }
+          if (bounds.left < -1 || bounds.right > window.innerWidth + 1) {
+            failures.push(`${index}:viewport-overflow`);
+          }
+
+          return failures;
+        }),
+      );
+    expect(displayFormulaFailures).toEqual([]);
+    const loadedKatexFontCount = await page.evaluate(async () => {
+      await document.fonts.ready;
+      return Array.from(document.fonts).filter(
+        (font) => font.family.includes("KaTeX") && font.status === "loaded",
+      ).length;
+    });
+    expect(loadedKatexFontCount).toBeGreaterThan(0);
     await expect(page.locator('[data-math-renderer="text"]')).toHaveCount(0);
     const missingMathLabels = await methodologyMath.evaluateAll(
       (elements) =>
@@ -148,6 +235,7 @@ test.describe("公開內容", () => {
     ).toBeVisible();
     await expectNoSeriousAccessibilityIssues(page);
     expect(consoleErrors).toEqual([]);
+    expect(failedFontRequests).toEqual([]);
     expect(pageErrors).toEqual([]);
   });
 
@@ -168,8 +256,46 @@ test.describe("公開內容", () => {
         document.documentElement.clientWidth,
     );
     expect(hasDocumentOverflow).toBe(false);
+    const overflowingFormulaIndex = await page
+      .locator(".formula-block")
+      .evaluateAll((elements) =>
+        elements.findIndex(
+          (element) => element.scrollWidth > element.clientWidth + 1,
+        ),
+      );
+    if (overflowingFormulaIndex >= 0) {
+      const overflowingFormula = page
+        .locator(".formula-block")
+        .nth(overflowingFormulaIndex);
+      await expect(overflowingFormula).toHaveAttribute("tabindex", "0");
+      expect(
+        await overflowingFormula.evaluate(
+          (element) => window.getComputedStyle(element).overflowX,
+        ),
+      ).toBe("auto");
+      await overflowingFormula.focus();
+      const initialScrollLeft = await overflowingFormula.evaluate(
+        (element) => element.scrollLeft,
+      );
+      await page.keyboard.press("ArrowRight");
+      await expect
+        .poll(() =>
+          overflowingFormula.evaluate((element) => element.scrollLeft),
+        )
+        .toBeGreaterThan(initialScrollLeft);
+    }
     await expect(page.locator('[data-math-renderer="text"]')).toHaveCount(0);
     await expectNoSeriousAccessibilityIssues(page);
+
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.reload();
+    expect(
+      await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth >
+          document.documentElement.clientWidth,
+      ),
+    ).toBe(false);
   });
 
   test("鍵盤可操作錯誤摘要，且 200% reflow 等效寬度無水平溢位", async ({
@@ -237,9 +363,28 @@ test.describe("估算核心流程", () => {
     const traceFormula = firstTrace.getByRole("math");
     await expect(traceFormula).toHaveAttribute("data-math-renderer", "katex");
     await expect(traceFormula.locator(".katex")).toBeVisible();
+    const traceTypography = await traceFormula
+      .locator(".katex")
+      .evaluate((element) => ({
+        fontFamily: window.getComputedStyle(element).fontFamily,
+        fontSize: Number.parseFloat(window.getComputedStyle(element).fontSize),
+        hasRawLatex: /\\(?:frac|times|mathrm|sum|prod|sqrt)\b/.test(
+          element.textContent ?? "",
+        ),
+      }));
+    expect(traceTypography.fontFamily).toContain("KaTeX_Main");
+    expect(traceTypography.fontSize).toBeGreaterThanOrEqual(20);
+    expect(traceTypography.hasRawLatex).toBe(false);
     await expect(
       page.locator('.trace-list [data-math-renderer="text"]'),
     ).toHaveCount(0);
+    expect(
+      await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth >
+          document.documentElement.clientWidth,
+      ),
+    ).toBe(false);
     await expectNoSeriousAccessibilityIssues(page);
 
     const transmittedContent = requests

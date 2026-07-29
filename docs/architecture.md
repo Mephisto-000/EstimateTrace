@@ -94,6 +94,9 @@ Presentation 負責：
 - `TWD`、person-hour、person-day、person-month 與 ratio display formatting。
 - 以 KaTeX 顯示 domain formula registry 的 source-controlled LaTeX，並提供可
   朗讀完整等式語意的中文 `aria-label`。
+- KaTeX stylesheet 由 root layout 載入為 hashed same-origin asset，確保 direct
+  load 與 App Router client navigation 都使用一致的數學字型、上下標與大型
+  運算子；非數學內容仍不執行 formula parsing。
 - Client hydration 後讀取 browser repository。
 
 Presentation 不得重寫或複製估算公式、複製 canonical parameter magic number，

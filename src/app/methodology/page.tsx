@@ -9,8 +9,6 @@ import { publicDemoParameterSet } from "@/config/parameter-sets/public-demo";
 import { createPublicPageMetadata } from "@/config/site";
 import { METHODOLOGY_MATH } from "@/features/estimation/domain";
 
-import "katex/dist/katex.min.css";
-
 export const metadata: Metadata = createPublicPageMetadata({
   title: "公式與定義",
   description:

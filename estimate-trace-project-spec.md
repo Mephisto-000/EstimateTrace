@@ -696,7 +696,9 @@ MVP 支援：
 
 - 說明文字使用繁體中文。
 - 專有名詞保留 English，例如 `Effort`、`Complexity Multiplier`、`P50`、`P80`、`Vendor Markup`。
-- 數學式以 KaTeX 或等價 accessible renderer 呈現。
+- 數學式以 KaTeX 或等價 accessible renderer 呈現；display formula 必須使用
+  傳統 serif math typography、italic variable、真正的上下標與可縮放大型運算子，
+  不得退化為 Unicode／monospace-like linear text。
 - 每個公式必須同時提供：
   - 中文目的。
   - 變數表。
