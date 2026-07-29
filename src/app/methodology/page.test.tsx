@@ -33,5 +33,11 @@ describe("MethodologyPage", () => {
       expect(element.getAttribute("aria-label")?.trim()).not.toBe("");
       expect(element.querySelector(".katex")).not.toBeNull();
     }
+
+    expect(
+      screen.getByRole("math", {
+        name: "P80 等於零與 PERT 期望值加上 z-score 0.8416 乘以標準差兩者中的較大值。",
+      }),
+    ).toBeVisible();
   });
 });

@@ -92,12 +92,15 @@ Presentation 負責：
 - App Router pages、semantic forms、navigation、responsive layout 與 A4 print style。
 - Field label、description、error summary、focus management、live region 與 accessible table。
 - `TWD`、person-hour、person-day、person-month 與 ratio display formatting。
-- 以 KaTeX 顯示 source-controlled LaTeX，並提供中文 `aria-label` 文字替代。
+- 以 KaTeX 顯示 domain formula registry 的 source-controlled LaTeX，並提供可
+  朗讀完整等式語意的中文 `aria-label`。
 - Client hydration 後讀取 browser repository。
 
-Presentation 不得以輸入字串重寫公式、複製 canonical parameter magic
-number，或使用 unvalidated result。User-generated text 只能進入 escaped text
-node；唯一的 `dangerouslySetInnerHTML` boundary 是 `MathFormula` 對 KaTeX
+Presentation 不得重寫或複製估算公式、複製 canonical parameter magic number，
+或使用 unvalidated result。Methodology 與 calculation trace 的 expression
+只能取自 `domain/formulas`；trace 先以 stable snapshot text 解析到對應的 LaTeX
+與完整中文文字替代。User-generated text 只能進入 escaped text node；唯一的
+`dangerouslySetInnerHTML` boundary 是 `MathFormula` 對 KaTeX
 `renderToString` 的輸出，固定使用 `trust=false`、bounded expansion／size，
 parse failure 則以 React escaped text fallback。Form、localStorage、JSON
 import 與 URL 都不得提供 LaTeX expression。
@@ -132,10 +135,11 @@ validated estimate input
 ```
 
 輸出包含未格式化 result 與 calculation trace。Trace 每一步要有 formula
-identifier、source-controlled LaTeX expression、代入值、中間結果、unit、
-parameter source 與 warning，使使用者能從 P50／P80 或 quote
-追溯到工作項目。LaTeX 只作顯示 metadata，不被 engine evaluate，也不參與
-結果 identity。
+identifier、向後相容的 stable formula snapshot text、代入值、中間結果、
+unit、parameter source 與 warning，使使用者能從 P50／P80 或 quote
+追溯到工作項目。Presentation 由 domain registry 將 snapshot text 解析為
+source-controlled LaTeX 與中文等式語意；LaTeX 不寫入 result snapshot、不被
+engine evaluate，也不參與結果 identity。
 
 版本規則：
 

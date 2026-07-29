@@ -391,7 +391,7 @@ export function calculateEstimate(
         id: `work-item:${item.id}:base`,
         metric: "workItemBaseEffortHours",
         formulaId: "work-item-base-effort",
-        formula: CALCULATION_FORMULAS.workItemBaseEffort,
+        formula: CALCULATION_FORMULAS.workItemBaseEffort.snapshotText,
         operands: [
           operand(
             "quantity",
@@ -413,7 +413,7 @@ export function calculateEstimate(
         id: `work-item:${item.id}:complexity`,
         metric: "workItemComplexityAdjustedEffortHours",
         formulaId: "complexity-adjustment",
-        formula: CALCULATION_FORMULAS.workItemComplexity,
+        formula: CALCULATION_FORMULAS.workItemComplexity.snapshotText,
         operands: [
           operand(
             "baseEffort",
@@ -461,7 +461,7 @@ export function calculateEstimate(
         id: `work-item:${item.id}:risk-product`,
         metric: "workItemRiskProduct",
         formulaId: "risk-factor-adjustment",
-        formula: CALCULATION_FORMULAS.riskProduct,
+        formula: CALCULATION_FORMULAS.riskProduct.snapshotText,
         operands: riskOperands,
         result: riskProduct,
         unit: "ratio",
@@ -470,7 +470,7 @@ export function calculateEstimate(
         id: `work-item:${item.id}:adjusted`,
         metric: "workItemAdjustedEffortHours",
         formulaId: "risk-factor-adjustment",
-        formula: CALCULATION_FORMULAS.workItemAdjusted,
+        formula: CALCULATION_FORMULAS.workItemAdjusted.snapshotText,
         operands: [
           operand(
             "complexityAdjustedEffort",
@@ -495,7 +495,7 @@ export function calculateEstimate(
     id: "estimate:base",
     metric: "baseEffortHours",
     formulaId: "work-item-base-effort",
-    formula: CALCULATION_FORMULAS.aggregateBaseEffort,
+    formula: CALCULATION_FORMULAS.aggregateBaseEffort.snapshotText,
     operands: calculatedItems.map(({ item, baseEffort: itemBaseEffort }) =>
       operand(
         item.id,
@@ -511,7 +511,7 @@ export function calculateEstimate(
     id: "estimate:complexity-adjusted",
     metric: "complexityAdjustedEffortHours",
     formulaId: "complexity-adjustment",
-    formula: CALCULATION_FORMULAS.aggregateComplexityEffort,
+    formula: CALCULATION_FORMULAS.aggregateComplexityEffort.snapshotText,
     operands: calculatedItems.map(
       ({ item, complexityAdjustedEffort: itemComplexityAdjustedEffort }) =>
         operand(
@@ -528,7 +528,7 @@ export function calculateEstimate(
     id: "estimate:complexity-adjustment",
     metric: "complexityAdjustmentHours",
     formulaId: "complexity-adjustment",
-    formula: CALCULATION_FORMULAS.complexityAdjustment,
+    formula: CALCULATION_FORMULAS.complexityAdjustment.snapshotText,
     operands: [
       operand(
         "complexityAdjustedEffort",
@@ -550,7 +550,7 @@ export function calculateEstimate(
     id: "estimate:effective-complexity-multiplier",
     metric: "effectiveComplexityMultiplier",
     formulaId: "complexity-adjustment",
-    formula: CALCULATION_FORMULAS.effectiveComplexity,
+    formula: CALCULATION_FORMULAS.effectiveComplexity.snapshotText,
     operands: [
       operand(
         "complexityAdjustedEffort",
@@ -572,7 +572,7 @@ export function calculateEstimate(
     id: "estimate:adjusted",
     metric: "adjustedEffortHours",
     formulaId: "risk-factor-adjustment",
-    formula: CALCULATION_FORMULAS.aggregateAdjustedEffort,
+    formula: CALCULATION_FORMULAS.aggregateAdjustedEffort.snapshotText,
     operands: calculatedItems.map(
       ({ item, adjustedEffort: itemAdjustedEffort }) =>
         operand(
@@ -589,7 +589,7 @@ export function calculateEstimate(
     id: "estimate:risk-adjustment",
     metric: "riskAdjustmentHours",
     formulaId: "risk-factor-adjustment",
-    formula: CALCULATION_FORMULAS.riskAdjustment,
+    formula: CALCULATION_FORMULAS.riskAdjustment.snapshotText,
     operands: [
       operand(
         "adjustedEffort",
@@ -615,7 +615,7 @@ export function calculateEstimate(
       id: `phase:${phase}`,
       metric: "phaseEffortHours",
       formulaId: "cross-cutting-effort",
-      formula: CALCULATION_FORMULAS.phaseCrossCutting,
+      formula: CALCULATION_FORMULAS.phaseCrossCutting.snapshotText,
       operands: [
         ...eligibleItems.map(({ item, adjustedEffort: itemAdjustedEffort }) =>
           operand(
@@ -640,7 +640,7 @@ export function calculateEstimate(
     id: "estimate:cross-cutting",
     metric: "crossCuttingEffortHours",
     formulaId: "cross-cutting-effort",
-    formula: CALCULATION_FORMULAS.aggregateCrossCutting,
+    formula: CALCULATION_FORMULAS.aggregateCrossCutting.snapshotText,
     operands: phaseEfforts.map(({ phase, effort }) =>
       operand(
         phase,
@@ -656,7 +656,7 @@ export function calculateEstimate(
     id: "estimate:most-likely",
     metric: "mostLikelyEffortHours",
     formulaId: "three-point-estimate",
-    formula: CALCULATION_FORMULAS.mostLikelyEffort,
+    formula: CALCULATION_FORMULAS.mostLikelyEffort.snapshotText,
     operands: [
       operand(
         "adjustedEffort",
@@ -684,7 +684,7 @@ export function calculateEstimate(
     id: "estimate:optimistic",
     metric: "optimisticEffortHours",
     formulaId: "three-point-estimate",
-    formula: CALCULATION_FORMULAS.optimisticEffort,
+    formula: CALCULATION_FORMULAS.optimisticEffort.snapshotText,
     operands: [
       operand(
         "mostLikelyEffort",
@@ -706,7 +706,7 @@ export function calculateEstimate(
     id: "estimate:pessimistic",
     metric: "pessimisticEffortHours",
     formulaId: "three-point-estimate",
-    formula: CALCULATION_FORMULAS.pessimisticEffort,
+    formula: CALCULATION_FORMULAS.pessimisticEffort.snapshotText,
     operands: [
       operand(
         "mostLikelyEffort",
@@ -728,7 +728,7 @@ export function calculateEstimate(
     id: "estimate:p50",
     metric: "p50EffortHours",
     formulaId: "pert-percentiles",
-    formula: CALCULATION_FORMULAS.p50Effort,
+    formula: CALCULATION_FORMULAS.p50Effort.snapshotText,
     operands: [
       operand(
         "optimisticEffort",
@@ -756,7 +756,7 @@ export function calculateEstimate(
     id: "estimate:standard-deviation",
     metric: "standardDeviationHours",
     formulaId: "pert-percentiles",
-    formula: CALCULATION_FORMULAS.standardDeviation,
+    formula: CALCULATION_FORMULAS.standardDeviation.snapshotText,
     operands: [
       operand(
         "pessimisticEffort",
@@ -778,7 +778,7 @@ export function calculateEstimate(
     id: "estimate:p80",
     metric: "p80EffortHours",
     formulaId: "pert-percentiles",
-    formula: CALCULATION_FORMULAS.p80Effort,
+    formula: CALCULATION_FORMULAS.p80Effort.snapshotText,
     operands: [
       operand(
         "p50Effort",
@@ -813,7 +813,7 @@ export function calculateEstimate(
       id: `estimate:${percentile}:person-days`,
       metric: `${percentile}PersonDays`,
       formulaId: "effort-conversion",
-      formula: CALCULATION_FORMULAS.personDays,
+      formula: CALCULATION_FORMULAS.personDays.snapshotText,
       operands: [
         operand(
           "effort",
@@ -835,7 +835,7 @@ export function calculateEstimate(
       id: `estimate:${percentile}:person-months`,
       metric: `${percentile}PersonMonths`,
       formulaId: "effort-conversion",
-      formula: CALCULATION_FORMULAS.personMonths,
+      formula: CALCULATION_FORMULAS.personMonths.snapshotText,
       operands: [
         operand(
           "effort",
@@ -869,7 +869,7 @@ export function calculateEstimate(
       id: `estimate:${percentile}:labor-cost`,
       metric: `${percentile}LaborCost`,
       formulaId: "engineering-cost",
-      formula: CALCULATION_FORMULAS.laborCost,
+      formula: CALCULATION_FORMULAS.laborCost.snapshotText,
       operands: [
         operand(
           "effort",
@@ -891,7 +891,7 @@ export function calculateEstimate(
       id: `estimate:${percentile}:direct-cost`,
       metric: `${percentile}DirectCost`,
       formulaId: "engineering-cost",
-      formula: CALCULATION_FORMULAS.directCost,
+      formula: CALCULATION_FORMULAS.directCost.snapshotText,
       operands: [
         operand(
           "directCost",
@@ -907,7 +907,7 @@ export function calculateEstimate(
       id: `estimate:${percentile}:delivery-cost`,
       metric: `${percentile}DeliveryCost`,
       formulaId: "engineering-cost",
-      formula: CALCULATION_FORMULAS.deliveryCost,
+      formula: CALCULATION_FORMULAS.deliveryCost.snapshotText,
       operands: [
         operand(
           "laborCost",
@@ -929,7 +929,7 @@ export function calculateEstimate(
       id: `estimate:${percentile}:engineering-cost`,
       metric: `${percentile}EngineeringCost`,
       formulaId: "engineering-cost",
-      formula: CALCULATION_FORMULAS.engineeringCost,
+      formula: CALCULATION_FORMULAS.engineeringCost.snapshotText,
       operands: [
         operand(
           "deliveryCost",
@@ -945,7 +945,7 @@ export function calculateEstimate(
       id: `estimate:${percentile}:overhead-amount`,
       metric: `${percentile}OverheadAmount`,
       formulaId: "commercial-loadings",
-      formula: CALCULATION_FORMULAS.overheadAmount,
+      formula: CALCULATION_FORMULAS.overheadAmount.snapshotText,
       operands: [
         operand(
           "deliveryCost",
@@ -967,7 +967,7 @@ export function calculateEstimate(
       id: `estimate:${percentile}:cost-after-overhead`,
       metric: `${percentile}CostAfterOverhead`,
       formulaId: "commercial-loadings",
-      formula: CALCULATION_FORMULAS.costAfterOverhead,
+      formula: CALCULATION_FORMULAS.costAfterOverhead.snapshotText,
       operands: [
         operand(
           "deliveryCost",
@@ -989,7 +989,7 @@ export function calculateEstimate(
       id: `estimate:${percentile}:warranty-cost`,
       metric: `${percentile}WarrantyCost`,
       formulaId: "commercial-loadings",
-      formula: CALCULATION_FORMULAS.warrantyCost,
+      formula: CALCULATION_FORMULAS.warrantyCost.snapshotText,
       operands: [
         operand(
           "warrantyCost",
@@ -1005,7 +1005,7 @@ export function calculateEstimate(
       id: `estimate:${percentile}:full-cost`,
       metric: `${percentile}FullCost`,
       formulaId: "commercial-loadings",
-      formula: CALCULATION_FORMULAS.fullCost,
+      formula: CALCULATION_FORMULAS.fullCost.snapshotText,
       operands: [
         operand(
           "costAfterOverhead",
@@ -1027,7 +1027,7 @@ export function calculateEstimate(
       id: `estimate:${percentile}:vendor-markup-amount`,
       metric: `${percentile}VendorMarkupAmount`,
       formulaId: "commercial-loadings",
-      formula: CALCULATION_FORMULAS.markupAmount,
+      formula: CALCULATION_FORMULAS.markupAmount.snapshotText,
       operands: [
         operand(
           "fullCost",
@@ -1049,7 +1049,7 @@ export function calculateEstimate(
       id: `estimate:${percentile}:quote-ex-tax`,
       metric: `${percentile}QuoteExTax`,
       formulaId: "commercial-loadings",
-      formula: CALCULATION_FORMULAS.quoteExTax,
+      formula: CALCULATION_FORMULAS.quoteExTax.snapshotText,
       operands: [
         operand(
           "fullCost",
@@ -1071,7 +1071,7 @@ export function calculateEstimate(
       id: `estimate:${percentile}:tax-amount`,
       metric: `${percentile}TaxAmount`,
       formulaId: "commercial-loadings",
-      formula: CALCULATION_FORMULAS.taxAmount,
+      formula: CALCULATION_FORMULAS.taxAmount.snapshotText,
       operands: [
         operand(
           "quoteExTax",
@@ -1093,7 +1093,7 @@ export function calculateEstimate(
       id: `estimate:${percentile}:quote-inc-tax`,
       metric: `${percentile}QuoteIncTax`,
       formulaId: "commercial-loadings",
-      formula: CALCULATION_FORMULAS.quoteIncTax,
+      formula: CALCULATION_FORMULAS.quoteIncTax.snapshotText,
       operands: [
         operand(
           "quoteExTax",
@@ -1261,8 +1261,8 @@ export function calculateEstimate(
       formulaId: "tax-normalization",
       formula:
         request.input.vendorQuote.taxBasis === "TAX_INCLUSIVE"
-          ? CALCULATION_FORMULAS.normalizeTaxInclusiveQuote
-          : CALCULATION_FORMULAS.normalizeTaxExclusiveQuote,
+          ? CALCULATION_FORMULAS.normalizeTaxInclusiveQuote.snapshotText
+          : CALCULATION_FORMULAS.normalizeTaxExclusiveQuote.snapshotText,
       operands: [
         operand(
           "quoteAmount",
@@ -1295,7 +1295,7 @@ export function calculateEstimate(
         id: `vendor:difference-from-${percentile}`,
         metric: `differenceFrom${percentile.toUpperCase()}`,
         formulaId: "vendor-quote-variance",
-        formula: CALCULATION_FORMULAS.vendorDifference,
+        formula: CALCULATION_FORMULAS.vendorDifference.snapshotText,
         operands: [
           operand(
             "normalizedQuoteExTax",
@@ -1318,7 +1318,7 @@ export function calculateEstimate(
           id: `vendor:variance-from-${percentile}`,
           metric: `varianceFrom${percentile.toUpperCase()}`,
           formulaId: "vendor-quote-variance",
-          formula: CALCULATION_FORMULAS.vendorVariance,
+          formula: CALCULATION_FORMULAS.vendorVariance.snapshotText,
           operands: [
             operand(
               "difference",
@@ -1340,7 +1340,7 @@ export function calculateEstimate(
           id: `vendor:ratio-to-${percentile}`,
           metric: `quoteTo${percentile.toUpperCase()}Ratio`,
           formulaId: "vendor-quote-variance",
-          formula: CALCULATION_FORMULAS.vendorQuoteRatio,
+          formula: CALCULATION_FORMULAS.vendorQuoteRatio.snapshotText,
           operands: [
             operand(
               "normalizedQuoteExTax",

@@ -188,7 +188,7 @@ describe("ResultView", () => {
       }),
     ).toHaveAttribute("href", "/methodology#base-effort");
     const renderedFormula = within(baseEffortDetails!).getByRole("math", {
-      name: "workItemBaseEffortHours 的計算公式",
+      name: /第 i 個工作項目的基礎工時 H i base，等於數量 q i 乘以每單位工時 u i/u,
     });
     expect(renderedFormula).toHaveAttribute("data-math-renderer", "katex");
     expect(renderedFormula.querySelector(".katex")).not.toBeNull();

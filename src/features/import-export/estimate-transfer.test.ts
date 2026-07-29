@@ -60,6 +60,10 @@ describe("importEstimateJson", () => {
       return;
     }
 
+    expect(exported.result.calculationTrace[0]?.formula).toBe(
+      "H_i,base = q_i × u_i",
+    );
+
     const imported = importEstimateJson(exported.text);
     expect(imported.ok).toBe(true);
     if (!imported.ok) {

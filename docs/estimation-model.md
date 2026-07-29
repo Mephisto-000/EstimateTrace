@@ -178,7 +178,9 @@ state，UI 顯示「無法計算」，不得輸出 `NaN` 或 `Infinity`。
 每個主要 metric 都關聯一個 structured trace node：
 
 - stable formula ID 與 `/methodology` anchor
-- source-controlled LaTeX expression；只供顯示，不由 engine evaluate
+- 向後相容的 stable formula snapshot text
+- 由 domain registry 解析的 source-controlled LaTeX 與完整中文文字替代；只供
+  顯示，不由 engine evaluate，也不寫入 result snapshot
 - operands 與 canonical decimal values
 - result 與 unit
 - work item、risk factor、parameter 或 commercial term source

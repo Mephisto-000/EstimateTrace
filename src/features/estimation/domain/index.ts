@@ -1,4 +1,9 @@
 export { calculateEstimate } from "./calculate-estimate";
+export {
+  CALCULATION_FORMULAS,
+  getCalculationFormulaPresentation,
+} from "./formulas/calculation-formulas";
+export { METHODOLOGY_MATH } from "./formulas/methodology-formulas";
 export { normalizeEstimateInputDecimals } from "./normalize-estimate-input";
 export {
   CURRENT_MODEL_VERSION,

@@ -9,15 +9,15 @@ describe("MathFormula", () => {
   it("renders source-controlled LaTeX as accessible KaTeX math", () => {
     const { container } = render(
       <MathFormula
-        expression="H_{i,\mathrm{base}} = q_i \times u_i"
-        label="第 i 個工作項目的基礎工時，等於數量乘以每單位工時。"
+        expression={String.raw`x = \frac{a}{b}`}
+        label="x 等於 a 除以 b。"
         display
       />,
     );
 
     expect(
       screen.getByRole("math", {
-        name: "第 i 個工作項目的基礎工時，等於數量乘以每單位工時。",
+        name: "x 等於 a 除以 b。",
       }),
     ).toBeVisible();
     expect(container.querySelector(".katex-display")).not.toBeNull();

@@ -139,6 +139,43 @@ import 的 expression；CSS 與 font 由 Next.js 打包為 same-origin assets，
 `/estimates` layout 的 route-scoped KaTeX CSS import、`MathFormula`
 component 與公式 rendering tests。
 
+### KaTeX dependency decision
+
+- **Problem／alternatives**：需求需要可靠呈現 fraction、sum、product、
+  subscript 與 display math。純 Unicode／手寫 CSS 無法穩定處理排版與
+  reflow；自行產生 MathML 會增加 browser 差異與維護成本；加入完整 Markdown
+  parser 又會擴大 dependency 與 untrusted-content surface。KaTeX
+  `renderToString` 是這個規模最小、可測且不需要 runtime service 的方案。
+- **Version／classification／license**：固定 production dependency
+  `katex@0.18.1`，MIT，與本 public MIT repository 相容；lockfile integrity 是
+  `sha512-Td8GCYSxDAoMhHOlKmCFMJ/hz5qlAAb71n66Dryw9nfCVfumLo7nhuotbvKom/XPADmrYC3O5QR71EPq4DarJQ==`。
+- **Compatibility**：KaTeX package 未宣告 `engines` 限制；已在本專案
+  Node.js `24.x` engine、Next.js `16.2.12`、React `19.2.8` 下通過
+  TypeScript、Vitest、Next.js production build 與 desktop／mobile E2E。
+  `/methodology` 仍為 static prerender；Calculation trace 在既有 client
+  workflow 內本機 render，不新增 Route Handler 或 Server Action。
+- **Supply chain／security**：registry package metadata 沒有
+  `preinstall`、`install` 或 `postinstall`，lockfile 也未標記
+  `requiresBuild`；package 自身的 `prepare` 是 source／publish workflow，
+  不會用於目前鎖定的 registry tarball。2026-07-29 執行完整
+  `pnpm audit --audit-level=high` 回傳 `No known vulnerabilities found`；
+  這是當次 advisory snapshot，不是永久保證。Renderer 固定
+  `trust=false`、`strict="error"`、`maxExpand=1000`、`maxSize=10`，並有
+  invalid expression 與 XSS corpus tests。
+- **Bundle／latency**：2026-07-29 production build 中，包含 KaTeX 的
+  estimates client chunk 為 318,464 bytes raw／90,924 bytes gzip；route-scoped
+  KaTeX CSS 為 25,283 bytes raw／4,164 bytes gzip；產出的 WOFF2 font files
+  合計 259,792 bytes，browser 只在 glyph／font face 被使用時同源載入。Client
+  chunk 同時含其他 estimates code，因此這些數字是觀察到的 asset 上限，不是
+  isolated KaTeX delta。`/methodology` 在 build 時完成 HTML rendering，不做
+  post-load formula parsing；estimates 的成本只發生在使用者進入計算 workflow
+  並顯示 trace 時。沒有 token、API latency、remote font 或 third-party
+  telemetry。
+- **Removal／rollback**：執行 `./scripts/pnpm-local.sh remove katex`
+  後依前段清單移除 renderer、route CSS 與 tests，再用 Unicode escaped-text
+  fallback；rollback 不變更 schema、model、parameter snapshot 或 browser
+  estimate data。
+
 ## 建立與還原環境
 
 先由既有 Node version manager 安裝／切換 Node.js `24.18.0`；專案不會修改 system runtime。Repository wrapper 會設定 `COREPACK_HOME="$PWD/.corepack"`，由 `packageManager` 欄位解析 exact pnpm：
