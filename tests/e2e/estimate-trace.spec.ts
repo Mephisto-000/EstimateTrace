@@ -21,6 +21,32 @@ async function expectNoSeriousAccessibilityIssues(page: Page) {
   expect(blockingViolations).toEqual([]);
 }
 
+async function expectAllTableCellsLeftAligned(page: Page) {
+  const tables = page.getByRole("table");
+  expect(await tables.count()).toBeGreaterThan(0);
+
+  const misalignedCells = await page
+    .locator("table th, table td")
+    .evaluateAll((cells) =>
+      cells.flatMap((cell, index) => {
+        const textAlign = window.getComputedStyle(cell).textAlign;
+
+        return textAlign === "left"
+          ? []
+          : [
+              {
+                index,
+                tag: cell.tagName.toLowerCase(),
+                text: (cell.textContent ?? "").trim().replace(/\s+/gu, " "),
+                textAlign,
+              },
+            ];
+      }),
+    );
+
+  expect(misalignedCells).toEqual([]);
+}
+
 async function createEstimateWithOneItem(page: Page) {
   await page.goto("/");
   await page.getByRole("link", { name: "開始估算", exact: true }).click();
@@ -365,6 +391,22 @@ test.describe("公開內容", () => {
     );
     expect(hasHorizontalOverflow).toBe(false);
     await expectNoSeriousAccessibilityIssues(page);
+  });
+});
+
+test.describe("表格排版", () => {
+  test("方法論與估算結果的表頭和內容皆靠左對齊", async ({ page }) => {
+    await page.goto("/methodology");
+    await expectAllTableCellsLeftAligned(page);
+
+    await createEstimateWithOneItem(page);
+    await expectAllTableCellsLeftAligned(page);
+
+    await page
+      .getByRole("link", { name: "閱讀完整方法論、公式與限制" })
+      .click();
+    await expect(page).toHaveURL(/\/methodology$/);
+    await expectAllTableCellsLeftAligned(page);
   });
 });
 

@@ -328,11 +328,6 @@ fieldset {
   vertical-align: top;
 }
 
-.data-table th[scope="row"],
-.data-table td:last-child {
-  text-align: right;
-}
-
 .trace-list {
   display: grid;
   min-width: 0;
