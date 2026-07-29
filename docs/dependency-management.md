@@ -216,9 +216,9 @@ Linux CI 使用 `pnpm exec playwright install --with-deps chromium` 安裝 runne
 
 MVP 不需要 production secret。目前唯一公開變數：
 
-| Variable               | Scope                            | Purpose                   | Safe local value        |
-| ---------------------- | -------------------------------- | ------------------------- | ----------------------- |
-| `NEXT_PUBLIC_SITE_URL` | Development／Preview／Production | Canonical public site URL | `http://localhost:3000` |
+| Variable               | Scope                            | Purpose                                                                                        | Safe local value        |
+| ---------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------- | ----------------------- |
+| `NEXT_PUBLIC_SITE_URL` | Development／Preview／Production | Canonical public site URL；production 未設定時 fallback 至 `https://estimate-trace.vercel.app` | `http://localhost:3000` |
 
 `NEXT_PUBLIC_*` 會進入 browser bundle，絕對不能存放 secret。Local override 放在 `.env.local`，該檔已被 `.gitignore` 排除；`.env.example` 只放安全示範值。新增變數時要更新 `.env.example`、README、本文件與 Vercel 各 environment scope。
 
@@ -234,7 +234,16 @@ MVP 不需要 production secret。目前唯一公開變數：
 - Formatting、lint、typecheck、unit／integration tests、完整 dependency audit、basic secret hygiene 與 production build。
 - 獨立 Chromium desktop／mobile E2E job。
 
-Vercel 應使用 Git integration：repository root、Next.js preset、production branch `main`，每個 PR／branch 建 Preview，merge 到 `main` 後建 Production。MVP 不需要 Vercel token 或 production secret；不要建立可接收案件資料的 Function。
+目前 production project `estimate-trace` 已透過連線的 Vercel API 使用 tracked
+source 建立，公開 URL 為 <https://estimate-trace.vercel.app>。Project link
+只寫入 repository-local、已忽略的 `.vercel/project.json`；不安裝 global
+Vercel CLI，也不寫入 user-level 設定。這種 source deployment 必須先有 clean
+local commit、完整 quality gate，且 release note 要記錄來源 tag。
+
+Remote push 完成後的正式 workflow 應改用 Git integration：repository root、
+Next.js preset、production branch `main`，每個 PR／branch 建 Preview，merge
+到 `main` 後建 Production。MVP 不需要 Vercel token 或 production secret；
+不要建立可接收案件資料的 Function。
 
 平台連線、Preview 與 Production URL 必須在實際部署後驗證，不能因設定檔存在就宣稱 deployment 成功。Production 問題先 revert 對應 Git commit，必要時暫時 promote 前一個已驗證 deployment；公式結果改變時同步處理 model version 與 release note。
 

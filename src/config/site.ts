@@ -15,6 +15,9 @@ export const siteConfig = {
   ],
 } as const;
 
+export const PRODUCTION_SITE_URL = "https://estimate-trace.vercel.app";
+const DEVELOPMENT_SITE_URL = "http://localhost:3000";
+
 type PublicPageMetadata = {
   title: string;
   description: string;
@@ -57,14 +60,18 @@ function withProtocol(value: string): string {
 }
 
 export function getSiteUrl(): URL {
+  const fallbackUrl =
+    process.env.NODE_ENV === "production"
+      ? PRODUCTION_SITE_URL
+      : DEVELOPMENT_SITE_URL;
   const configuredUrl =
     process.env.NEXT_PUBLIC_SITE_URL ??
     process.env.VERCEL_PROJECT_PRODUCTION_URL ??
-    "http://localhost:3000";
+    fallbackUrl;
 
   try {
     return new URL(withProtocol(configuredUrl));
   } catch {
-    return new URL("http://localhost:3000");
+    return new URL(fallbackUrl);
   }
 }

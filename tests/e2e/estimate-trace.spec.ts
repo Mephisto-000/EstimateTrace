@@ -84,9 +84,21 @@ test.describe("公開內容", () => {
     expect(headers["referrer-policy"]).toBe("strict-origin-when-cross-origin");
     expect(headers["permissions-policy"]).toContain("camera=()");
     expect(headers["cross-origin-opener-policy"]).toBe("same-origin");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      "https://estimate-trace.vercel.app",
+    );
     const estimatesResponse = await page.request.get("/estimates");
     expect(estimatesResponse.headers()["x-robots-tag"]).toBe(
       "noindex, nofollow, noarchive",
+    );
+    const robotsResponse = await page.request.get("/robots.txt");
+    expect(await robotsResponse.text()).toContain(
+      "Sitemap: https://estimate-trace.vercel.app/sitemap.xml",
+    );
+    const sitemapResponse = await page.request.get("/sitemap.xml");
+    expect(await sitemapResponse.text()).toContain(
+      "<loc>https://estimate-trace.vercel.app/</loc>",
     );
     await expect(
       page.getByRole("heading", {

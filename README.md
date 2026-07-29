@@ -114,6 +114,8 @@ Domain engine 不依賴 React、Next.js、Web Storage、clock、UUID 或 network
 
 ## Vercel
 
+Production：<https://estimate-trace.vercel.app>
+
 Project 設定：
 
 - Project name：`estimate-trace`
@@ -123,9 +125,14 @@ Project 設定：
 - Node.js：`24.x`
 - Package manager：由 `packageManager` 欄位固定為 pnpm `10.34.5`
 
-MVP 不需要 production secret。`NEXT_PUBLIC_SITE_URL` 只是公開 canonical URL。
-GitHub Actions 執行 quality gate；Vercel Git integration 提供 Preview 與
-Production deployment。
+MVP 不需要 production secret。`NEXT_PUBLIC_SITE_URL` 只是公開 canonical URL；
+若 Vercel API deployment 未提供 system environment variable，production build
+會安全 fallback 到上述 stable production URL。
+
+目前 production 由已連線的 Vercel API 使用 tracked source 部署；實際 project
+link 保存在已忽略的 `.vercel/project.json`，不會污染 user-level 設定。GitHub
+remote push 完成後，目標 workflow 是由 GitHub Actions 執行 quality gate，
+Vercel Git integration 提供 Preview 與 Production deployment。
 
 ## Dependency 操作
 
