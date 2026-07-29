@@ -2,8 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, type Request, test } from "@playwright/test";
 
 const estimateName = "虛構權限查詢 E2E";
-const estimateDescription =
-  "fictional／illustrative：用於自動化驗證的去識別化需求。";
+const estimateDescription = "虛構示意：用於自動化驗證的去識別化需求。";
 const workItemTitle = "虛構查詢畫面";
 
 async function expectNoSeriousAccessibilityIssues(page: Page) {
@@ -39,8 +38,8 @@ async function createEstimateWithOneItem(page: Page) {
   ).toBeVisible();
   await page.getByRole("button", { name: /加入第一筆/ }).click();
   await page.getByLabel("標題", { exact: true }).fill(workItemTitle);
-  await page.getByLabel("Quantity", { exact: true }).fill("2");
-  await page.getByLabel(/Unit hours/).fill("12");
+  await page.getByLabel("數量", { exact: true }).fill("2");
+  await page.getByLabel(/每單位工時/).fill("12");
 
   await page.getByRole("button", { name: "繼續：風險與交付" }).click();
   await expect(page.getByRole("heading", { name: "風險與交付" })).toBeVisible();
@@ -52,10 +51,10 @@ async function createEstimateWithOneItem(page: Page) {
   await expect(
     page.getByRole("heading", { name: "結果與報價比較" }),
   ).toBeVisible();
-  await expect(page.getByText("P50 effort", { exact: true })).toBeVisible();
-  await expect(page.getByText("P80 effort", { exact: true })).toBeVisible();
-  await expect(page.getByText("P50 quote（含稅）")).toBeVisible();
-  await expect(page.getByText("P80 quote（含稅）")).toBeVisible();
+  await expect(page.getByText("P50 工時", { exact: true })).toBeVisible();
+  await expect(page.getByText("P80 工時", { exact: true })).toBeVisible();
+  await expect(page.getByText("P50 參考報價（含稅）")).toBeVisible();
+  await expect(page.getByText("P80 參考報價（含稅）")).toBeVisible();
 }
 
 function recordRequests(requests: Request[]) {
@@ -70,6 +69,39 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe("公開內容", () => {
+  test("主要頁面使用繁體中文，完整中英對照集中在公式與定義", async ({
+    page,
+  }) => {
+    const legacyMixedLanguageCopy = [
+      "Traceable software estimation",
+      "Explainability first",
+      "About EstimateTrace",
+      "Privacy by design",
+      "Fictional examples",
+      "Browser-only workspace",
+    ];
+
+    for (const path of ["/", "/about", "/privacy", "/examples", "/estimates"]) {
+      await page.goto(path);
+      const visibleCopy = await page.locator("body").innerText();
+
+      for (const legacyCopy of legacyMixedLanguageCopy) {
+        expect(visibleCopy).not.toContain(legacyCopy);
+      }
+    }
+
+    await page.goto("/methodology");
+    const terminologyTable = page.getByRole("table", {
+      name: "估算名詞中英對照",
+    });
+    await expect(terminologyTable).toBeVisible();
+    await expect(terminologyTable).toContainText("工作項目(Work Item)");
+    await expect(terminologyTable).toContainText("風險因子(Risk Factor)");
+    await expect(terminologyTable).toContainText(
+      "跨階段工作量(Cross-cutting Effort)",
+    );
+  });
+
   test("首頁與方法論公開公式、變數與限制，且無重大 accessibility 問題", async ({
     page,
   }) => {
@@ -231,7 +263,7 @@ test.describe("公開內容", () => {
     );
     expect(missingMathLabels).toBe(0);
     await expect(
-      page.getByRole("heading", { name: "常見 double counting" }),
+      page.getByRole("heading", { name: "常見重複計入" }),
     ).toBeVisible();
     await expectNoSeriousAccessibilityIssues(page);
     expect(consoleErrors).toEqual([]);
@@ -311,7 +343,7 @@ test.describe("公開內容", () => {
     const errorSummary = page.locator("#new-estimate-errors");
     await expect(errorSummary).toBeFocused();
     await expect(errorSummary).toContainText("案件名稱為必填。");
-    await expect(errorSummary).toContainText("背景摘要與 scope 為必填。");
+    await expect(errorSummary).toContainText("背景摘要與範圍為必填。");
     await expect(page.getByLabel("案件名稱")).toHaveAttribute(
       "aria-invalid",
       "true",
@@ -346,7 +378,7 @@ test.describe("估算核心流程", () => {
     await createEstimateWithOneItem(page);
 
     await page.getByRole("button", { name: "新增乙方報價" }).click();
-    await page.getByLabel("報價金額（TWD）").fill("450000");
+    await page.getByLabel("報價金額（新臺幣）").fill("450000");
     await page.getByLabel("稅額基礎").selectOption("TAX_INCLUSIVE");
 
     await expect(
@@ -356,7 +388,7 @@ test.describe("估算核心流程", () => {
     ).toBeVisible();
     await expect(page.getByText(/乙方報價正規化為未稅/)).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Calculation trace", exact: true }),
+      page.getByRole("heading", { name: "計算軌跡", exact: true }),
     ).toBeVisible();
     const firstTrace = page.locator(".trace-list details").first();
     await firstTrace.locator("summary").click();
@@ -460,7 +492,7 @@ test.describe("估算核心流程", () => {
 
     await page.emulateMedia({ media: "print" });
     await expect(
-      page.getByRole("heading", { name: "Work item breakdown" }),
+      page.getByRole("heading", { name: "工作項目分解" }),
     ).toBeVisible();
     await expect(page.locator(".site-header")).toBeHidden();
     await expect(
@@ -474,12 +506,12 @@ test.describe("估算核心流程", () => {
 
     const p50Before = await page
       .locator(".metric")
-      .filter({ hasText: "P50 effort" })
+      .filter({ hasText: "P50 工時" })
       .locator("strong")
       .innerText();
     const p80Before = await page
       .locator(".metric")
-      .filter({ hasText: "P80 effort" })
+      .filter({ hasText: "P80 工時" })
       .locator("strong")
       .innerText();
 
@@ -500,7 +532,7 @@ test.describe("估算核心流程", () => {
 
     await page.locator('input[type="file"]').setInputFiles(downloadPath!);
     await expect(
-      page.getByText("匯入成功，重算結果與 snapshot 一致。"),
+      page.getByText("匯入成功，重算結果與快照一致。"),
     ).toBeVisible();
     await page
       .getByRole("heading", { name: estimateName })
@@ -509,56 +541,44 @@ test.describe("估算核心流程", () => {
 
     await expect(page).toHaveURL(/\/estimates\/[^/?]+\?step=result$/);
     await expect(
-      page
-        .locator(".metric")
-        .filter({ hasText: "P50 effort" })
-        .locator("strong"),
+      page.locator(".metric").filter({ hasText: "P50 工時" }).locator("strong"),
     ).toHaveText(p50Before);
     await expect(
-      page
-        .locator(".metric")
-        .filter({ hasText: "P80 effort" })
-        .locator("strong"),
+      page.locator(".metric").filter({ hasText: "P80 工時" }).locator("strong"),
     ).toHaveText(p80Before);
   });
 
-  test("載入兩筆 fictional examples 並跨 reload 保存在此瀏覽器", async ({
-    page,
-  }) => {
+  test("載入兩筆虛構範例並在重新載入後保存在此瀏覽器", async ({ page }) => {
     await page.goto("/estimates");
     await page.getByRole("button", { name: "載入兩筆虛構範例" }).click();
 
-    await expect(
-      page.getByText("已載入兩筆 fictional／illustrative 範例。"),
-    ).toBeVisible();
+    await expect(page.getByText("已載入兩筆虛構教學範例。")).toBeVisible();
     await expect(
       page.getByRole("heading", {
-        name: "會員資料查詢與匯出（fictional）",
+        name: "會員資料查詢與匯出（虛構）",
       }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", {
-        name: "公開市場價格批次介接（fictional）",
+        name: "公開市場價格批次介接（虛構）",
       }),
     ).toBeVisible();
-    await expect(page.getByText("P50 effort", { exact: true })).toHaveCount(2);
+    await expect(page.getByText("P50 工時", { exact: true })).toHaveCount(2);
 
     await page.reload();
     await expect(
       page.getByRole("heading", {
-        name: "會員資料查詢與匯出（fictional）",
+        name: "會員資料查詢與匯出（虛構）",
       }),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", {
-        name: "公開市場價格批次介接（fictional）",
+        name: "公開市場價格批次介接（虛構）",
       }),
     ).toBeVisible();
   });
 
-  test("localStorage 寫入失敗時仍可在 session 完成一次計算", async ({
-    page,
-  }) => {
+  test("瀏覽器本機儲存失敗時仍可在本次操作完成一次計算", async ({ page }) => {
     await page.addInitScript(() => {
       Storage.prototype.setItem = () => {
         throw new DOMException("Simulated quota failure", "QuotaExceededError");
@@ -566,10 +586,10 @@ test.describe("估算核心流程", () => {
     });
 
     await page.goto("/estimates/new");
-    await page.getByLabel("案件名稱").fill("虛構 storage fallback");
+    await page.getByLabel("案件名稱").fill("虛構本機儲存備援");
     await page
       .getByLabel("背景摘要")
-      .fill("fictional／illustrative：驗證 browser storage failure fallback。");
+      .fill("虛構示意：驗證瀏覽器本機儲存失敗時的備援流程。");
     await page.getByRole("button", { name: "建立並拆工作項目" }).click();
 
     await expect(page).toHaveURL("/estimates/new?step=items");
@@ -580,7 +600,7 @@ test.describe("估算核心流程", () => {
       .getByRole("alert")
       .filter({ hasText: "本機儲存提醒" });
     await expect(storageAlert).toContainText("本機儲存提醒");
-    await expect(storageAlert).toContainText("目前 session");
+    await expect(storageAlert).toContainText("本次操作");
 
     await page.getByRole("button", { name: /加入第一筆/ }).click();
     await page.getByRole("button", { name: "繼續：風險與交付" }).click();
@@ -588,8 +608,8 @@ test.describe("估算核心流程", () => {
     await page.getByRole("button", { name: "繼續：商業參數" }).click();
     await page.getByRole("button", { name: "繼續：結果與報價" }).click();
 
-    await expect(page.getByText("P50 effort", { exact: true })).toBeVisible();
-    await expect(page.getByText("P80 effort", { exact: true })).toBeVisible();
+    await expect(page.getByText("P50 工時", { exact: true })).toBeVisible();
+    await expect(page.getByText("P80 工時", { exact: true })).toBeVisible();
     await expect(
       page.getByRole("button", { name: "匯出可重算 JSON" }),
     ).toBeVisible();

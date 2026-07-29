@@ -41,12 +41,12 @@ const productPrinciples = [
   {
     title: "相同輸入得到相同結果",
     description:
-      "核心採 deterministic Bottom-up Parametric Model，不使用 AI 或隱藏係數決定價格。",
+      "核心採確定性的由下而上參數估算模型，不使用人工智慧或隱藏係數決定價格。",
   },
   {
     title: "資料留在瀏覽器",
     description:
-      "MVP 不登入、沒有資料庫，也不把估算案件送到伺服器；可用 JSON 自行備份。",
+      "公開版不登入、沒有資料庫，也不把估算案件送到伺服器；可用 JSON 檔案自行備份。",
   },
 ] as const;
 
@@ -56,12 +56,11 @@ export default function HomePage() {
       <section className="hero">
         <div className="hero__inner">
           <div className="hero__copy">
-            <p className="eyebrow">Traceable software estimation</p>
+            <p className="eyebrow">可追溯的軟體估算</p>
             <h1>讓每一筆估算，都能被檢查、重算與說明。</h1>
             <p className="hero__lead">
-              EstimateTrace 協助甲方 IT Business Analyst
-              將需求拆成工作項目，產生 P50、P80
-              工作量與價格區間，再用一致的成本口徑比較乙方報價。
+              EstimateTrace 協助甲方資訊科技商業分析師將需求拆成工作項目，產生
+              P50、P80 工作量與價格區間，再用一致的成本口徑比較乙方報價。
             </p>
             <div className="button-group">
               <Link className="button button--primary" href="/estimates/new">
@@ -72,11 +71,11 @@ export default function HomePage() {
               </Link>
             </div>
             <p className="hero__privacy-note">
-              無需登入 · Browser-only storage · 不預設啟用 Analytics
+              無需登入 · 資料只留在瀏覽器 · 不啟用使用分析
             </p>
           </div>
           <aside className="hero__trace" aria-label="估算軌跡示意">
-            <p className="hero__trace-label">Estimate trace</p>
+            <p className="hero__trace-label">估算軌跡</p>
             <ol>
               <li>
                 <span>需求範圍</span>
@@ -103,8 +102,7 @@ export default function HomePage() {
         <section className="notice-grid" aria-label="使用前提醒">
           <Callout title="公開網站資料提醒" tone="warning">
             <p>
-              請勿輸入公司機密、個人資料、真實乙方名稱、受 NDA
-              保護內容或未公開報價。使用共享裝置時，本機資料仍可能被其他使用者看到。
+              請勿輸入公司機密、個人資料、真實乙方名稱、受保密協議保護的內容或未公開報價。使用共享裝置時，本機資料仍可能被其他使用者看到。
             </p>
           </Callout>
           <Callout title="決策輔助免責聲明" tone="info">
@@ -134,7 +132,7 @@ export default function HomePage() {
 
         <section className="content-section" aria-labelledby="principles-title">
           <div className="section-heading">
-            <p className="eyebrow">Explainability first</p>
+            <p className="eyebrow">可說明性優先</p>
             <h2 id="principles-title">適合拿來說明，不是假裝精準的黑盒子</h2>
           </div>
           <div className="card-grid card-grid--three">

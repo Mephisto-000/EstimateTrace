@@ -23,23 +23,23 @@ export const fictionalExampleDescriptors = [
     id: "member-profile-query-export",
     title: "會員資料查詢與匯出",
     summary:
-      "一般 CRUD、角色權限與報表匯出的教學情境，用來示範畫面、授權與報表工作如何拆解。",
+      "一般新增、查詢、修改與刪除、角色權限及報表匯出的教學情境，用來示範畫面、授權與報表工作如何拆解。",
     scope: ["查詢與維護畫面", "角色與功能權限", "資料匯出報表"],
-    labels: ["UI", "REPORT", "AUTHORIZATION"],
+    workItemTypes: ["UI", "REPORT", "AUTHORIZATION"],
   },
   {
     index: 1,
     id: "public-market-price-batch",
     title: "公開市場價格批次介接",
     summary:
-      "公開資料 API、排程批次、資料核對與 rollback 的教學情境，用來示範整合依賴與資料品質風險。",
+      "公開資料介面、排程批次、資料核對與回復的教學情境，用來示範整合依賴與資料品質風險。",
     scope: [
-      "公開 API 介接",
-      "排程與 idempotent retry",
-      "資料核對與 rollback regression",
-      "Production rollout",
+      "公開資料介接",
+      "排程與冪等重試",
+      "資料核對與回復測試",
+      "正式環境上線",
     ],
-    labels: ["INTEGRATION", "BATCH", "TESTING", "DEPLOYMENT"],
+    workItemTypes: ["INTEGRATION", "BATCH", "TESTING", "DEPLOYMENT"],
   },
 ] as const;
 
@@ -129,7 +129,7 @@ function workItem(
     id: runtime.createId(),
     type,
     title,
-    description: `${defaults.displayName}的 fictional／illustrative 工作項目。`,
+    description: `${defaults.displayName}的虛構示意工作項目。`,
     quantity,
     unit: defaults.unit,
     unitHours: defaults.defaultUnitHours,
@@ -144,8 +144,8 @@ function memberLookupExample(runtime: RuntimeServices): EstimateCaseDocument {
   const descriptor = fictionalExampleDescriptors[0];
   const estimate = createEmptyEstimateCase(
     {
-      name: `${descriptor.title}（fictional）`,
-      description: `fictional／illustrative：${descriptor.summary}不對應任何真實組織或系統。`,
+      name: `${descriptor.title}（虛構）`,
+      description: `虛構示意：${descriptor.summary}不對應任何真實組織或系統。`,
     },
     runtime,
   );
@@ -180,13 +180,13 @@ function memberLookupExample(runtime: RuntimeServices): EstimateCaseDocument {
           "2",
           "HIGH",
           ["SECURITY_COMPLIANCE"],
-          "示範 Role-based permission，不代表真實權限模型。",
+          "示範角色權限，不代表真實權限模型。",
         ),
       ],
       vendorQuote: {
         amount: "420000",
         taxBasis: "TAX_INCLUSIVE",
-        note: "fictional／illustrative quote，不含真實乙方名稱。",
+        note: "虛構示意報價，不含真實乙方名稱。",
         quoteDate: "2026-07-29",
       },
     },
@@ -197,8 +197,8 @@ function marketBatchExample(runtime: RuntimeServices): EstimateCaseDocument {
   const descriptor = fictionalExampleDescriptors[1];
   const estimate = createEmptyEstimateCase(
     {
-      name: `${descriptor.title}（fictional）`,
-      description: `fictional／illustrative：${descriptor.summary}不對應真實金融系統。`,
+      name: `${descriptor.title}（虛構）`,
+      description: `虛構示意：${descriptor.summary}不對應真實金融系統。`,
     },
     runtime,
   );
@@ -207,11 +207,11 @@ function marketBatchExample(runtime: RuntimeServices): EstimateCaseDocument {
     ...estimate.input.riskProfile,
     INTEGRATION_DEPENDENCY: {
       level: "HIGH",
-      rationale: "示範外部 public API availability 與契約變更。",
+      rationale: "示範外部公開介面的可用性與契約變更。",
     },
     DATA_MIGRATION_QUALITY: {
       level: "HIGH",
-      rationale: "示範資料缺漏、重送與 reconciliation。",
+      rationale: "示範資料缺漏、重送與核對。",
     },
     SCHEDULE_COMPRESSION: {
       level: "NOMINAL",
@@ -228,44 +228,44 @@ function marketBatchExample(runtime: RuntimeServices): EstimateCaseDocument {
         workItem(
           runtime,
           "INTEGRATION",
-          "公開價格 API adapter",
+          "公開價格介接元件",
           "3",
           "HIGH",
           ["INTEGRATION_DEPENDENCY", "SECURITY_COMPLIANCE"],
-          "使用 example.com 等保留網域描述，不連到 production endpoint。",
+          "使用 example.com 等保留網域描述，不連到正式環境端點。",
         ),
         workItem(
           runtime,
           "BATCH",
-          "價格日批次與 idempotent retry",
+          "價格日批次與冪等重試",
           "2",
           "HIGH",
           ["INTEGRATION_DEPENDENCY", "DATA_MIGRATION_QUALITY"],
-          "需保留重跑、對帳與 rollback strategy。",
+          "需保留重跑、對帳與回復策略。",
         ),
         workItem(
           runtime,
           "TESTING",
-          "資料核對與 rollback regression",
+          "資料核對與回復測試",
           "2",
           "HIGH",
           ["DATA_MIGRATION_QUALITY"],
-          "額外測試 item 已包含 QA effort，避免 phase loading 重複。",
+          "額外測試項目已包含品質保證工時，避免跨階段工作量重複計入。",
         ),
         workItem(
           runtime,
           "DEPLOYMENT",
-          "批次排程與 production rollout",
+          "批次排程與正式環境上線",
           "1",
           "MEDIUM",
           ["INTEGRATION_DEPENDENCY"],
-          "示範 deployment、rollback 與 hypercare。",
+          "示範部署、回復與上線後密集支援。",
         ),
       ],
       vendorQuote: {
         amount: "780000",
         taxBasis: "TAX_EXCLUSIVE",
-        note: "fictional／illustrative quote。",
+        note: "虛構示意報價。",
         quoteDate: "2026-07-29",
       },
     },

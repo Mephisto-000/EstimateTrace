@@ -22,11 +22,11 @@ import { useBrowserEstimateRepository } from "./use-browser-estimate-repository"
 
 const storageWarningText: Record<StorageWarning, string> = {
   STORAGE_UNAVAILABLE:
-    "這個瀏覽器目前無法使用 localStorage；你仍可在本次操作中計算，請匯出 JSON 備份。",
+    "這個瀏覽器目前無法使用本機儲存；你仍可在本次操作中計算，請匯出 JSON 備份。",
   STORAGE_READ_FAILED:
     "無法讀取本機案件；原始資料未被覆寫。請檢查瀏覽器儲存權限。",
   STORAGE_WRITE_FAILED:
-    "本機儲存失敗；目前 session 仍保留資料，離開前請匯出 JSON 備份。",
+    "本機儲存失敗；本次操作仍保留資料，離開前請匯出 JSON 備份。",
   STORAGE_DATA_CORRUPTED:
     "偵測到無法驗證的本機資料；原始內容未被覆寫，清單暫不載入。",
 };
@@ -72,7 +72,7 @@ export function EstimateListClient() {
 
   function loadExamples() {
     persistAll(createFictionalExamples(browserRuntimeServices));
-    setMessage("已載入兩筆 fictional／illustrative 範例。");
+    setMessage("已載入兩筆虛構教學範例。");
   }
 
   function duplicateEstimate(source: EstimateCaseDocument) {
@@ -108,7 +108,7 @@ export function EstimateListClient() {
     setMessage(
       result.persisted
         ? "案件已從目前瀏覽器刪除。"
-        : "案件僅從目前 session 移除；本機儲存失敗，重新開啟後可能恢復。",
+        : "案件僅從本次操作移除；本機儲存失敗，重新開啟後可能恢復。",
     );
   }
 
@@ -125,14 +125,14 @@ export function EstimateListClient() {
     setMessage(
       result.persisted
         ? "本機案件已全部清除；內建範例仍可重新載入。"
-        : "案件僅從目前 session 清除；本機儲存失敗，重新開啟後可能恢復。",
+        : "案件僅從本次操作清除；本機儲存失敗，重新開啟後可能恢復。",
     );
   }
 
   function exportEstimate(estimate: EstimateCaseDocument) {
     if (
       !window.confirm(
-        "匯出檔可能含有你輸入的內容。請確認不含公司機密、個人資料、真實乙方名稱或受 NDA 保護資訊。",
+        "匯出檔可能含有你輸入的內容。請確認不含公司機密、個人資料、真實乙方名稱或受保密協議保護的資訊。",
       )
     ) {
       return;
@@ -167,7 +167,7 @@ export function EstimateListClient() {
     if (
       existing &&
       !window.confirm(
-        `匯入檔的案件 ID 與「${existing.name}」相同。是否以匯入內容取代既有案件？`,
+        `匯入檔的案件識別碼與「${existing.name}」相同。是否以匯入內容取代既有案件？`,
       )
     ) {
       setMessage("匯入已取消，既有案件未變更。");
@@ -178,10 +178,10 @@ export function EstimateListClient() {
     refresh();
     setMessage(
       result.warnings.length > 0
-        ? "已匯入並重新計算，但 result snapshot 與目前重算結果不同，請檢查版本與參數。"
+        ? "已匯入並重新計算，但結果快照與目前重算結果不同，請檢查版本與參數。"
         : saveResult?.persisted === false
           ? "匯入成功，但無法持久化；請立即匯出備份。"
-          : "匯入成功，重算結果與 snapshot 一致。",
+          : "匯入成功，重算結果與快照一致。",
     );
   }
 
@@ -198,8 +198,8 @@ export function EstimateListClient() {
       <div className="privacy-banner">
         <strong>EstimateTrace 是公開網站；資料只儲存在此瀏覽器。</strong>
         <p>
-          請勿建立或匯入公司機密、個人資料、真實乙方名稱、受 NDA
-          保護內容或未公開報價。不會上傳到 Vercel function
+          請勿建立或匯入公司機密、個人資料、真實乙方名稱、受保密協議保護的內容或未公開報價。不會上傳到
+          Vercel 函式
           或第三方；共享裝置上的其他使用者可能看見本機資料，清除後本站也無法復原。
         </p>
       </div>
@@ -248,7 +248,7 @@ export function EstimateListClient() {
         <div className="empty-state">
           <div>
             <h2>目前瀏覽器還沒有估算案件</h2>
-            <p>從空白案件開始，或先載入 fictional example 熟悉流程。</p>
+            <p>從空白案件開始，或先載入虛構範例熟悉流程。</p>
           </div>
           <div className="button-group">
             <Link className="button button--primary" href="/estimates/new">
@@ -286,13 +286,13 @@ export function EstimateListClient() {
               {outcome.ok ? (
                 <div className="estimate-card__metrics">
                   <div>
-                    <span className="metric__label">P50 effort</span>
+                    <span className="metric__label">P50 工時</span>
                     <strong>
                       {formatEffort(outcome.result.p50EffortHours)}
                     </strong>
                   </div>
                   <div>
-                    <span className="metric__label">P80 effort</span>
+                    <span className="metric__label">P80 工時</span>
                     <strong>
                       {formatEffort(outcome.result.p80EffortHours)}
                     </strong>
@@ -306,7 +306,7 @@ export function EstimateListClient() {
                     </strong>
                   </div>
                   <div>
-                    <span className="metric__label">P80 benchmark 未稅</span>
+                    <span className="metric__label">P80 未稅模型參考值</span>
                     <strong>{formatMoney(outcome.result.p80QuoteExTax)}</strong>
                   </div>
                 </div>

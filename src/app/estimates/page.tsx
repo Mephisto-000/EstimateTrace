@@ -7,7 +7,7 @@ export default function EstimatesPage() {
     <div className="page-shell estimate-page">
       <header className="estimate-page__header">
         <div>
-          <p className="eyebrow">Browser-only workspace</p>
+          <p className="eyebrow">僅限瀏覽器的工作區</p>
           <h1>我的估算</h1>
           <p>
             案件只儲存在目前瀏覽器。請定期匯出 JSON

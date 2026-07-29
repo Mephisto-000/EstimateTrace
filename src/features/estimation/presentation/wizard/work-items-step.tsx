@@ -11,16 +11,16 @@ import type {
   WorkItemType,
 } from "@/features/estimation/domain";
 
+import {
+  COMPLEXITY_LEVEL_LABELS,
+  CROSS_CUTTING_PHASE_LABELS,
+  formatIncludedActivity,
+  formatLegacyParameterText,
+  formatWorkItemUnit,
+  RISK_FACTOR_LABELS,
+  WORK_ITEM_TYPE_LABELS,
+} from "../labels";
 import type { EstimateUpdater, WizardStepProps } from "./types";
-
-const phaseLabels: Record<CrossCuttingPhase, string> = {
-  BUSINESS_ANALYSIS: "Business Analysis",
-  ARCHITECTURE_DESIGN: "Architecture／Technical Design",
-  PROJECT_MANAGEMENT: "Project Management",
-  QUALITY_ASSURANCE: "Quality Assurance",
-  DEPLOYMENT_RELEASE: "Deployment／Release",
-  DOCUMENTATION_TRAINING: "Documentation／Training",
-};
 
 interface WorkItemCardProps {
   readonly item: WorkItemInput;
@@ -40,6 +40,12 @@ function WorkItemCard({
   const catalog = estimate.parameterSnapshot.workItemCatalog;
   const complexity = estimate.parameterSnapshot.complexityParameters;
   const risks = estimate.parameterSnapshot.riskFactors;
+  const selectedCatalogEntry = catalog.find(
+    (entry) => entry.code === item.type,
+  );
+  const selectedComplexity = complexity.find(
+    (entry) => entry.level === item.complexity,
+  );
   const errorFor = (fieldId: string) =>
     issues.find((issue) => issue.fieldId === fieldId);
 
@@ -123,7 +129,7 @@ function WorkItemCard({
           >
             {catalog.map((entry) => (
               <option key={entry.code} value={entry.code}>
-                {entry.displayName}（{entry.code}）
+                {WORK_ITEM_TYPE_LABELS[entry.code]}
               </option>
             ))}
           </select>
@@ -185,7 +191,7 @@ function WorkItemCard({
 
       <div className="form-grid form-grid--three">
         <div className="field">
-          <label htmlFor={`item-quantity-${item.id}`}>Quantity</label>
+          <label htmlFor={`item-quantity-${item.id}`}>數量</label>
           <input
             id={`item-quantity-${item.id}`}
             type="number"
@@ -215,7 +221,7 @@ function WorkItemCard({
         </div>
         <div className="field">
           <label htmlFor={`item-unit-hours-${item.id}`}>
-            Unit hours（person-hour／{item.unit}）
+            每單位工時（人時／{formatWorkItemUnit(item.unit)}）
           </label>
           <input
             id={`item-unit-hours-${item.id}`}
@@ -237,9 +243,9 @@ function WorkItemCard({
           />
           <span className="field__help" id={`item-unit-hours-${item.id}-help`}>
             示範值，非市場標準；預設只包含{" "}
-            {catalog
-              .find((entry) => entry.code === item.type)
-              ?.includedActivities.join("、") || "未指定活動"}
+            {selectedCatalogEntry?.includedActivities
+              .map(formatIncludedActivity)
+              .join("、") || "未指定活動"}
             。
           </span>
           {errorFor(`item-unit-hours-${item.id}`) ? (
@@ -252,7 +258,7 @@ function WorkItemCard({
           ) : null}
         </div>
         <div className="field">
-          <label htmlFor={`item-complexity-${item.id}`}>Complexity</label>
+          <label htmlFor={`item-complexity-${item.id}`}>複雜度</label>
           <select
             id={`item-complexity-${item.id}`}
             value={item.complexity}
@@ -264,24 +270,24 @@ function WorkItemCard({
           >
             {complexity.map((entry) => (
               <option key={entry.level} value={entry.level}>
-                {entry.displayName} × {entry.multiplier} — {entry.description}
+                {COMPLEXITY_LEVEL_LABELS[entry.level]} × {entry.multiplier} —{" "}
+                {formatLegacyParameterText(entry.description)}
               </option>
             ))}
           </select>
           <span className="field__help">
-            {
-              complexity.find((entry) => entry.level === item.complexity)
-                ?.description
-            }
+            {selectedComplexity
+              ? formatLegacyParameterText(selectedComplexity.description)
+              : null}
           </span>
         </div>
       </div>
 
       <details>
-        <summary>適用風險與 double-counting 設定</summary>
+        <summary>適用風險與重複計入設定</summary>
         <div className="form-stack">
           <fieldset id={`risk-factors-${item.id}`}>
-            <legend>只選擇真正影響這個項目的 Risk Factors</legend>
+            <legend>只選擇真正影響這個項目的風險因子</legend>
             <div className="choice-grid">
               {risks.map((risk) => (
                 <label className="choice-row" key={risk.id}>
@@ -293,9 +299,11 @@ function WorkItemCard({
                     }
                   />
                   <span>
-                    <strong>{risk.displayName}</strong>
+                    <strong>{RISK_FACTOR_LABELS[risk.id]}</strong>
                     <br />
-                    <span className="field__help">{risk.description}</span>
+                    <span className="field__help">
+                      {formatLegacyParameterText(risk.description)}
+                    </span>
                   </span>
                 </label>
               ))}
@@ -303,29 +311,30 @@ function WorkItemCard({
           </fieldset>
 
           <fieldset>
-            <legend>此 unit effort 已包含的 Cross-cutting phases</legend>
+            <legend>此單位工時已包含的跨階段活動</legend>
             <p className="field__help">
-              勾選後，該 item 不再成為同 phase loading 的分母，避免 double
-              counting。
+              勾選後，該工作項目不再列入同一階段的工時計算基礎，避免重複計入。
             </p>
             <div className="choice-grid">
-              {Object.entries(phaseLabels).map(([phase, label]) => (
-                <label className="choice-row" key={phase}>
-                  <input
-                    type="checkbox"
-                    checked={item.includedCrossCuttingPhases.includes(
-                      phase as CrossCuttingPhase,
-                    )}
-                    onChange={(event) =>
-                      togglePhase(
+              {Object.entries(CROSS_CUTTING_PHASE_LABELS).map(
+                ([phase, label]) => (
+                  <label className="choice-row" key={phase}>
+                    <input
+                      type="checkbox"
+                      checked={item.includedCrossCuttingPhases.includes(
                         phase as CrossCuttingPhase,
-                        event.currentTarget.checked,
-                      )
-                    }
-                  />
-                  <span>{label}</span>
-                </label>
-              ))}
+                      )}
+                      onChange={(event) =>
+                        togglePhase(
+                          phase as CrossCuttingPhase,
+                          event.currentTarget.checked,
+                        )
+                      }
+                    />
+                    <span>{label}</span>
+                  </label>
+                ),
+              )}
             </div>
           </fieldset>
         </div>
@@ -333,7 +342,7 @@ function WorkItemCard({
 
       <div className="field">
         <label htmlFor={`item-assumptions-${item.id}`}>
-          備註與 assumptions（每行一項）
+          備註與假設（每行一項）
         </label>
         <textarea
           id={`item-assumptions-${item.id}`}
@@ -369,15 +378,15 @@ export function WorkItemsStep({
     const item: WorkItemInput = {
       id: browserRuntimeServices.createId(),
       type: selectedCatalog.code,
-      title: selectedCatalog.displayName,
-      description: selectedCatalog.description,
+      title: WORK_ITEM_TYPE_LABELS[selectedCatalog.code],
+      description: formatLegacyParameterText(selectedCatalog.description),
       quantity: "1",
       unit: defaults.unit,
       unitHours: defaults.defaultUnitHours,
       complexity: "MEDIUM",
       applicableRiskFactorIds: [],
       includedCrossCuttingPhases: defaults.includedCrossCuttingPhases,
-      assumptions: ["示範 unit effort，需依實際 scope 與歷史資料校準。"],
+      assumptions: ["示範單位工時，需依實際範圍與歷史資料校準。"],
     };
     updateEstimate((current) => ({
       ...current,
@@ -391,19 +400,18 @@ export function WorkItemsStep({
   return (
     <div className="form-stack" id="work-items">
       <header className="wizard-heading">
-        <p className="eyebrow">Step 2 of 5</p>
+        <p className="eyebrow">步驟 2／5</p>
         <h1 id="wizard-step-title" tabIndex={-1}>
           工作項目
         </h1>
         <p>
-          把需求拆成可數量化的交付項目。Unit effort 是公開教學起點，請依 scope
-          與歷史 evidence 調整。
+          把需求拆成可數量化的交付項目。單位工時是公開教學起點，請依範圍與歷史資料調整。
         </p>
       </header>
 
       <div className="workspace-toolbar">
         <div className="field">
-          <label htmlFor="catalog-type">Catalog 類型</label>
+          <label htmlFor="catalog-type">工作項目類型</label>
           <select
             id="catalog-type"
             value={selectedType}
@@ -413,7 +421,8 @@ export function WorkItemsStep({
           >
             {estimate.parameterSnapshot.workItemCatalog.map((entry) => (
               <option key={entry.code} value={entry.code}>
-                {entry.displayName} — {entry.description}
+                {WORK_ITEM_TYPE_LABELS[entry.code]} —{" "}
+                {formatLegacyParameterText(entry.description)}
               </option>
             ))}
           </select>
@@ -431,14 +440,17 @@ export function WorkItemsStep({
         <div className="empty-state">
           <div>
             <h2>尚未加入工作項目</h2>
-            <p>至少加入一筆 item 才能產生不具誤導性的結果。</p>
+            <p>至少加入一筆工作項目才能產生不具誤導性的結果。</p>
           </div>
           <button
             className="button button--primary"
             type="button"
             onClick={addItem}
           >
-            加入第一筆 {selectedCatalog?.displayName}
+            加入第一筆{" "}
+            {selectedCatalog
+              ? WORK_ITEM_TYPE_LABELS[selectedCatalog.code]
+              : "工作項目"}
           </button>
         </div>
       ) : (

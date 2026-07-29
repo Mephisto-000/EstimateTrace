@@ -1,9 +1,9 @@
-import type {
-  CrossCuttingPhase,
-  ParameterSnapshot,
-  RiskFactorId,
-  WorkItemType,
-} from "@/features/estimation/domain";
+import {
+  ZH_TW_COMPLEXITY_LEVEL_LABELS,
+  ZH_TW_CROSS_CUTTING_PHASE_LABELS,
+  ZH_TW_RISK_FACTOR_LABELS,
+  ZH_TW_WORK_ITEM_TYPE_LABELS,
+} from "@/config/locale/zh-tw";
 import {
   MODEL_DECIMAL_PRECISION,
   MODEL_INTERMEDIATE_ROUNDING,
@@ -12,6 +12,10 @@ import {
   MODEL_P80_Z_SCORE,
   MODEL_PRESENTATION_ROUNDING,
   MODEL_ROUNDING_MODE,
+  type CrossCuttingPhase,
+  type ParameterSnapshot,
+  type RiskFactorId,
+  type WorkItemType,
 } from "@/features/estimation/domain";
 
 const illustrativeSource =
@@ -109,14 +113,14 @@ function phase(
 
 export const publicDemoParameterSet = {
   id: "public-demo-zh-tw",
-  version: "1.0.0",
+  version: "1.0.1",
   displayName: "公開示範參數（繁體中文）",
   description:
     "供 EstimateTrace 教學與方法展示使用；不代表任何產業、公司或市場的標準工時與價格。",
   workItemCatalog: [
     {
       code: "UI",
-      displayName: "畫面功能",
+      displayName: ZH_TW_WORK_ITEM_TYPE_LABELS.UI,
       description: "查詢、維護或審核畫面。",
       defaultUnitHours: "24",
       unit: "screen",
@@ -126,8 +130,8 @@ export const publicDemoParameterSet = {
     },
     {
       code: "REPORT",
-      displayName: "報表",
-      description: "Excel、PDF 或監管報表。",
+      displayName: ZH_TW_WORK_ITEM_TYPE_LABELS.REPORT,
+      description: "試算表、PDF 或監管報表。",
       defaultUnitHours: "24",
       unit: "report",
       includedActivities:
@@ -136,7 +140,7 @@ export const publicDemoParameterSet = {
     },
     {
       code: "BUSINESS_LOGIC",
-      displayName: "商業邏輯",
+      displayName: ZH_TW_WORK_ITEM_TYPE_LABELS.BUSINESS_LOGIC,
       description: "計算、規則或狀態流程。",
       defaultUnitHours: "16",
       unit: "rule",
@@ -146,8 +150,8 @@ export const publicDemoParameterSet = {
     },
     {
       code: "DATABASE",
-      displayName: "資料庫",
-      description: "Table、View 或 Stored Procedure。",
+      displayName: ZH_TW_WORK_ITEM_TYPE_LABELS.DATABASE,
+      description: "資料表、檢視或預存程序。",
       defaultUnitHours: "8",
       unit: "object",
       includedActivities:
@@ -156,8 +160,8 @@ export const publicDemoParameterSet = {
     },
     {
       code: "INTEGRATION",
-      displayName: "系統介接",
-      description: "REST API、SFTP 或 Message Queue。",
+      displayName: ZH_TW_WORK_ITEM_TYPE_LABELS.INTEGRATION,
+      description: "網頁服務介面、檔案傳輸或訊息佇列。",
       defaultUnitHours: "24",
       unit: "endpoint",
       includedActivities:
@@ -166,7 +170,7 @@ export const publicDemoParameterSet = {
     },
     {
       code: "BATCH",
-      displayName: "批次處理",
+      displayName: ZH_TW_WORK_ITEM_TYPE_LABELS.BATCH,
       description: "排程、日終或月結作業。",
       defaultUnitHours: "24",
       unit: "job",
@@ -176,7 +180,7 @@ export const publicDemoParameterSet = {
     },
     {
       code: "MIGRATION",
-      displayName: "資料轉置",
+      displayName: ZH_TW_WORK_ITEM_TYPE_LABELS.MIGRATION,
       description: "資料清理、轉換與核對。",
       defaultUnitHours: "32",
       unit: "batch",
@@ -186,8 +190,8 @@ export const publicDemoParameterSet = {
     },
     {
       code: "AUTHORIZATION",
-      displayName: "權限",
-      description: "Role、Function 或 Data Permission。",
+      displayName: ZH_TW_WORK_ITEM_TYPE_LABELS.AUTHORIZATION,
+      description: "角色、功能或資料權限。",
       defaultUnitHours: "16",
       unit: "permission-set",
       includedActivities:
@@ -196,8 +200,8 @@ export const publicDemoParameterSet = {
     },
     {
       code: "TESTING",
-      displayName: "額外測試",
-      description: "Regression、Performance 或 Security testing。",
+      displayName: ZH_TW_WORK_ITEM_TYPE_LABELS.TESTING,
+      description: "回歸、效能或資安測試。",
       defaultUnitHours: "16",
       unit: "test-scope",
       includedActivities:
@@ -206,8 +210,8 @@ export const publicDemoParameterSet = {
     },
     {
       code: "DEPLOYMENT",
-      displayName: "部署",
-      description: "SIT、UAT 或 Production deployment。",
+      displayName: ZH_TW_WORK_ITEM_TYPE_LABELS.DEPLOYMENT,
+      description: "系統整合測試、使用者驗收測試或正式環境部署。",
       defaultUnitHours: "16",
       unit: "environment",
       includedActivities:
@@ -216,7 +220,7 @@ export const publicDemoParameterSet = {
     },
     {
       code: "DOCUMENTATION",
-      displayName: "文件與教育",
+      displayName: ZH_TW_WORK_ITEM_TYPE_LABELS.DOCUMENTATION,
       description: "操作手冊、技術文件或訓練。",
       defaultUnitHours: "8",
       unit: "deliverable",
@@ -226,7 +230,7 @@ export const publicDemoParameterSet = {
     },
     {
       code: "CUSTOM",
-      displayName: "自訂",
+      displayName: ZH_TW_WORK_ITEM_TYPE_LABELS.CUSTOM,
       description: "由使用者明確定義的其他可估算工作。",
       defaultUnitHours: "8",
       unit: "item",
@@ -238,25 +242,25 @@ export const publicDemoParameterSet = {
   complexityParameters: [
     {
       level: "LOW",
-      displayName: "Low",
+      displayName: ZH_TW_COMPLEXITY_LEVEL_LABELS.LOW,
       multiplier: "0.8",
       description: "單一路徑、規則明確、低整合依賴。",
     },
     {
       level: "MEDIUM",
-      displayName: "Medium",
+      displayName: ZH_TW_COMPLEXITY_LEVEL_LABELS.MEDIUM,
       multiplier: "1",
       description: "一般企業功能、少量例外與驗證。",
     },
     {
       level: "HIGH",
-      displayName: "High",
+      displayName: ZH_TW_COMPLEXITY_LEVEL_LABELS.HIGH,
       multiplier: "1.35",
       description: "多路徑、多角色、多例外或高整合依賴。",
     },
     {
       level: "VERY_HIGH",
-      displayName: "Very High",
+      displayName: ZH_TW_COMPLEXITY_LEVEL_LABELS.VERY_HIGH,
       multiplier: "1.7",
       description: "核心交易、複雜狀態、嚴格效能或高度法遵。",
     },
@@ -264,69 +268,69 @@ export const publicDemoParameterSet = {
   riskFactors: [
     riskFactor(
       "REQUIREMENT_CLARITY",
-      "Requirement Clarity",
+      ZH_TW_RISK_FACTOR_LABELS.REQUIREMENT_CLARITY,
       "需求完整度、例外與驗收條件的不確定性。",
     ),
     riskFactor(
       "LEGACY_TECHNICAL_DEBT",
-      "Legacy／Technical Debt",
-      "既有設計限制、歷史相依與技術債造成的額外 effort。",
+      ZH_TW_RISK_FACTOR_LABELS.LEGACY_TECHNICAL_DEBT,
+      "既有設計限制、歷史相依與技術債造成的額外工作量。",
     ),
     riskFactor(
       "INTEGRATION_DEPENDENCY",
-      "Integration Dependency",
+      ZH_TW_RISK_FACTOR_LABELS.INTEGRATION_DEPENDENCY,
       "外部介接、協調、測試環境與契約穩定性的風險。",
     ),
     riskFactor(
       "SECURITY_COMPLIANCE",
-      "Security／Compliance",
-      "資安、權限、稽核與法遵要求造成的額外 effort。",
+      ZH_TW_RISK_FACTOR_LABELS.SECURITY_COMPLIANCE,
+      "資安、權限、稽核與法遵要求造成的額外工作量。",
     ),
     riskFactor(
       "DATA_MIGRATION_QUALITY",
-      "Data Migration Quality",
+      ZH_TW_RISK_FACTOR_LABELS.DATA_MIGRATION_QUALITY,
       "來源資料品質、轉換與核對的不確定性。",
     ),
     riskFactor(
       "SCHEDULE_COMPRESSION",
-      "Schedule Compression",
-      "平行作業、協調、返工或加班造成的額外 effort。",
+      ZH_TW_RISK_FACTOR_LABELS.SCHEDULE_COMPRESSION,
+      "平行作業、協調、返工或加班造成的額外工作量。",
     ),
   ],
   phaseLoadingParameters: [
     phase(
       "BUSINESS_ANALYSIS",
-      "Business Analysis",
+      ZH_TW_CROSS_CUTTING_PHASE_LABELS.BUSINESS_ANALYSIS,
       "0.12",
-      "以未包含此活動的 adjusted implementation effort 為分母。",
+      "以尚未包含此活動的調整後實作工時為計算基礎。",
     ),
     phase(
       "ARCHITECTURE_DESIGN",
-      "Architecture／Technical Design",
+      ZH_TW_CROSS_CUTTING_PHASE_LABELS.ARCHITECTURE_DESIGN,
       "0.08",
       "跨工作項目的架構與技術設計。",
     ),
     phase(
       "PROJECT_MANAGEMENT",
-      "Project Management",
+      ZH_TW_CROSS_CUTTING_PHASE_LABELS.PROJECT_MANAGEMENT,
       "0.1",
       "規劃、協調、追蹤與風險管理。",
     ),
     phase(
       "QUALITY_ASSURANCE",
-      "Quality Assurance",
+      ZH_TW_CROSS_CUTTING_PHASE_LABELS.QUALITY_ASSURANCE,
       "0.18",
       "額外的整合、回歸與品質保證活動。",
     ),
     phase(
       "DEPLOYMENT_RELEASE",
-      "Deployment／Release",
+      ZH_TW_CROSS_CUTTING_PHASE_LABELS.DEPLOYMENT_RELEASE,
       "0.05",
-      "跨環境部署、release 與上線協調。",
+      "跨環境部署、發布與上線協調。",
     ),
     phase(
       "DOCUMENTATION_TRAINING",
-      "Documentation／Training",
+      ZH_TW_CROSS_CUTTING_PHASE_LABELS.DOCUMENTATION_TRAINING,
       "0.05",
       "交付文件、操作說明與訓練。",
     ),
@@ -336,7 +340,7 @@ export const publicDemoParameterSet = {
       level: "LOW",
       downsideRate: "0.1",
       upsideRate: "0.15",
-      description: "Scope 清楚、依賴少。",
+      description: "範圍清楚、依賴少。",
     },
     {
       level: "MEDIUM",
@@ -383,7 +387,7 @@ export const publicDemoParameterSet = {
     {
       id: "testing-scope",
       priority: 10,
-      text: "是否包含完整 SIT、UAT 與 Regression Test？",
+      text: "是否包含完整的系統整合測試、使用者驗收測試與回歸測試？",
       triggers: [
         {
           kind: "BAND",
@@ -414,7 +418,7 @@ export const publicDemoParameterSet = {
     {
       id: "release-rollback",
       priority: 30,
-      text: "是否包含 Production deployment、rollback 與 hypercare？",
+      text: "是否包含正式環境部署、回復與上線後密集支援？",
       triggers: [
         {
           kind: "WORK_ITEM_TYPE",
@@ -430,7 +434,7 @@ export const publicDemoParameterSet = {
     {
       id: "warranty-sla",
       priority: 40,
-      text: "Warranty 範圍、期間與 SLA 為何？",
+      text: "保固範圍、期間與服務水準為何？",
       triggers: [
         {
           kind: "BAND",
@@ -441,7 +445,7 @@ export const publicDemoParameterSet = {
     {
       id: "contingency",
       priority: 50,
-      text: "是否因需求未明而加入 contingency？",
+      text: "是否因需求未明而加入預備金或緩衝？",
       triggers: [
         {
           kind: "RISK_FACTOR",
@@ -453,7 +457,7 @@ export const publicDemoParameterSet = {
     {
       id: "role-rate",
       priority: 60,
-      text: "乙方是否能提供角色別人日與 blended rate？",
+      text: "乙方是否能提供角色別人日與綜合費率？",
       triggers: [
         {
           kind: "BAND",

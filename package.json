@@ -1,8 +1,8 @@
 {
   "name": "estimate-trace",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
-  "description": "Traceable software requirement cost estimation and vendor quote analysis for IT business analysts.",
+  "description": "提供可追溯的軟體需求成本估算與乙方報價分析。",
   "license": "MIT",
   "engines": {
     "node": ">=24.0.0 <25"

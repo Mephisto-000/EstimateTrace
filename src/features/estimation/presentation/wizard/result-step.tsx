@@ -71,7 +71,7 @@ export function ResultStep({ estimate, updateEstimate }: WizardStepProps) {
   function handleExport(): void {
     if (
       !window.confirm(
-        "JSON 可能包含案件名稱、scope、assumptions 與商業數字。請先確認沒有敏感資料，再儲存或分享。",
+        "JSON 可能包含案件名稱、範圍、假設與商業數字。請先確認沒有敏感資料，再儲存或分享。",
       )
     ) {
       return;
@@ -87,18 +87,18 @@ export function ResultStep({ estimate, updateEstimate }: WizardStepProps) {
   return (
     <div className="result-stack" id="estimate-result">
       <header className="wizard-heading">
-        <p className="eyebrow">Step 5 of 5</p>
+        <p className="eyebrow">步驟 5／5</p>
         <h1 id="wizard-step-title" tabIndex={-1}>
           結果與報價比較
         </h1>
         <p>
-          結果由目前的 scope、工作項目、風險、uncertainty 與商務參數即時計算。
+          結果由目前的範圍、工作項目、風險、不確定性與商務參數即時計算。
           模型提供可追溯參考，不構成正式報價或採購建議。
         </p>
       </header>
       <p className="visually-hidden" aria-live="polite">
         {outcome.ok
-          ? "估算結果已產生，可檢視 P50、P80 與 calculation trace。"
+          ? "估算結果已產生，可檢視 P50、P80 與計算軌跡。"
           : "目前無法產生估算，請依錯誤摘要修正。"}
       </p>
 
@@ -111,8 +111,7 @@ export function ResultStep({ estimate, updateEstimate }: WizardStepProps) {
         <div>
           <h2 id="vendor-quote-title">乙方報價（選填）</h2>
           <p className="field__help">
-            不輸入乙方名稱；只比較金額與 model range，避免品牌背書或 procurement
-            recommendation。
+            不輸入乙方名稱；只比較金額與模型參考區間，避免品牌背書或採購建議。
           </p>
         </div>
         {estimate.input.vendorQuote === null ? (
@@ -133,7 +132,7 @@ export function ResultStep({ estimate, updateEstimate }: WizardStepProps) {
           <>
             <div className="form-grid form-grid--three">
               <div className="field">
-                <label htmlFor="vendor-quote-amount">報價金額（TWD）</label>
+                <label htmlFor="vendor-quote-amount">報價金額（新臺幣）</label>
                 <input
                   id="vendor-quote-amount"
                   type="number"

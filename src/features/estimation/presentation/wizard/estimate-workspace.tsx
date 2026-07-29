@@ -18,6 +18,7 @@ import type {
   StorageWarning,
 } from "@/features/estimation/infrastructure/local-estimate-repository";
 
+import { CROSS_CUTTING_PHASE_LABELS } from "../labels";
 import { CommercialStep } from "./commercial-step";
 import { ResultStep } from "./result-step";
 import { RiskStep } from "./risk-step";
@@ -37,10 +38,9 @@ type StepId = (typeof steps)[number]["id"];
 
 const storageMessages: Partial<Record<StorageWarning, string>> = {
   STORAGE_UNAVAILABLE:
-    "localStorage 不可用；目前 session 可繼續計算，離開前請匯出備份。",
+    "瀏覽器本機儲存不可用；本次操作仍可繼續計算，離開前請匯出備份。",
   STORAGE_READ_FAILED: "本機資料無法讀取；原始內容沒有被覆寫。",
-  STORAGE_WRITE_FAILED:
-    "自動儲存失敗；目前 session 仍保留內容，離開前請匯出備份。",
+  STORAGE_WRITE_FAILED: "自動儲存失敗；本次操作仍保留內容，離開前請匯出備份。",
   STORAGE_DATA_CORRUPTED: "本機資料無法通過驗證；原始內容沒有被覆寫。",
 };
 
@@ -89,7 +89,7 @@ function validateStep(
         : [issue("case-name", "案件名稱不可超過 200 字。")]),
       ...(estimate.description.trim()
         ? []
-        : [issue("case-description", "背景摘要與 scope 為必填。")]),
+        : [issue("case-description", "背景摘要與範圍為必填。")]),
       ...(estimate.description.length <= 1000
         ? []
         : [issue("case-description", "背景摘要不可超過 1,000 字。")]),
@@ -103,7 +103,7 @@ function validateStep(
         : [
             issue(
               "hours-per-day",
-              `每 person-day 小時必須大於 0 且不超過 ${estimate.parameterSnapshot.constraints.maximumHoursPerPersonDay}。`,
+              `每人日小時必須大於 0 且不超過 ${estimate.parameterSnapshot.constraints.maximumHoursPerPersonDay}。`,
             ),
           ]),
       ...(decimalInRange(
@@ -116,7 +116,7 @@ function validateStep(
         : [
             issue(
               "days-per-month",
-              `每 person-month 工作日必須大於 0 且不超過 ${estimate.parameterSnapshot.constraints.maximumDaysPerPersonMonth}。`,
+              `每人月工作日必須大於 0 且不超過 ${estimate.parameterSnapshot.constraints.maximumDaysPerPersonMonth}。`,
             ),
           ]),
     ];
@@ -147,7 +147,7 @@ function validateStep(
         : [
             issue(
               `item-quantity-${item.id}`,
-              `工作項目 ${index + 1} 的 quantity 必須大於 0 且未超過上限。`,
+              `工作項目 ${index + 1} 的數量必須大於 0 且未超過上限。`,
             ),
           ]),
       ...(decimalInRange(
@@ -159,7 +159,7 @@ function validateStep(
         : [
             issue(
               `item-unit-hours-${item.id}`,
-              `工作項目 ${index + 1} 的 unit hours 必須介於 0.25 與參數上限之間。`,
+              `工作項目 ${index + 1} 的每單位工時必須介於 0.25 與參數上限之間。`,
             ),
           ]),
     ]);
@@ -179,7 +179,7 @@ function validateStep(
         issues.push(
           issue(
             `phase-${phase.phase}`,
-            `${phase.displayName} 必須介於 0% 與允許上限之間。`,
+            `${CROSS_CUTTING_PHASE_LABELS[phase.phase]} 必須介於 0% 與允許上限之間。`,
           ),
         );
       } else {
@@ -191,9 +191,7 @@ function validateStep(
         estimate.parameterSnapshot.constraints.maximumTotalPhaseLoadingRate,
       )
     ) {
-      issues.push(
-        issue("phase-loading", "Cross-cutting loading 合計超過參數上限。"),
-      );
+      issues.push(issue("phase-loading", "跨階段工時比例合計超過參數上限。"));
     }
     if (
       !decimalInRange(
@@ -203,14 +201,14 @@ function validateStep(
       )
     ) {
       issues.push(
-        issue("fixed-effort", "Fixed effort 必須為非負值且未超過參數上限。"),
+        issue("fixed-effort", "固定額外工時必須為非負值且未超過參數上限。"),
       );
     }
     if (!decimalInRange(estimate.input.uncertainty.downsideRate, "0", "0.5")) {
-      issues.push(issue("downside-rate", "Downside 必須介於 0% 與 50%。"));
+      issues.push(issue("downside-rate", "樂觀下修率必須介於 0% 與 50%。"));
     }
     if (!decimalInRange(estimate.input.uncertainty.upsideRate, "0", "2")) {
-      issues.push(issue("upside-rate", "Upside 必須介於 0% 與 200%。"));
+      issues.push(issue("upside-rate", "悲觀上修率必須介於 0% 與 200%。"));
     }
     return issues;
   }
@@ -219,14 +217,14 @@ function validateStep(
     const { constraints } = estimate.parameterSnapshot;
     const issues: WizardValidationIssue[] = [];
     const moneyFields = [
-      ["hourlyRate", "Blended hourly rate"],
-      ["directCost", "Direct cost"],
-      ["warrantyCost", "Warranty cost"],
+      ["hourlyRate", "綜合每小時成本"],
+      ["directCost", "直接成本"],
+      ["warrantyCost", "保固成本"],
     ] as const;
     const rateFields = [
-      ["overheadRate", "Overhead"],
-      ["vendorMarkupRate", "Vendor markup"],
-      ["taxRate", "Tax rate"],
+      ["overheadRate", "管銷間接成本"],
+      ["vendorMarkupRate", "乙方成本加成率"],
+      ["taxRate", "稅率"],
     ] as const;
     for (const [field, label] of moneyFields) {
       if (
@@ -267,7 +265,7 @@ function validateStep(
       issues.push(
         issue(
           "commercial-hours-per-day",
-          `Hours per person-day 必須大於 0 且不超過 ${constraints.maximumHoursPerPersonDay}。`,
+          `每人日小時必須大於 0 且不超過 ${constraints.maximumHoursPerPersonDay}。`,
         ),
       );
     }
@@ -282,7 +280,7 @@ function validateStep(
       issues.push(
         issue(
           "commercial-days-per-month",
-          `Days per person-month 必須大於 0 且不超過 ${constraints.maximumDaysPerPersonMonth}。`,
+          `每人月工作日必須大於 0 且不超過 ${constraints.maximumDaysPerPersonMonth}。`,
         ),
       );
     }
@@ -333,7 +331,7 @@ export function EstimateWorkspace({
     }
     if (!result.persisted) {
       setStorageWarning(result.warning);
-      setSaveMessage("目前只保留在本次 session。");
+      setSaveMessage("目前只保留在本次操作。");
       return;
     }
     setStorageWarning(null);
@@ -382,7 +380,7 @@ export function EstimateWorkspace({
                 href={`/estimates/${estimate.id}?step=${step.id}`}
                 aria-current={step.id === currentStep ? "step" : undefined}
               >
-                <span>Step {index + 1}</span>
+                <span>步驟 {index + 1}</span>
                 {step.label}
               </Link>
             </li>

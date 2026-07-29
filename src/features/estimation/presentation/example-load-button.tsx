@@ -32,7 +32,7 @@ export function ExampleLoadButton({ exampleIndex }: ExampleLoadButtonProps) {
     }
     if (!saved.persisted) {
       setMessage(
-        "目前無法使用 localStorage，未開啟範例；請到「建立估算」進行單次 session 估算。",
+        "目前無法使用瀏覽器本機儲存，未開啟範例；請到「建立估算」進行單次估算。",
       );
       return;
     }

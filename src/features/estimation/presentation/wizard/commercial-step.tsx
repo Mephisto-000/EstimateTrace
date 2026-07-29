@@ -10,17 +10,17 @@ type CommercialField = keyof CommercialTerms;
 const moneyFields = [
   {
     key: "hourlyRate",
-    label: "Blended hourly rate（TWD／person-hour）",
+    label: "綜合每小時成本（新臺幣／人時）",
     help: "依投入角色與實際成本結構校準；不是公開市場報價。",
   },
   {
     key: "directCost",
-    label: "Direct cost（TWD）",
+    label: "直接成本（新臺幣）",
     help: "授權、設備、差旅等可直接歸屬本案的成本。",
   },
   {
     key: "warrantyCost",
-    label: "Warranty／hypercare cost（TWD）",
+    label: "保固與上線後支援成本（新臺幣）",
     help: "固定保固與上線後支援成本；不要與工時重複計入。",
   },
 ] as const;
@@ -28,17 +28,17 @@ const moneyFields = [
 const rateFields = [
   {
     key: "overheadRate",
-    label: "Overhead（%）",
+    label: "管銷間接成本（%）",
     help: "管銷與間接成本比例。",
   },
   {
     key: "vendorMarkupRate",
-    label: "Vendor markup（%）",
-    help: "成本加成率（markup），不是 Gross Margin。",
+    label: "乙方成本加成率（%）",
+    help: "以成本為分母的加成率，不是以售價為分母的毛利率。",
   },
   {
     key: "taxRate",
-    label: "Tax rate（%）",
+    label: "稅率（%）",
     help: "預設 5% 僅供台灣公開示範，請依交易情境確認。",
   },
 ] as const;
@@ -67,20 +67,20 @@ export function CommercialStep({
   return (
     <div className="form-stack" id="commercial-terms">
       <header className="wizard-heading">
-        <p className="eyebrow">Step 4 of 5</p>
+        <p className="eyebrow">步驟 4／5</p>
         <h1 id="wizard-step-title" tabIndex={-1}>
           商業參數
         </h1>
         <p>
-          先由 effort 推導成本，再依序套用 overhead、warranty、markup 與
-          tax。所有值只保存在這個瀏覽器，且可隨 JSON 一起匯出。
+          先由工作量推導成本，再依序套用管銷間接成本、保固成本、乙方成本加成與稅率。所有值只保存在這個瀏覽器，且可隨
+          JSON 檔案一起匯出。
         </p>
       </header>
 
       <div className="calculation-warning">
         <strong>公開示範參數，不是市場基準</strong>
         <p>
-          預設 rate 與比例只用來解釋模型。正式決策前，請以組織實際薪資、
+          預設費率與比例只用來解釋模型。正式決策前，請以組織實際薪資、
           合約、稅務與歷史交付資料校準。
         </p>
       </div>
@@ -89,7 +89,7 @@ export function CommercialStep({
         <div>
           <h2 id="commercial-cost-title">成本與報價條件</h2>
           <p className="field__help">
-            金額以 TWD 輸入；比例欄位在畫面用百分比，儲存時轉為 decimal ratio。
+            金額以新臺幣輸入；比例欄位在畫面用百分比，儲存時轉為小數比率。
           </p>
         </div>
         <div className="form-grid form-grid--three">
@@ -175,17 +175,14 @@ export function CommercialStep({
 
       <section className="form-stack" aria-labelledby="capacity-title">
         <div>
-          <h2 id="capacity-title">Capacity conversion</h2>
+          <h2 id="capacity-title">工作量換算</h2>
           <p className="field__help">
-            只用於將 person-hour 換算為 person-day／person-month，不改變
-            effort。
+            只用於將人時換算為人日與人月，不改變工作量。
           </p>
         </div>
         <div className="form-grid form-grid--two">
           <div className="field">
-            <label htmlFor="commercial-hours-per-day">
-              Hours per person-day
-            </label>
+            <label htmlFor="commercial-hours-per-day">每人日小時</label>
             <input
               id="commercial-hours-per-day"
               type="number"
@@ -216,9 +213,7 @@ export function CommercialStep({
             ) : null}
           </div>
           <div className="field">
-            <label htmlFor="commercial-days-per-month">
-              Days per person-month
-            </label>
+            <label htmlFor="commercial-days-per-month">每人月工作日</label>
             <input
               id="commercial-days-per-month"
               type="number"

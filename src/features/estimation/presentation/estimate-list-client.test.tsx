@@ -159,7 +159,7 @@ describe("EstimateListClient", () => {
     expect(storage.getItem(ESTIMATE_STORAGE_KEY)).toBe("[]");
   });
 
-  it("delete persistence failure 只宣告 session state，不宣稱永久刪除", async () => {
+  it("刪除無法持久化時只宣告本次操作狀態，不宣稱永久刪除", async () => {
     const user = userEvent.setup();
     const { estimate, storage } = useStoredExample();
     vi.spyOn(window, "confirm").mockReturnValue(true);
@@ -173,13 +173,13 @@ describe("EstimateListClient", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.getByText(
-        "案件僅從目前 session 移除；本機儲存失敗，重新開啟後可能恢復。",
+        "案件僅從本次操作移除；本機儲存失敗，重新開啟後可能恢復。",
       ),
     ).toBeVisible();
     expect(storage.getItem(ESTIMATE_STORAGE_KEY)).toContain(estimate.id);
   });
 
-  it("clear persistence failure 只宣告 session state，不宣稱永久清除", async () => {
+  it("清除無法持久化時只宣告本次操作狀態，不宣稱永久清除", async () => {
     const user = userEvent.setup();
     const { estimate, storage } = useStoredExample();
     vi.spyOn(window, "confirm").mockReturnValue(true);
@@ -193,13 +193,13 @@ describe("EstimateListClient", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.getByText(
-        "案件僅從目前 session 清除；本機儲存失敗，重新開啟後可能恢復。",
+        "案件僅從本次操作清除；本機儲存失敗，重新開啟後可能恢復。",
       ),
     ).toBeVisible();
     expect(storage.getItem(ESTIMATE_STORAGE_KEY)).toContain(estimate.id);
   });
 
-  it("same-ID import 必須確認 replace，取消後既有案件不變", async () => {
+  it("匯入相同識別碼時必須確認取代，取消後既有案件不變", async () => {
     const user = userEvent.setup();
     const { estimate, repository } = useStoredExample();
     const replacement = {
@@ -223,7 +223,7 @@ describe("EstimateListClient", () => {
     );
 
     expect(confirm).toHaveBeenCalledWith(
-      `匯入檔的案件 ID 與「${estimate.name}」相同。是否以匯入內容取代既有案件？`,
+      `匯入檔的案件識別碼與「${estimate.name}」相同。是否以匯入內容取代既有案件？`,
     );
     expect(
       await screen.findByText("匯入已取消，既有案件未變更。"),

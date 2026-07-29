@@ -72,7 +72,7 @@ describe("CALCULATION_FORMULAS", () => {
 
   it("person-month 文字替代保留分母乘積的運算順序", () => {
     expect(CALCULATION_FORMULAS.personMonths.accessibleLabel).toBe(
-      "指定 percentile 的人月，等於該 percentile 工時 H P x，除以每日工時 h d 與每月工作日 d m 的乘積。",
+      "指定百分位數的人月，等於該百分位工時 H P x，除以每日工時 h d 與每月工作日 d m 的乘積。",
     );
   });
 });

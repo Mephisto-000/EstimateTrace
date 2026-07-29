@@ -2,8 +2,8 @@
 
 > Public GitHub repository：`estimate-trace`
 > 產品定位：可追溯的軟體需求成本估算與乙方報價合理性分析工具
-> 文件版本：`1.0.0`
-> 文件日期：2026-07-29
+> 文件版本：`1.0.1`
+> 文件日期：2026-07-30
 > 文件語言：繁體中文；專有名詞、API、程式碼與必要術語保留英文
 > 預定授權：MIT License
 > 規格狀態：Ready for implementation
@@ -381,18 +381,18 @@ MVP 支援：
 
 至少顯示：
 
-- Base implementation effort。
-- Adjusted implementation effort。
-- Cross-cutting effort。
-- Total most-likely effort。
-- P50 與 P80 person-hours。
-- 換算 person-days、person-months。
-- P50 與 P80 engineering cost。
-- P50 與 P80 benchmark quote，分別顯示未稅與含稅。
+- 基礎實作工時。
+- 調整後實作工時。
+- 跨階段工作量。
+- 最可能總工時。
+- P50 與 P80 人時。
+- 換算後的人日與人月。
+- P50 與 P80 工程成本。
+- P50 與 P80 模型參考報價，分別顯示未稅與含稅。
 - 主要三項成本或風險驅動因素。
 - `modelVersion` 與參數集名稱。
 
-#### FR-042：Explainability Breakdown
+#### FR-042：可說明的結果分解
 
 每個摘要數字都能展開，顯示：
 
@@ -402,21 +402,21 @@ MVP 支援：
 - 單位。
 - 四捨五入規則。
 - 來源工作項目或參數。
-- 避免 double counting 的提示。
+- 避免重複計入的提示。
 
-#### FR-043：Waterfall
+#### FR-043：成本瀑布
 
-以 accessible table 為必要實作，圖表為 progressive enhancement，依序顯示：
+以無障礙表格為必要實作，圖表只作為漸進增強，依序顯示：
 
-1. Base effort
-2. Complexity adjustment
-3. Risk adjustment
-4. Cross-cutting effort
-5. Direct cost
-6. Overhead
-7. Warranty／Support
-8. Vendor Markup
-9. Tax
+1. 基礎工時。
+2. 複雜度調整。
+3. 風險調整。
+4. 跨階段工作量。
+5. 直接成本。
+6. 管銷間接成本。
+7. 保固與支援。
+8. 乙方成本加成。
+9. 稅額。
 
 ### 6.6 乙方報價比較
 
@@ -424,10 +424,10 @@ MVP 支援：
 
 欄位：
 
-- Quote amount
-- Tax basis：tax-inclusive 或 tax-exclusive
-- Optional quote note，不得要求乙方真實名稱
-- Quote date，可選
+- 報價金額。
+- 稅額基礎：含稅或未稅。
+- 選填報價備註，不得要求乙方真實名稱。
+- 選填報價日期。
 
 #### FR-051：比較結果
 
@@ -436,8 +436,8 @@ MVP 支援：
 - 正規化後乙方未稅報價。
 - 與 P50 的金額差與百分比。
 - 與 P80 的金額差與百分比。
-- Vendor quote／P50 ratio。
-- Vendor quote／P80 ratio。
+- 乙方報價／P50 比率。
+- 乙方報價／P80 比率。
 - 區間標籤。
 - 根據主要差異產生的規則式追問清單。
 
@@ -452,14 +452,14 @@ MVP 支援：
 
 #### FR-052：追問事項
 
-追問清單由 deterministic rules 產生，例如：
+追問清單由確定性規則產生，例如：
 
-- 是否包含完整 SIT、UAT 與 Regression Test？
+- 是否包含完整的系統整合測試、使用者驗收測試與回歸測試？
 - 是否包含既有系統影響分析與資料核對？
-- 是否包含 Production deployment、rollback 與 hypercare？
-- Warranty 範圍、期間與 SLA 為何？
-- 是否因需求未明而加入 contingency？
-- 乙方是否能提供角色別人日與 blended rate？
+- 是否包含正式環境部署、回復與上線後密集支援？
+- 保固範圍、期間與服務水準為何？
+- 是否因需求未明而加入預備金或緩衝？
+- 乙方是否能提供角色別人日與綜合費率？
 - 報價是否包含稅、授權、第三方服務與差旅？
 
 ### 6.7 匯入、匯出與列印
@@ -501,13 +501,13 @@ MVP 支援：
 
 - 案件名稱與估算時間。
 - 免責聲明與資料敏感提醒。
-- Scope 與 assumptions。
-- Work item breakdown。
-- Risk factor rationale。
-- P50／P80 effort and price。
-- Vendor quote comparison。
-- Questions to vendor。
-- Model version、parameter snapshot ID。
+- 範圍與假設。
+- 工作項目分解。
+- 風險因子與選擇理由。
+- P50／P80 工作量與價格。
+- 乙方報價比較。
+- 向乙方確認的問題。
+- 模型版本、參數快照識別碼。
 - 公式專頁 URL。
 
 不得在列印版出現導覽、按鈕或無意義背景。
@@ -659,15 +659,15 @@ MVP 支援：
 - `step` 只控制 UI，不承載估算內容。
 - `/estimates/[id]` 與 `/estimates/new` 設為 `noindex`。
 
-### 8.2 估算 Wizard
+### 8.2 估算流程
 
-| Step | 名稱 | 主要內容 | 完成條件 |
+| 步驟 | 名稱 | 主要內容 | 完成條件 |
 |---|---|---|---|
 | 1 | 範圍與假設 | 名稱、背景、計量單位、免責提醒 | 必填欄位合法 |
-| 2 | 工作項目 | Catalog、quantity、unit hours、complexity | 至少一筆合法 item |
-| 3 | 風險與交付 | Risk factors、phase loading、uncertainty | 所有 factor 有值 |
-| 4 | 商業參數 | Hourly rate、direct cost、overhead、warranty、markup、tax | 金額與比率合法 |
-| 5 | 結果與報價 | P50、P80、breakdown、vendor quote、questions | 可匯出或列印 |
+| 2 | 工作項目 | 類型、數量、單位工時、複雜度 | 至少一筆合法工作項目 |
+| 3 | 風險與交付 | 風險因子、階段工時比例、不確定性 | 所有風險因子有值 |
+| 4 | 商業參數 | 每小時成本、直接成本、管銷、保固、成本加成、稅額 | 金額與比率合法 |
+| 5 | 結果與報價 | P50、P80、結果分解、乙方報價、追問事項 | 可匯出或列印 |
 
 ### 8.3 主導覽文案
 
@@ -689,13 +689,14 @@ MVP 支援：
 - Route：`/methodology`
 - Page title：`公式與定義｜EstimateTrace`
 - H1：`軟體需求成本估算的公式與定義`
-- 頁面必須可從主導覽與每個結果 breakdown 直接到達。
+- 頁面必須可從主導覽與每個結果分解直接到達。
 - 頁面是正式產品功能，不是 README 的替代品。
 
 ### 9.2 呈現規則
 
-- 說明文字使用繁體中文。
-- 專有名詞保留 English，例如 `Effort`、`Complexity Multiplier`、`P50`、`P80`、`Vendor Markup`。
+- 產品文案與說明文字以繁體中文為主。
+- 一般頁面不重複堆疊中英名詞；只有非常特殊且需要辨識的專有名詞，才在第一次出現時使用「中文(English)」。
+- 完整中英名詞對照與定義集中在本頁「名詞與計量單位」章節；`P50`、`P80`、程式識別碼、API 與檔案格式等必要技術標記可保留原文。
 - 數學式以 KaTeX 或等價 accessible renderer 呈現；display formula 必須使用
   傳統 serif math typography、italic variable、真正的上下標與可縮放大型運算子，
   不得退化為 Unicode／monospace-like linear text。
@@ -713,20 +714,20 @@ MVP 支援：
 
 1. 為什麼成本估算應輸出區間。
 2. 名詞與計量單位。
-3. Work Item Base Effort。
-4. Complexity Multiplier。
-5. Risk Factor Adjustment。
-6. Cross-cutting Effort。
-7. Three-point Estimate。
+3. 工作項目基礎工時。
+4. 複雜度乘數。
+5. 風險因子調整。
+6. 跨階段工作量。
+7. 三點估算。
 8. P50 與 P80。
-9. Engineering Cost。
-10. Overhead、Warranty 與 Vendor Markup。
-11. Tax normalization。
-12. Vendor Quote Variance。
+9. 工程成本。
+10. 管銷、保固與成本加成。
+11. 稅基正規化。
+12. 乙方報價差異。
 13. 結果如何解讀。
-14. 常見 double counting。
+14. 常見重複計入。
 15. 模型限制與適用邊界。
-16. COCOMO II、COSMIC 與後續擴充。
+16. 其他估算方法與後續擴充。
 
 ---
 
@@ -966,7 +967,7 @@ PersonMonths_x=\frac{H_{P_x}}{h_d\times d_m}
 h_d=8,\qquad d_m=20
 \]
 
-UI 必須顯示此為換算假設，不可把 person-month 當作 calendar month。
+`/methodology` 必須列出 \(h_d\)、\(d_m\) 的名稱、單位、允許範圍、預設值及代入範例。UI 必須顯示此為換算假設，不可把人月當作日曆月。
 
 ### 10.9 Engineering Cost
 
@@ -1249,10 +1250,10 @@ ParameterSet
 └── sourceNotes[]
 ```
 
-第一版：
+目前版本：
 
 ```text
-public-demo-zh-tw@1.0.0
+public-demo-zh-tw@1.0.1
 ```
 
 ### 11.4 Browser Storage
@@ -1456,7 +1457,7 @@ estimate-trace/
 
 ### 14.1 視覺方向
 
-- 專業、清楚、接近 decision-support tool，不採遊戲化視覺。
+- 專業、清楚、接近決策輔助工具，不採遊戲化視覺。
 - 主要色彩不暗示「綠色必然合理、紅色必然不合理」。
 - 數值對齊、單位固定呈現。
 - 一頁只強調一個主要下一步。
@@ -1464,12 +1465,12 @@ estimate-trace/
 
 ### 14.2 結果資訊層級
 
-1. P50／P80 effort and quote。
-2. Vendor comparison。
-3. Top drivers。
-4. Breakdown。
-5. Assumptions and warnings。
-6. Full trace。
+1. P50／P80 工作量與報價。
+2. 乙方報價比較。
+3. 主要驅動因素。
+4. 工作量與成本分解。
+5. 假設與警示。
+6. 完整計算軌跡。
 
 ### 14.3 文案規則
 
@@ -1487,15 +1488,15 @@ estimate-trace/
 - 「乙方報價不合理」
 - 「保證」
 - 「市場公允價」
-- 「AI 判定」
+- 「人工智慧判定」
 
-### 14.4 Empty、Loading、Error States
+### 14.4 空白、載入與錯誤狀態
 
-- Browser-only storage 不需要 fake server loading。
-- Hydration 前避免顯示錯誤案件數。
+- 僅限瀏覽器的儲存流程不需要模擬伺服器載入狀態。
+- 頁面互動初始化完成前避免顯示錯誤案件數。
 - 無資料時提供範例與下一步。
-- Import error 顯示欄位路徑與原因，但不顯示整份敏感 payload。
-- Calculation warning 與 validation error 分開。
+- 匯入錯誤顯示欄位路徑與原因，但不顯示整份敏感內容。
+- 計算警示與輸入驗證錯誤分開。
 
 ---
 
@@ -1895,21 +1896,21 @@ Exit criteria：
 
 Given 使用者從空白案件開始，
 When 新增至少一個合法工作項目並完成必要參數，
-Then 系統顯示 base、adjusted、P50、P80 effort 與 price，且無 NaN／Infinity。
+Then 系統顯示基礎、調整後、P50、P80 工作量與價格，且無非數值或無限值。
 
-### AC-003：Trace
+### AC-003：計算軌跡
 
 Given 任何 P50／P80 結果，
 When 使用者展開計算明細，
 Then 可看到公式、代入值、單位、參數版本與來源項目。
 
-### AC-004：Formula Page
+### AC-004：公式與定義
 
 Given 使用者位於任一頁面，
 When 選擇「公式與定義」，
-Then 可到 `/methodology`，並看到繁體中文說明、數學式、English terminology、變數表、範例、限制與 double-counting 提醒。
+Then 可到 `/methodology`，並看到繁體中文說明、數學式、集中式中英名詞對照、變數表、範例、限制與重複計入提醒。
 
-### AC-005：Vendor Quote
+### AC-005：乙方報價
 
 Given 使用者輸入含稅或未稅乙方報價，
 When 比較結果生成，
@@ -1919,17 +1920,17 @@ Then 系統以相同稅基比較 P50／P80，顯示差額與差異率，且不�
 
 Given 一筆完成估算，
 When 匯出 JSON、清除資料後重新匯入，
-Then 重算結果與原 result snapshot 在定義的精度內一致。
+Then 重算結果與原結果快照在定義的精度內一致。
 
 ### AC-007：Privacy
 
 Given 使用者完成估算，
-When 以 browser network inspector 觀察操作，
-Then 案件名稱、描述、工作項目、金額與匯入內容不會傳送到 Vercel function 或第三方。
+When 以瀏覽器網路檢查工具觀察操作，
+Then 案件名稱、描述、工作項目、金額與匯入內容不會傳送到 Vercel 函式或第三方。
 
-### AC-008：Invalid Import
+### AC-008：不合法匯入
 
-Given malformed、oversized 或不支援 schema 的 JSON，
+Given 格式錯誤、超過大小限制或不支援 schema 的 JSON，
 When 使用者匯入，
 Then 系統拒絕檔案、顯示原因，且既有案件不變。
 
@@ -2208,4 +2209,5 @@ README 與 `docs/dependency-management.md` 必須與實際設定一致，包含�
 
 | 日期 | 文件版本 | 變更 | 原因 | 影響 |
 |---|---|---|---|---|
+| 2026-07-30 | 1.0.1 | 統一繁體中文介面文案，集中名詞中英對照，更新公開示範參數顯示文案 | 降低中英夾雜造成的閱讀干擾 | Application `0.1.3`、parameter set `public-demo-zh-tw@1.0.1`；schema、model、數值參數、公式與隱私邊界不變 |
 | 2026-07-29 | 1.0.0 | 初版 | 建立 Public MVP 開發目標 | 新專案 |

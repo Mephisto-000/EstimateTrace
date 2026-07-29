@@ -69,7 +69,7 @@ export function NewEstimateClient() {
       nextIssues.push("背景摘要不可超過 1,000 字。");
     }
     if (description.trim().length === 0) {
-      nextIssues.push("背景摘要與 scope 為必填。");
+      nextIssues.push("背景摘要與範圍為必填。");
     }
     if (nextIssues.length > 0) {
       setIssues(nextIssues);
@@ -116,14 +116,12 @@ export function NewEstimateClient() {
   }
 
   const nameIssue = issues.find((issue) => issue.includes("名稱"));
-  const descriptionIssue = issues.find(
-    (issue) => issue.includes("背景摘要") || issue.includes("scope"),
-  );
+  const descriptionIssue = issues.find((issue) => issue.includes("背景摘要"));
 
   return (
     <section className="wizard-panel form-stack" id="scope">
       <header className="wizard-heading">
-        <p className="eyebrow">Step 1 of 5</p>
+        <p className="eyebrow">步驟 1／5</p>
         <h1>建立估算範圍</h1>
         <p>
           先用去識別化方式描述案件；建立後可繼續拆工作項目、設定風險與成本。
@@ -133,8 +131,7 @@ export function NewEstimateClient() {
       <div className="privacy-banner">
         <strong>EstimateTrace 是公開網站。</strong>
         <p>
-          請勿輸入公司機密、個人資料、真實乙方名稱、受 NDA
-          保護內容或未公開報價。案件只儲存在目前瀏覽器。
+          請勿輸入公司機密、個人資料、真實乙方名稱、受保密協議保護的內容或未公開報價。案件只儲存在目前瀏覽器。
         </p>
       </div>
 
@@ -214,15 +211,12 @@ export function NewEstimateClient() {
             onChange={(event) => {
               setDescription(event.currentTarget.value);
               setIssues((current) =>
-                current.filter(
-                  (issue) =>
-                    !issue.includes("背景摘要") && !issue.includes("scope"),
-                ),
+                current.filter((issue) => !issue.includes("背景摘要")),
               );
             }}
           />
           <span className="field__meta" id="estimate-description-help">
-            {description.length} / 1,000 字；請勿貼上需求書或 NDA 內容。
+            {description.length} / 1,000 字；請勿貼上需求書或保密協議內容。
           </span>
           {descriptionIssue ? (
             <span className="field__error" id="estimate-description-error">
@@ -233,15 +227,15 @@ export function NewEstimateClient() {
 
         <dl className="form-grid form-grid--three">
           <div className="metric">
-            <dt className="metric__label">Currency</dt>
-            <dd className="metric__value">TWD</dd>
+            <dt className="metric__label">幣別</dt>
+            <dd className="metric__value">新臺幣</dd>
           </div>
           <div className="metric">
-            <dt className="metric__label">Person-day</dt>
+            <dt className="metric__label">人日</dt>
             <dd className="metric__value">8 小時</dd>
           </div>
           <div className="metric">
-            <dt className="metric__label">Demo tax</dt>
+            <dt className="metric__label">示範稅率</dt>
             <dd className="metric__value">5%</dd>
           </div>
         </dl>

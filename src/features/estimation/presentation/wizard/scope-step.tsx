@@ -15,21 +15,19 @@ export function ScopeStep({
   return (
     <div className="form-stack" id="scope">
       <header className="wizard-heading">
-        <p className="eyebrow">Step 1 of 5</p>
+        <p className="eyebrow">步驟 1／5</p>
         <h1 id="wizard-step-title" tabIndex={-1}>
           範圍與假設
         </h1>
         <p>
-          使用中性描述界定
-          scope。名稱與背景只會保存在目前瀏覽器，但仍不應包含敏感資料。
+          使用中性描述界定範圍。名稱與背景只會保存在目前瀏覽器，但仍不應包含敏感資料。
         </p>
       </header>
 
       <div className="privacy-banner">
         <strong>公開網站資料提醒</strong>
         <p>
-          請勿輸入公司機密、個人資料、真實乙方名稱、受 NDA
-          保護內容或未公開報價；共享裝置上的其他使用者可能看見本機資料。
+          請勿輸入公司機密、個人資料、真實乙方名稱、受保密協議保護的內容或未公開報價；共享裝置上的其他使用者可能看見本機資料。
         </p>
       </div>
 
@@ -40,7 +38,7 @@ export function ScopeStep({
           onClick={() => {
             if (
               window.confirm(
-                "確定重設為公開示範參數？這會重設 unit hours、phase loading、uncertainty 與商業參數，但保留 scope、工作項目內容、風險選擇與乙方報價。",
+                "確定重設為公開示範參數？這會重設單位工時、跨階段工作量、不確定性與商業參數，但保留範圍、工作項目內容、風險選擇與乙方報價。",
               )
             ) {
               updateEstimate(resetToPublicDemoParameters);
@@ -83,7 +81,7 @@ export function ScopeStep({
       </div>
 
       <div className="field">
-        <label htmlFor="case-description">背景摘要與 scope</label>
+        <label htmlFor="case-description">背景摘要與範圍</label>
         <textarea
           id="case-description"
           value={estimate.description}
@@ -103,8 +101,8 @@ export function ScopeStep({
           }
         />
         <span className="field__meta" id="case-description-help">
-          {estimate.description.length} / 1,000 字；請列出
-          assumptions，不要貼需求書原文。
+          {estimate.description.length} / 1,000
+          字；請列出假設，不要貼需求書原文。
         </span>
         {errorFor("case-description") ? (
           <span className="field__error" id="case-description-error">
@@ -115,12 +113,10 @@ export function ScopeStep({
 
       <fieldset>
         <legend>工時計量假設</legend>
-        <p className="field__help">
-          只用於 effort 換算；person-month 不等於 calendar month。
-        </p>
+        <p className="field__help">只用於工作量換算；人月不等於日曆月。</p>
         <div className="form-grid form-grid--two">
           <div className="field">
-            <label htmlFor="hours-per-day">每 person-day 小時</label>
+            <label htmlFor="hours-per-day">每人日小時</label>
             <input
               id="hours-per-day"
               type="number"
@@ -154,7 +150,7 @@ export function ScopeStep({
             ) : null}
           </div>
           <div className="field">
-            <label htmlFor="days-per-month">每 person-month 工作日</label>
+            <label htmlFor="days-per-month">每人月工作日</label>
             <input
               id="days-per-month"
               type="number"

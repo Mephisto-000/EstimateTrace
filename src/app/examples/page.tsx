@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { createPublicPageMetadata } from "@/config/site";
 import { fictionalExampleDescriptors } from "@/features/estimation/application/create-estimate";
 import { ExampleLoadButton } from "@/features/estimation/presentation/example-load-button";
+import { WORK_ITEM_TYPE_LABELS } from "@/features/estimation/presentation/labels";
 
 export const metadata: Metadata = createPublicPageMetadata({
   title: "範例",
@@ -16,17 +17,15 @@ export const metadata: Metadata = createPublicPageMetadata({
 export default function ExamplesPage() {
   return (
     <div className="page-shell content-page">
-      <PageHeader eyebrow="Fictional examples" title="從虛構範例理解估算方式">
+      <PageHeader eyebrow="虛構教學範例" title="從虛構範例理解估算方式">
         <p>
-          以下案例只為教學而設計，名稱、範圍與數字皆為
-          fictional／illustrative，不對應任何真實公司、系統、乙方或市場報價。
+          以下案例只為教學而設計，名稱、範圍與數字皆為虛構示意，不對應任何真實公司、系統、乙方或市場報價。
         </p>
       </PageHeader>
 
       <Callout title="不可作為市場基準" tone="warning">
         <p>
-          範例中的 unit effort、risk multiplier
-          與商業參數只用來展示模型，不代表任何產業或組織的標準。
+          範例中的單位工時、風險乘數與商業參數只用來展示模型，不代表任何產業或組織的標準。
         </p>
       </Callout>
 
@@ -51,8 +50,10 @@ export default function ExamplesPage() {
               </ul>
             </div>
             <ul className="tag-list" aria-label="工作項目類型">
-              {example.labels.map((label) => (
-                <li key={label}>{label}</li>
+              {example.workItemTypes.map((workItemType) => (
+                <li key={workItemType}>
+                  {WORK_ITEM_TYPE_LABELS[workItemType]}
+                </li>
               ))}
             </ul>
             <ExampleLoadButton exampleIndex={example.index} />

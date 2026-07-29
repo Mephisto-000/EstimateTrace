@@ -18,6 +18,8 @@ const deterministicRuntime = {
 
 describe("createEmptyEstimateCase", () => {
   it("建立含完整參數快照且可開始編輯的本機案件", () => {
+    expect(publicDemoParameterSet.version).toBe("1.0.1");
+
     const estimate = createEmptyEstimateCase(
       {
         name: "公開示範案件",
@@ -56,7 +58,7 @@ describe("createEmptyEstimateCase", () => {
 });
 
 describe("createFictionalExamples", () => {
-  it("提供兩筆明確標示 fictional 的可計算範例", () => {
+  it("提供兩筆明確標示為虛構資料的可計算範例", () => {
     let sequence = 0;
     const examples = createFictionalExamples({
       createId: () =>
@@ -66,14 +68,14 @@ describe("createFictionalExamples", () => {
 
     expect(examples).toHaveLength(2);
     expect(examples.map((item) => item.name)).toEqual([
-      "會員資料查詢與匯出（fictional）",
-      "公開市場價格批次介接（fictional）",
+      "會員資料查詢與匯出（虛構）",
+      "公開市場價格批次介接（虛構）",
     ]);
     expect(examples.every((item) => item.input.workItems.length > 0)).toBe(
       true,
     );
     expect(
-      examples.every((item) => item.description.includes("illustrative")),
+      examples.every((item) => item.description.includes("虛構示意")),
     ).toBe(true);
     expect(
       examples[1]?.input.workItems.find(({ type }) => type === "TESTING")

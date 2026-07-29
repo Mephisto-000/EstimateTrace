@@ -22,8 +22,8 @@ export const metadata: Metadata = {
     "需求估算",
     "P50",
     "P80",
-    "Vendor Quote",
-    "IT Business Analyst",
+    "乙方報價",
+    "資訊科技商業分析師",
   ],
   openGraph: {
     type: "website",

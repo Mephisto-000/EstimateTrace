@@ -35,6 +35,10 @@ export const METHODOLOGY_MATH = Object.freeze({
     grossMargin: String.raw`g`,
     benchmarkQuotes: String.raw`Q_{\mathrm{exTax},50},\ Q_{\mathrm{exTax},80}`,
     benchmarkVariances: String.raw`\mathrm{Variance}_{50},\ \mathrm{Variance}_{80}`,
+    hoursPerPersonDay: String.raw`h_d`,
+    daysPerPersonMonth: String.raw`d_m`,
+    personDays: String.raw`\mathrm{PersonDays}_x`,
+    personMonths: String.raw`\mathrm{PersonMonths}_x`,
   }),
   formulas: Object.freeze({
     workItemBaseEffort: CALCULATION_FORMULAS.workItemBaseEffort.latex,
@@ -52,6 +56,8 @@ export const METHODOLOGY_MATH = Object.freeze({
     percentileEffort: String.raw`H_{P_x} = \max\left(0, \mu + z_x \sigma\right)`,
     p50Effort: String.raw`H_{P50} = \mu`,
     p80Effort: String.raw`H_{P80} = \max\left(0, \mu + ${MODEL_P80_Z_SCORE}\sigma\right)`,
+    personDays: CALCULATION_FORMULAS.personDays.latex,
+    personMonths: CALCULATION_FORMULAS.personMonths.latex,
     laborCost: CALCULATION_FORMULAS.laborCost.latex,
     deliveryCost: CALCULATION_FORMULAS.deliveryCost.latex,
     fullCost: String.raw`C_{\mathrm{full},x} = C_{\mathrm{delivery},x} \times (1 + o) + W`,
@@ -78,6 +84,8 @@ export const METHODOLOGY_MATH = Object.freeze({
     threePointBounds: String.raw`H_O = 61.6896,\ H_P = 94.3488`,
     p50AndSigma: String.raw`H_{P50} = 74.3904,\ \sigma = 5.4432`,
     p80: String.raw`74.3904 + 0.8416 \times 5.4432 = 78.97139712`,
+    personDays: String.raw`\frac{78.97139712}{8} = 9.87142464`,
+    personMonths: String.raw`\frac{78.97139712}{8 \times 20} = 0.493571232`,
     normalizeTax: String.raw`\frac{105{,}000}{1.05} = 100{,}000`,
   }),
   invariants: Object.freeze({

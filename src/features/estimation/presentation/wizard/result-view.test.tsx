@@ -93,7 +93,7 @@ function createWorkedEstimate(): EstimateCaseDocument {
 }
 
 describe("ResultView", () => {
-  it("renders the worked P50/P80 result, vendor evidence, and expandable calculation trace", async () => {
+  it("呈現 P50／P80 結果、乙方報價依據與可展開的計算軌跡", async () => {
     const user = userEvent.setup();
     const estimate = createWorkedEstimate();
     const outcome = calculateEstimate({
@@ -136,41 +136,39 @@ describe("ResultView", () => {
     ).toBeVisible();
     expect(
       within(vendorComparison!).getByText(
-        "是否包含完整 SIT、UAT 與 Regression Test？",
+        "是否包含完整的系統整合測試、使用者驗收測試與回歸測試？",
       ),
     ).toBeVisible();
     expect(
-      within(vendorComparison!).getAllByText(
-        "觸發依據：comparison band CLEARLY_BELOW_MODEL_RANGE",
-      ),
+      within(vendorComparison!).getAllByText("CLEARLY_BELOW_MODEL_RANGE"),
     ).toHaveLength(2);
 
     const drivers = screen
-      .getByRole("heading", { name: "主要成本 drivers" })
+      .getByRole("heading", { name: "主要成本驅動因素" })
       .closest("section");
     expect(drivers).not.toBeNull();
-    expect(within(drivers!).getByText("P50 labor cost")).toBeVisible();
+    expect(within(drivers!).getByText("P50 人力成本")).toBeVisible();
     expect(within(drivers!).getByText("$74,390")).toBeVisible();
     expect(within(drivers!).getByText("estimate:p50:labor-cost")).toBeVisible();
-    expect(within(drivers!).getByText("Vendor markup")).toBeVisible();
+    expect(within(drivers!).getByText("乙方成本加成")).toBeVisible();
     expect(within(drivers!).getByText("$16,686")).toBeVisible();
     expect(
       within(drivers!).getByText("estimate:p50:vendor-markup-amount"),
     ).toBeVisible();
-    expect(within(drivers!).getByText("Overhead")).toBeVisible();
+    expect(within(drivers!).getByText("管銷與間接成本")).toBeVisible();
     expect(within(drivers!).getByText("$7,539")).toBeVisible();
     expect(
       within(drivers!).getByText(
-        "P50 benchmark quote 的前三大可加總成本構成；全部以 TWD 比較。",
+        "P50 模型參考報價的前三大可加總成本構成；全部以新臺幣比較。",
       ),
     ).toBeVisible();
 
     const trace = screen
-      .getByRole("heading", { name: "Calculation trace" })
+      .getByRole("heading", { name: "計算軌跡" })
       .closest("section");
     expect(trace).not.toBeNull();
     const baseEffortSummary = within(trace!).getByText(
-      /workItemBaseEffortHours — 32 person-hour/u,
+      /工作項目基礎工時 — 32 人時/u,
     );
     const baseEffortDetails = baseEffortSummary.closest("details");
     expect(baseEffortDetails).not.toBeNull();
@@ -180,7 +178,7 @@ describe("ResultView", () => {
 
     expect(baseEffortDetails).toHaveAttribute("open");
     expect(
-      within(baseEffortDetails!).getByText(/48 significant digits/u),
+      within(baseEffortDetails!).getByText(/48 位有效數字/u),
     ).toBeVisible();
     expect(
       within(baseEffortDetails!).getByRole("link", {

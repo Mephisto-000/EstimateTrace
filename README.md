@@ -1,32 +1,32 @@
 # EstimateTrace
 
 EstimateTrace 是公開、免費、可說明計算過程的軟體需求成本估算網站，協助甲方
-IT Business Analyst 把需求、工作量、風險、成本與乙方報價連成一條可檢查、
-可重算、可說明的估算軌跡。
+資訊科技商業分析師把需求、工作量、風險、成本與乙方報價連成一條可檢查、可重
+算、可說明的估算軌跡。
 
 > 本工具為決策輔助，不構成正式報價、採購或法律意見。公開示範參數不是市場
 > 標準，也不代表任何公司或產業的合理價格。
 
-## Privacy boundary
+## 隱私邊界
 
-案件資料只保存在目前瀏覽器的 `localStorage` 或記憶體中。MVP 沒有帳號、
-database、Analytics、AI、接收案件內容的 API 或 Server Action。
+案件資料只保存在目前瀏覽器的 `localStorage` 或記憶體中。最小可行產品沒有帳
+號、資料庫、網站分析、人工智慧、接收案件內容的 API 或 Server Action。
 
-EstimateTrace 是公開網站。請勿輸入公司機密、個人資料、真實乙方名稱、受
-NDA 保護內容或未公開報價；使用共享裝置時，其他使用者仍可能讀到本機資料。
+EstimateTrace 是公開網站。請勿輸入公司機密、個人資料、真實乙方名稱、受保密
+協議保護的內容或未公開報價；使用共享裝置時，其他使用者仍可能讀到本機資料。
 
 ## 功能
 
-- 五步驟建立可追溯的 Bottom-up estimate。
-- 計算 P50、P80 effort、engineering cost 與 benchmark quote。
+- 五步驟建立可追溯的由下而上估算。
+- 計算 P50、P80 工作量、工程成本與基準報價。
 - 將含稅／未稅乙方報價正規化後比較。
-- 展開 formula、substitution、unit、source 與 parameter version。
-- 以全站 same-origin KaTeX stylesheet 排版公開公式與 Calculation trace；
-  display formula 使用 publication-style serif math、真正上下標與大型運算子，
-  並提供中文文字替代。
-- Browser-only 案件 CRUD、兩筆 fictional examples、JSON import/export。
-- A4 print report 與完整「公式與定義」專頁。
-- Storage failure 時保留目前 session，仍可計算與匯出備份。
+- 展開公式、代入值、單位、來源與參數版本。
+- 以同源 KaTeX 樣式表排版公開公式與計算軌跡，提供真正的上下標、大型運算子
+  與中文文字替代。
+- 僅在瀏覽器保存案件，支援新增、查詢、修改、刪除、兩筆虛構範例與 JSON
+  匯入／匯出。
+- A4 列印報告與完整「公式與定義」專頁。
+- 本機儲存失敗時保留目前工作階段，仍可計算與匯出備份。
 
 ## 技術基線
 
@@ -114,6 +114,7 @@ Domain engine 不依賴 React、Next.js、Web Storage、clock、UUID 或 network
 - [Dependency management](docs/dependency-management.md)
 - [Privacy and security](docs/privacy-and-security.md)
 - [Sample data policy](docs/sample-data-policy.md)
+- [v0.1.3 發行說明](docs/releases/v0.1.3.md)
 
 ## Vercel
 
