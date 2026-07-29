@@ -2,13 +2,9 @@ import { Suspense } from "react";
 
 import { EstimateEditorClient } from "@/features/estimation/presentation/estimate-editor-client";
 
-interface EstimatePageProps {
-  readonly params: Promise<{ id: string }>;
-}
+export const dynamic = "error";
 
-export default async function EstimatePage({ params }: EstimatePageProps) {
-  const { id } = await params;
-
+export default function EstimateEditorPage() {
   return (
     <div className="page-shell estimate-page">
       <Suspense
@@ -18,7 +14,7 @@ export default async function EstimatePage({ params }: EstimatePageProps) {
           </section>
         }
       >
-        <EstimateEditorClient estimateId={id} />
+        <EstimateEditorClient />
       </Suspense>
     </div>
   );

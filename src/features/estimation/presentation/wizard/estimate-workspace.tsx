@@ -2,8 +2,8 @@
 
 import Decimal from "decimal.js";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { type MouseEvent, useState } from "react";
 
 import {
   browserRuntimeServices,
@@ -300,7 +300,6 @@ export function EstimateWorkspace({
   repository,
   initialStorageWarning,
 }: EstimateWorkspaceProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [estimate, setEstimate] = useState(initialDocument);
   const [storageWarning, setStorageWarning] = useState<StorageWarning | null>(
@@ -340,10 +339,30 @@ export function EstimateWorkspace({
 
   function goTo(step: StepId) {
     setStepIssues([]);
-    router.replace(`/estimates/${estimate.id}?step=${step}`);
+    window.history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}?step=${step}`,
+    );
     requestAnimationFrame(() => {
       document.querySelector<HTMLElement>("#wizard-step-title")?.focus();
     });
+  }
+
+  function navigateToStep(event: MouseEvent<HTMLAnchorElement>, step: StepId) {
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    goTo(step);
   }
 
   function goNext() {
@@ -378,7 +397,9 @@ export function EstimateWorkspace({
             <li key={step.id}>
               <Link
                 href={`/estimates/${estimate.id}?step=${step.id}`}
+                prefetch={false}
                 aria-current={step.id === currentStep ? "step" : undefined}
+                onClick={(event) => navigateToStep(event, step.id)}
               >
                 <span>步驟 {index + 1}</span>
                 {step.label}
@@ -426,7 +447,11 @@ export function EstimateWorkspace({
                 返回上一步
               </button>
             ) : (
-              <Link className="button button--secondary" href="/estimates">
+              <Link
+                className="button button--secondary"
+                href="/estimates"
+                prefetch={false}
+              >
                 返回我的估算
               </Link>
             )}
@@ -441,7 +466,11 @@ export function EstimateWorkspace({
               繼續：{steps[currentIndex + 1]!.label}
             </button>
           ) : (
-            <Link className="button button--secondary" href="/estimates">
+            <Link
+              className="button button--secondary"
+              href="/estimates"
+              prefetch={false}
+            >
               完成並返回清單
             </Link>
           )}

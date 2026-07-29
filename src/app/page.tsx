@@ -66,7 +66,11 @@ export default function HomePage() {
               <Link className="button button--primary" href="/estimates/new">
                 開始估算
               </Link>
-              <Link className="button button--secondary" href="/methodology">
+              <Link
+                className="button button--secondary"
+                href="/methodology"
+                prefetch={false}
+              >
                 查看公式與定義
               </Link>
             </div>
@@ -154,10 +158,18 @@ export default function HomePage() {
             </p>
           </div>
           <div className="button-group">
-            <Link className="button button--primary" href="/estimates/new">
+            <Link
+              className="button button--primary"
+              href="/estimates/new"
+              prefetch={false}
+            >
               建立估算
             </Link>
-            <Link className="button button--secondary" href="/examples">
+            <Link
+              className="button button--secondary"
+              href="/examples"
+              prefetch={false}
+            >
               查看虛構範例
             </Link>
           </div>

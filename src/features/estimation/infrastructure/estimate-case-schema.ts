@@ -1,6 +1,9 @@
 import { z } from "zod";
 
-import type { EstimateCaseDocument } from "@/features/estimation/application/estimate-case";
+import {
+  type EstimateCaseDocument,
+  isEstimateCaseId,
+} from "@/features/estimation/application/estimate-case";
 import {
   CURRENT_MODEL_VERSION,
   isCanonicalNonNegativeDecimal,
@@ -12,6 +15,10 @@ const decimalStringSchema = z
     (value) => isCanonicalNonNegativeDecimal(value),
     "必須是 canonical non-negative decimal string",
   );
+
+const estimateCaseIdSchema = z
+  .string()
+  .refine(isEstimateCaseId, "必須是 RFC 9562／4122 UUID");
 
 const workItemTypeSchema = z.enum([
   "UI",
@@ -279,7 +286,7 @@ const parameterSnapshotSchema = z
 
 export const estimateCaseSchema = z
   .object({
-    id: z.uuid(),
+    id: estimateCaseIdSchema,
     schemaVersion: z.literal("1.0.0"),
     modelVersion: z
       .literal("bottom-up-1.0.0")

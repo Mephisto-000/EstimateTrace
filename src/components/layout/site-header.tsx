@@ -7,7 +7,7 @@ function NavigationLinks() {
     <ul className="navigation-list">
       {siteConfig.navigation.map((item) => (
         <li key={item.href}>
-          <Link className="navigation-link" href={item.href}>
+          <Link className="navigation-link" href={item.href} prefetch={false}>
             {item.label}
           </Link>
         </li>
@@ -20,7 +20,12 @@ export function SiteHeader() {
   return (
     <header className="site-header" data-print="hide">
       <div className="site-header__inner">
-        <Link className="brand" href="/" aria-label="EstimateTrace 首頁">
+        <Link
+          className="brand"
+          href="/"
+          prefetch={false}
+          aria-label="EstimateTrace 首頁"
+        >
           <span className="brand__mark" aria-hidden="true">
             ET
           </span>

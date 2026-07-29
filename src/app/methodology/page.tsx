@@ -372,7 +372,10 @@ function CalculatorFieldLink({
   return (
     <p className="calculator-field-link">
       <span>計算器對應欄位：</span>
-      <Link href={`/estimates/new?target=${encodeURIComponent(target)}`}>
+      <Link
+        href={`/estimates/new?target=${encodeURIComponent(target)}`}
+        prefetch={false}
+      >
         {children}（建立案件後前往）
       </Link>
     </p>
@@ -423,7 +426,7 @@ export default function MethodologyPage() {
             <ol>
               {tableOfContents.map((item, index) => (
                 <li key={item.id}>
-                  <Link href={`#${item.id}`}>
+                  <Link href={`#${item.id}`} prefetch={false}>
                     <span aria-hidden="true">
                       {String(index + 1).padStart(2, "0")}
                     </span>
@@ -1259,7 +1262,11 @@ export default function MethodologyPage() {
               <Link className="button button--primary" href="/estimates/new">
                 開始建立估算
               </Link>
-              <Link className="button button--secondary" href="/examples">
+              <Link
+                className="button button--secondary"
+                href="/examples"
+                prefetch={false}
+              >
                 查看虛構範例
               </Link>
             </div>

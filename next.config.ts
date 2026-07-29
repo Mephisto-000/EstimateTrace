@@ -50,6 +50,15 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  async rewrites() {
+    return [
+      {
+        source:
+          "/estimates/:estimateId([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})",
+        destination: "/estimates/editor",
+      },
+    ];
+  },
   async headers() {
     return [
       {

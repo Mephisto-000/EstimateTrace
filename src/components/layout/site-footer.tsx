@@ -13,13 +13,19 @@ export function SiteFooter() {
         <nav aria-label="頁尾導覽">
           <ul className="site-footer__links">
             <li>
-              <Link href="/methodology">公式與定義</Link>
+              <Link href="/methodology" prefetch={false}>
+                公式與定義
+              </Link>
             </li>
             <li>
-              <Link href="/privacy">資料與隱私</Link>
+              <Link href="/privacy" prefetch={false}>
+                資料與隱私
+              </Link>
             </li>
             <li>
-              <Link href="/about">關於</Link>
+              <Link href="/about" prefetch={false}>
+                關於
+              </Link>
             </li>
           </ul>
         </nav>

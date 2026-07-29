@@ -27,6 +27,8 @@ EstimateTrace 是公開網站。請勿輸入公司機密、個人資料、真實
   匯入／匯出。
 - A4 列印報告與完整「公式與定義」專頁。
 - 本機儲存失敗時保留目前工作階段，仍可計算與匯出備份。
+- 案件編輯器以可快取的靜態殼層提供；切換步驟不發送網路請求，並關閉非必要
+  的背景預抓取，降低 Vercel Hobby 配額消耗。
 
 ## 技術基線
 
@@ -114,7 +116,7 @@ Domain engine 不依賴 React、Next.js、Web Storage、clock、UUID 或 network
 - [Dependency management](docs/dependency-management.md)
 - [Privacy and security](docs/privacy-and-security.md)
 - [Sample data policy](docs/sample-data-policy.md)
-- [v0.1.4 發行說明](docs/releases/v0.1.4.md)
+- [v0.1.5 發行說明](docs/releases/v0.1.5.md)
 
 ## Vercel
 
@@ -132,6 +134,11 @@ Project 設定：
 MVP 不需要 production secret。`NEXT_PUBLIC_SITE_URL` 只是公開 canonical URL；
 若 Vercel API deployment 未提供 system environment variable，production build
 會安全 fallback 到上述 stable production URL。
+
+所有 application route 都預先產生為 static content。可見的
+`/estimates/<opaque UUID>` 路徑由 Next.js rewrite 對應到共用靜態編輯器殼層，
+案件仍只在 hydration 後由 browser repository 讀取；正常案件請求不執行
+application Function。
 
 目前 production 由已連線的 Vercel API 使用 tracked source 部署；實際 project
 link 保存在已忽略的 `.vercel/project.json`，不會污染 user-level 設定。GitHub

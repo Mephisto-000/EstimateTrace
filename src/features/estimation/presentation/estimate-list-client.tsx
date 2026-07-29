@@ -270,7 +270,10 @@ export function EstimateListClient() {
               <div className="estimate-card__header">
                 <div>
                   <h2>
-                    <Link href={`/estimates/${estimate.id}?step=result`}>
+                    <Link
+                      href={`/estimates/${estimate.id}?step=result`}
+                      prefetch={false}
+                    >
                       {estimate.name}
                     </Link>
                   </h2>
@@ -318,6 +321,7 @@ export function EstimateListClient() {
                 <Link
                   className="button button--primary"
                   href={`/estimates/${estimate.id}?step=scope`}
+                  prefetch={false}
                 >
                   開啟
                 </Link>

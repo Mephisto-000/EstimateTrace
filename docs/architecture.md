@@ -121,6 +121,20 @@ import 與 URL 都不得提供 LaTeX expression。
 | `/estimates/new`  | Static shell＋client state                         | 只在 browser                 |
 | `/estimates/[id]` | Static shell＋client lookup                        | 只在 browser                 |
 
+可見的 `/estimates/<opaque UUID>` 透過一般 `afterFiles` rewrite 對應到固定的
+`/estimates/editor` 靜態頁。固定檔案 route 會先匹配，因此 `/estimates/new`
+與 `/estimates/editor` 不會被攔截。編輯器頁以 `dynamic = "error"` 防止未來不慎
+加入 `cookies`、`headers` 或其他 Dynamic API；client hydration 後才從可見
+pathname 取得 UUID、用與 storage schema 相同的規則驗證，再查詢 browser
+repository。Rewrite 不接收或渲染案件內容，正常案件請求只讀取無限期
+prerender 的 file fallback，不執行 application Function。
+
+導覽採明確的流量預算：site header、footer、次要 CTA 與含 UUID 的案件 Link
+關閉 background prefetch，只保留首頁最主要的「開始估算」行動；wizard 步驟
+使用 History API 更新 `step` query 與 client 畫面，不觸發 RSC navigation。
+正常點擊、直接載入、重新整理與另開分頁仍保留
+`/estimates/[id]?step=...` 的可分享 UI state。
+
 `/estimates` 全 route tree 以 response header 設定 `noindex, nofollow, noarchive`。這是 defense in depth，不代表可在 URL 或 rendered HTML 放敏感資料。
 
 Static-compatible CSP 在 Production 允許 Next.js 所需的 same-origin inline bootstrap script，但不允許 `unsafe-eval`、remote script 或 third-party tracker。若未來改成 nonce-based CSP，必須評估它會讓對應 route dynamic rendering，不能靜默犧牲 static strategy。

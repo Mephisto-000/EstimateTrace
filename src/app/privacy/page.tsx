@@ -68,10 +68,18 @@ export default function PrivacyPage() {
           <li>瀏覽器清除網站資料也會移除本機案件，且無法復原。</li>
         </ol>
         <div className="button-group">
-          <Link className="button button--primary" href="/estimates">
+          <Link
+            className="button button--primary"
+            href="/estimates"
+            prefetch={false}
+          >
             管理我的估算
           </Link>
-          <Link className="button button--secondary" href="/methodology">
+          <Link
+            className="button button--secondary"
+            href="/methodology"
+            prefetch={false}
+          >
             查看模型說明
           </Link>
         </div>

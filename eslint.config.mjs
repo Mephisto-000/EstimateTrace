@@ -10,6 +10,7 @@ export default defineConfig([
     ".pnpm/**",
     ".pnpm-store/**",
     ".corepack/**",
+    ".vercel/**",
     "coverage/**",
     "playwright-report/**",
     "test-results/**",

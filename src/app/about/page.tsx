@@ -80,7 +80,11 @@ export default function AboutPage() {
         <Link className="button button--primary" href="/estimates/new">
           開始估算
         </Link>
-        <Link className="button button--secondary" href="/methodology">
+        <Link
+          className="button button--secondary"
+          href="/methodology"
+          prefetch={false}
+        >
           閱讀公式與限制
         </Link>
       </div>

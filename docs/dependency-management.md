@@ -287,6 +287,15 @@ source 建立，公開 URL 為 <https://estimate-trace.vercel.app>。Project lin
 Vercel CLI，也不寫入 user-level 設定。這種 source deployment 必須先有 clean
 local commit、完整 quality gate，且 release note 要記錄來源 tag。
 
+所有 application route 都必須維持 static output。`/estimates/<opaque UUID>`
+以 `afterFiles` rewrite 對應到固定靜態 editor shell，browser hydration 後才讀取
+local repository；release gate 需同時確認 `next build` 沒有 `ƒ` route，且
+editor 的 Vercel prerender config 是 `isDynamicRoute=false`、
+`expiration=false` 並使用 file fallback。Vercel 的 Next.js builder 仍可能為
+framework error／metadata RSC 產生共用 fallback `.func` 與 route symlink，
+因此不能只用 `.func` 檔名數量判定 application route 是否 dynamic。不要用
+Middleware 取代 rewrite，否則每次請求都可能增加 Function invocation。
+
 Remote push 完成後的正式 workflow 應改用 Git integration：repository root、
 Next.js preset、production branch `main`，每個 PR／branch 建 Preview，merge
 到 `main` 後建 Production。MVP 不需要 Vercel token 或 production secret；

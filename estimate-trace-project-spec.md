@@ -2,7 +2,7 @@
 
 > Public GitHub repository：`estimate-trace`
 > 產品定位：可追溯的軟體需求成本估算與乙方報價合理性分析工具
-> 文件版本：`1.0.1`
+> 文件版本：`1.0.2`
 > 文件日期：2026-07-30
 > 文件語言：繁體中文；專有名詞、API、程式碼與必要術語保留英文
 > 預定授權：MIT License
@@ -1360,7 +1360,7 @@ Browser Storage / Import-Export Adapters
 | `/privacy` | Static |
 | `/estimates` | Client-side data after static shell |
 | `/estimates/new` | Client component inside static shell |
-| `/estimates/[id]` | Client-side local repository lookup |
+| `/estimates/[id]` | Static shell rewrite＋client-side local repository lookup |
 
 ### 12.4 Dependency Policy
 
@@ -2209,5 +2209,6 @@ README 與 `docs/dependency-management.md` 必須與實際設定一致，包含�
 
 | 日期 | 文件版本 | 變更 | 原因 | 影響 |
 |---|---|---|---|---|
+| 2026-07-30 | 1.0.2 | 將案件路徑改為共用靜態殼層，關閉非必要預抓取，wizard 步驟改由 History API 更新 | 降低 Vercel Hobby 的 Edge Request 與 Function 用量，同時維持 browser-only privacy boundary | Application `0.1.5`；所有 application route 為 static output；schema、model、parameter set、數值參數、公式與案件資料格式不變 |
 | 2026-07-30 | 1.0.1 | 統一繁體中文介面文案，集中名詞中英對照，更新公開示範參數顯示文案 | 降低中英夾雜造成的閱讀干擾 | Application `0.1.3`、parameter set `public-demo-zh-tw@1.0.1`；schema、model、數值參數、公式與隱私邊界不變 |
 | 2026-07-29 | 1.0.0 | 初版 | 建立 Public MVP 開發目標 | 新專案 |

@@ -33,6 +33,12 @@ User form / fictional built-in sample / local JSON file
 
 Browser 仍會取得網站本身的 HTML、CSS、JavaScript 與 same-origin static assets；Vercel 會有一般 deployment／edge access metadata。Application 不得把案件內容加入 request。
 
+`/estimates/<opaque UUID>?step=...` 只包含不具業務語意的案件識別碼與 UI
+navigation state。該路徑由 rewrite 取得共用靜態編輯器殼層，案件內容只在
+hydration 後由 browser repository 查詢；正常案件請求由 static prerender
+提供，不會執行 application Function。UUID 與 query 仍屬 untrusted input，
+不能視為授權或秘密。
+
 ## Data classification
 
 | Classification | Public MVP | Examples                                     |
@@ -192,6 +198,10 @@ curl --fail --silent --show-error --head https://PUBLIC_DEPLOYMENT_URL/estimates
 4. 驗證 storage disabled／quota failure 時仍可單次計算且不宣稱已保存。
 5. 測試 malformed、oversized、unsupported schema、prototype pollution 與 XSS strings；既有案件不得改變。
 6. 檢查 Production CSP 不含 `unsafe-eval`，`/estimates` response 具有 noindex。
+7. 確認案件 editor 的 Vercel prerender config 為
+   `isDynamicRoute=false`、`expiration=false` 且使用 file fallback；不得有專屬
+   case route Function。清單 background prefetch 與 wizard 步驟切換不得產生
+   案件 RSC request。
 
 把實際 URL、commit SHA、執行日期與結果記入 release evidence；不要在 evidence 附真實 payload。
 

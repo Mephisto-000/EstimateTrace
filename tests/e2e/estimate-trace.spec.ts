@@ -89,12 +89,75 @@ function recordRequests(requests: Request[]) {
   };
 }
 
+const estimatePathPattern =
+  /^\/estimates\/[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
+
+function isEstimateRscRequest(request: Request) {
+  return (
+    estimatePathPattern.test(new URL(request.url()).pathname) &&
+    request.resourceType() === "fetch" &&
+    request.headers().rsc === "1"
+  );
+}
+
+function isRscPrefetch(request: Request) {
+  return (
+    request.resourceType() === "fetch" &&
+    request.headers().rsc === "1" &&
+    request.headers()["next-router-prefetch"] === "1"
+  );
+}
+
+function requestDiagnostics(requests: readonly Request[]) {
+  return requests.map((request) => ({
+    method: request.method(),
+    resourceType: request.resourceType(),
+    url: request.url(),
+    rsc: request.headers().rsc,
+    prefetch: request.headers()["next-router-prefetch"],
+  }));
+}
+
 test.beforeEach(async ({ page }) => {
   await page.goto("/");
   await page.evaluate(() => window.localStorage.clear());
 });
 
 test.describe("公開內容", () => {
+  test("公開頁背景預抓取只保留主要建立估算行動", async ({ context }) => {
+    for (const path of [
+      "/",
+      "/methodology",
+      "/examples",
+      "/about",
+      "/privacy",
+    ]) {
+      const probePage = await context.newPage();
+      const requests: Request[] = [];
+      probePage.on("request", recordRequests(requests));
+      await probePage.goto(path);
+      await probePage.getByRole("main").waitFor();
+      await probePage.waitForTimeout(500);
+
+      const prefetches = requests.filter(isRscPrefetch);
+      const nonCriticalPrefetches = prefetches.filter(
+        (request) => new URL(request.url()).pathname !== "/estimates/new",
+      );
+
+      expect(
+        requestDiagnostics(nonCriticalPrefetches),
+        `Unexpected background prefetches from ${path}`,
+      ).toEqual([]);
+      expect(
+        prefetches.length,
+        `Too many background prefetches from ${path}: ${JSON.stringify(
+          requestDiagnostics(prefetches),
+        )}`,
+      ).toBeLessThanOrEqual(6);
+      await probePage.close();
+    }
+  });
+
   test("主要頁面使用繁體中文，完整中英對照集中在公式與定義", async ({
     page,
   }) => {
@@ -411,6 +474,98 @@ test.describe("表格排版", () => {
 });
 
 test.describe("估算核心流程", () => {
+  test("案件網址使用可快取的靜態殼層，且內容維持不被索引", async ({ page }) => {
+    const estimateId = "11111111-1111-7111-8111-111111111111";
+    const response = await page.goto(`/estimates/${estimateId}?step=scope`);
+
+    expect(response).not.toBeNull();
+    expect(response!.headers()["cache-control"] ?? "").not.toMatch(
+      /\b(?:private|no-store)\b/u,
+    );
+    expect(response!.headers()["x-robots-tag"]).toBe(
+      "noindex, nofollow, noarchive",
+    );
+    await expect(page).toHaveURL(
+      new RegExp(`/estimates/${estimateId}\\?step=scope$`, "u"),
+    );
+    await expect(
+      page.getByRole("heading", { name: "這個瀏覽器找不到案件" }),
+    ).toBeVisible();
+  });
+
+  test("估算清單不預抓案件，編輯器不背景預抓 RSC", async ({ page }) => {
+    const requests: Request[] = [];
+    page.on("request", recordRequests(requests));
+
+    await page.goto("/estimates");
+    await page.getByRole("button", { name: "載入兩筆虛構範例" }).click();
+
+    const estimateHeading = page.getByRole("heading", {
+      name: "會員資料查詢與匯出（虛構）",
+    });
+    await expect(estimateHeading).toBeVisible();
+    await estimateHeading.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+
+    const listPrefetches = requests.filter(isEstimateRscRequest);
+    const estimateHref = await estimateHeading
+      .getByRole("link")
+      .getAttribute("href");
+    expect(estimateHref).not.toBeNull();
+
+    requests.length = 0;
+    await page.goto(estimateHref!);
+    await expect(
+      page.getByRole("heading", { name: "結果與報價比較" }),
+    ).toBeVisible();
+    const firstTrace = page.locator(".trace-list details").first();
+    await firstTrace.locator("summary").click();
+    await firstTrace.getByRole("link").scrollIntoViewIfNeeded();
+    await page.locator(".wizard-actions").scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
+
+    const editorPrefetches = requests.filter(isRscPrefetch);
+
+    expect({
+      list: requestDiagnostics(listPrefetches),
+      editor: requestDiagnostics(editorPrefetches),
+    }).toEqual({ list: [], editor: [] });
+  });
+
+  test("切換估算步驟只更新本機網址與畫面，不發送網路請求", async ({ page }) => {
+    await page.goto("/estimates");
+    await page.getByRole("button", { name: "載入兩筆虛構範例" }).click();
+
+    await page
+      .getByRole("heading", {
+        name: "會員資料查詢與匯出（虛構）",
+      })
+      .getByRole("link")
+      .click();
+    await expect(
+      page.getByRole("heading", { name: "結果與報價比較" }),
+    ).toBeVisible();
+    await page.waitForLoadState("networkidle");
+
+    const estimatePath = new URL(page.url()).pathname;
+    const requests: Request[] = [];
+    page.on("request", recordRequests(requests));
+
+    await page.getByRole("link", { name: /範圍與假設/u }).click();
+
+    await expect(page).toHaveURL(
+      new RegExp(
+        `${estimatePath.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&")}\\?step=scope$`,
+        "u",
+      ),
+    );
+    await expect(
+      page.getByRole("heading", { name: "範圍與假設", exact: true }),
+    ).toBeVisible();
+
+    expect(requestDiagnostics(requests)).toEqual([]);
+  });
+
   test("建立估算、加入工作項目並產生 P50／P80 與乙方報價比較", async ({
     page,
   }) => {

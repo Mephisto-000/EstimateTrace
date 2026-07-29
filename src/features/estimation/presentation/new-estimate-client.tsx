@@ -241,7 +241,11 @@ export function NewEstimateClient() {
         </dl>
 
         <div className="wizard-actions">
-          <Link className="button button--secondary" href="/estimates">
+          <Link
+            className="button button--secondary"
+            href="/estimates"
+            prefetch={false}
+          >
             返回我的估算
           </Link>
           <button className="button button--primary" type="submit">

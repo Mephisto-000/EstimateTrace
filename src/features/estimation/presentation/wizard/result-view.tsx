@@ -199,7 +199,7 @@ function TraceSection({ result }: { result: EstimateResult }) {
                 <p>
                   <strong>公式識別碼：</strong>
                   {formulaHref ? (
-                    <Link href={formulaHref}>
+                    <Link href={formulaHref} prefetch={false}>
                       <code>{node.formulaId}</code>
                     </Link>
                   ) : (
@@ -618,7 +618,9 @@ export function ResultView({ estimate, result, onExport }: ResultViewProps) {
           資料分級與去識別化檢查。
         </p>
         <p>
-          <Link href="/methodology">閱讀完整方法論、公式與限制</Link>
+          <Link href="/methodology" prefetch={false}>
+            閱讀完整方法論、公式與限制
+          </Link>
           <span className="print-only">（{methodologyPrintUrl}）</span>
         </p>
       </section>
