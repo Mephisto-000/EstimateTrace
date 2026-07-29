@@ -1,0 +1,66 @@
+name: Feature request
+description: 提議可追蹤、可測試且不超出 public MVP 隱私邊界的改善
+title: "feat: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        請先描述要支援的決策或工作流程。Public upstream 不接受真實公司參數、機密資料、登入／資料庫／analytics 或把估算內容送到第三方的變更，除非先核准規格變更。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 問題與使用情境
+      description: 誰遇到什麼問題？目前為何無法安全地完成？
+    validations:
+      required: true
+
+  - type: textarea
+    id: outcome
+    attributes:
+      label: 期望結果與 Acceptance Criteria
+      description: 以可觀察、可測試的結果描述，不要只指定 UI 或套件。
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 最小方案
+      description: 說明最小可維護方案、替代方案與刻意不做的範圍。
+
+  - type: dropdown
+    id: model_impact
+    attributes:
+      label: 是否改變公式、參數或結果語意？
+      options:
+        - 否
+        - 是，需要 model／parameter version 與 migration
+        - 尚不確定
+    validations:
+      required: true
+
+  - type: dropdown
+    id: privacy_impact
+    attributes:
+      label: 是否改變 browser-only／無第三方傳輸的隱私邊界？
+      options:
+        - 否
+        - 是，需要先核准規格與 Privacy 變更
+        - 尚不確定
+    validations:
+      required: true
+
+  - type: textarea
+    id: verification
+    attributes:
+      label: 測試與驗證建議
+      description: 列出 unit、integration、E2E、accessibility、security 或 migration 驗證。
+
+  - type: checkboxes
+    id: hygiene
+    attributes:
+      label: Public repository 確認
+      options:
+        - label: 此提案不含真實公司、乙方、員工、系統、報價、credential 或 NDA 資料。
+          required: true

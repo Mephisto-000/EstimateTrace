@@ -2,7 +2,11 @@ export { calculateEstimate } from "./calculate-estimate";
 export {
   CURRENT_MODEL_VERSION,
   MODEL_DECIMAL_PRECISION,
+  MODEL_INTERMEDIATE_ROUNDING,
+  MODEL_MAXIMUM_DAYS_PER_PERSON_MONTH,
+  MODEL_MAXIMUM_HOURS_PER_PERSON_DAY,
   MODEL_P80_Z_SCORE,
+  MODEL_PRESENTATION_ROUNDING,
   MODEL_ROUNDING_MODE,
 } from "./model-definition";
 export type * from "./types";

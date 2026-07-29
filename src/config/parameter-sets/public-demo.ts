@@ -5,7 +5,11 @@ import type {
 } from "@/features/estimation/domain";
 import {
   MODEL_DECIMAL_PRECISION,
+  MODEL_INTERMEDIATE_ROUNDING,
+  MODEL_MAXIMUM_DAYS_PER_PERSON_MONTH,
+  MODEL_MAXIMUM_HOURS_PER_PERSON_DAY,
   MODEL_P80_Z_SCORE,
+  MODEL_PRESENTATION_ROUNDING,
   MODEL_ROUNDING_MODE,
 } from "@/features/estimation/domain";
 
@@ -290,6 +294,8 @@ export const publicDemoParameterSet = {
   calculationPolicy: {
     decimalPrecision: MODEL_DECIMAL_PRECISION,
     roundingMode: MODEL_ROUNDING_MODE,
+    intermediateRounding: MODEL_INTERMEDIATE_ROUNDING,
+    presentationRounding: MODEL_PRESENTATION_ROUNDING,
     p80ZScore: MODEL_P80_Z_SCORE,
   },
   constraints: {
@@ -300,6 +306,8 @@ export const publicDemoParameterSet = {
     maximumCommercialRate: "5",
     maximumPhaseLoadingRate: "1",
     maximumTotalPhaseLoadingRate: "3",
+    maximumHoursPerPersonDay: MODEL_MAXIMUM_HOURS_PER_PERSON_DAY,
+    maximumDaysPerPersonMonth: MODEL_MAXIMUM_DAYS_PER_PERSON_MONTH,
     riskProductSafetyCap: "3",
   },
   vendorQuestions: [
@@ -307,36 +315,98 @@ export const publicDemoParameterSet = {
       id: "testing-scope",
       priority: 10,
       text: "是否包含完整 SIT、UAT 與 Regression Test？",
+      triggers: [
+        {
+          kind: "BAND",
+          bands: ["CLEARLY_BELOW_MODEL_RANGE"],
+        },
+      ],
     },
     {
       id: "impact-analysis",
       priority: 20,
       text: "是否包含既有系統影響分析與資料核對？",
+      triggers: [
+        {
+          kind: "WORK_ITEM_TYPE",
+          workItemTypes: ["DATABASE", "INTEGRATION", "BATCH", "MIGRATION"],
+        },
+        {
+          kind: "RISK_FACTOR",
+          factorIds: [
+            "LEGACY_TECHNICAL_DEBT",
+            "INTEGRATION_DEPENDENCY",
+            "DATA_MIGRATION_QUALITY",
+          ],
+          minimumLevel: "HIGH",
+        },
+      ],
     },
     {
       id: "release-rollback",
       priority: 30,
       text: "是否包含 Production deployment、rollback 與 hypercare？",
+      triggers: [
+        {
+          kind: "WORK_ITEM_TYPE",
+          workItemTypes: ["INTEGRATION", "BATCH", "MIGRATION", "DEPLOYMENT"],
+        },
+        {
+          kind: "RISK_FACTOR",
+          factorIds: ["SCHEDULE_COMPRESSION"],
+          minimumLevel: "HIGH",
+        },
+      ],
     },
     {
       id: "warranty-sla",
       priority: 40,
       text: "Warranty 範圍、期間與 SLA 為何？",
+      triggers: [
+        {
+          kind: "BAND",
+          bands: ["ABOVE_MODEL_P50", "ABOVE_MODEL_P80"],
+        },
+      ],
     },
     {
       id: "contingency",
       priority: 50,
       text: "是否因需求未明而加入 contingency？",
+      triggers: [
+        {
+          kind: "RISK_FACTOR",
+          factorIds: ["REQUIREMENT_CLARITY", "SCHEDULE_COMPRESSION"],
+          minimumLevel: "HIGH",
+        },
+      ],
     },
     {
       id: "role-rate",
       priority: 60,
       text: "乙方是否能提供角色別人日與 blended rate？",
+      triggers: [
+        {
+          kind: "BAND",
+          bands: ["ABOVE_MODEL_P50", "ABOVE_MODEL_P80"],
+        },
+      ],
     },
     {
       id: "quote-inclusions",
       priority: 70,
       text: "報價是否包含稅、授權、第三方服務與差旅？",
+      triggers: [
+        {
+          kind: "BAND",
+          bands: [
+            "CLEARLY_BELOW_MODEL_RANGE",
+            "NEAR_MODEL_REFERENCE_RANGE",
+            "ABOVE_MODEL_P50",
+            "ABOVE_MODEL_P80",
+          ],
+        },
+      ],
     },
   ],
   sourceNotes: [illustrativeSource],

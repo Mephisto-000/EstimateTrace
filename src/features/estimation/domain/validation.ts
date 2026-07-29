@@ -2,6 +2,11 @@ import DecimalJs from "decimal.js";
 
 import {
   MODEL_DECIMAL_PRECISION,
+  MODEL_INTERMEDIATE_ROUNDING,
+  MODEL_MAXIMUM_DAYS_PER_PERSON_MONTH,
+  MODEL_MAXIMUM_HOURS_PER_PERSON_DAY,
+  MODEL_P80_Z_SCORE,
+  MODEL_PRESENTATION_ROUNDING,
   MODEL_ROUNDING_MODE,
 } from "./model-definition";
 import type {
@@ -12,6 +17,7 @@ import type {
   DecimalString,
   RiskFactorId,
   RiskLevel,
+  VendorComparisonBand,
   WorkItemType,
 } from "./types";
 
@@ -73,6 +79,13 @@ export const CROSS_CUTTING_PHASES: readonly CrossCuttingPhase[] = [
   "QUALITY_ASSURANCE",
   "DEPLOYMENT_RELEASE",
   "DOCUMENTATION_TRAINING",
+];
+
+export const VENDOR_COMPARISON_BANDS: readonly VendorComparisonBand[] = [
+  "CLEARLY_BELOW_MODEL_RANGE",
+  "NEAR_MODEL_REFERENCE_RANGE",
+  "ABOVE_MODEL_P50",
+  "ABOVE_MODEL_P80",
 ];
 
 interface DecimalRange {
@@ -196,12 +209,42 @@ function validateParameterSet(
       { supported: MODEL_ROUNDING_MODE },
     );
   }
+  if (
+    parameters.calculationPolicy.intermediateRounding !==
+    MODEL_INTERMEDIATE_ROUNDING
+  ) {
+    addIssue(
+      issues,
+      "INVALID_PARAMETER_SET",
+      "parameterSnapshot.calculationPolicy.intermediateRounding",
+      { supported: MODEL_INTERMEDIATE_ROUNDING },
+    );
+  }
+  if (
+    parameters.calculationPolicy.presentationRounding !==
+    MODEL_PRESENTATION_ROUNDING
+  ) {
+    addIssue(
+      issues,
+      "INVALID_PARAMETER_SET",
+      "parameterSnapshot.calculationPolicy.presentationRounding",
+      { supported: MODEL_PRESENTATION_ROUNDING },
+    );
+  }
   validateDecimal(
     parameters.calculationPolicy.p80ZScore,
     "parameterSnapshot.calculationPolicy.p80ZScore",
     issues,
     { minimum: "0" },
   );
+  if (parameters.calculationPolicy.p80ZScore !== MODEL_P80_Z_SCORE) {
+    addIssue(
+      issues,
+      "INVALID_PARAMETER_SET",
+      "parameterSnapshot.calculationPolicy.p80ZScore",
+      { expected: MODEL_P80_Z_SCORE },
+    );
+  }
 
   if (
     !Number.isInteger(parameters.constraints.maximumWorkItems) ||
@@ -234,6 +277,26 @@ function validateParameterSet(
       { minimum: "0", minimumExclusive: true },
     );
   });
+  validateDecimal(
+    parameters.constraints.maximumHoursPerPersonDay,
+    "parameterSnapshot.constraints.maximumHoursPerPersonDay",
+    issues,
+    {
+      minimum: "0",
+      minimumExclusive: true,
+      maximum: MODEL_MAXIMUM_HOURS_PER_PERSON_DAY,
+    },
+  );
+  validateDecimal(
+    parameters.constraints.maximumDaysPerPersonMonth,
+    "parameterSnapshot.constraints.maximumDaysPerPersonMonth",
+    issues,
+    {
+      minimum: "0",
+      minimumExclusive: true,
+      maximum: MODEL_MAXIMUM_DAYS_PER_PERSON_MONTH,
+    },
+  );
 
   validateDecimal(
     parameters.comparison.clearlyBelowP50Ratio,
@@ -397,25 +460,86 @@ function validateParameterSet(
     issues,
   );
   parameters.vendorQuestions.forEach((question, index) => {
-    validateRequiredString(
-      question.id,
-      `parameterSnapshot.vendorQuestions.${index}.id`,
-      issues,
-      128,
-    );
-    validateRequiredString(
-      question.text,
-      `parameterSnapshot.vendorQuestions.${index}.text`,
-      issues,
-    );
+    const questionPath = `parameterSnapshot.vendorQuestions.${index}`;
+    validateRequiredString(question.id, `${questionPath}.id`, issues, 128);
+    validateRequiredString(question.text, `${questionPath}.text`, issues);
     if (!Number.isSafeInteger(question.priority)) {
-      addIssue(
-        issues,
-        "INVALID_PARAMETER_SET",
-        `parameterSnapshot.vendorQuestions.${index}.priority`,
-        { expected: "safe integer" },
-      );
+      addIssue(issues, "INVALID_PARAMETER_SET", `${questionPath}.priority`, {
+        expected: "safe integer",
+      });
     }
+    if (question.triggers.length === 0) {
+      addIssue(issues, "INVALID_PARAMETER_SET", `${questionPath}.triggers`, {
+        expected: "at least one evidence trigger",
+      });
+    }
+    question.triggers.forEach((trigger, triggerIndex) => {
+      const triggerPath = `${questionPath}.triggers.${triggerIndex}`;
+      switch (trigger.kind) {
+        case "BAND":
+          if (trigger.bands.length === 0) {
+            addIssue(issues, "INVALID_PARAMETER_SET", `${triggerPath}.bands`, {
+              expected: "at least one comparison band",
+            });
+          }
+          trigger.bands.forEach((band, bandIndex) => {
+            if (!VENDOR_COMPARISON_BANDS.includes(band)) {
+              addIssue(
+                issues,
+                "UNKNOWN_VALUE",
+                `${triggerPath}.bands.${bandIndex}`,
+                { actual: band },
+              );
+            }
+          });
+          break;
+        case "WORK_ITEM_TYPE":
+          if (trigger.workItemTypes.length === 0) {
+            addIssue(
+              issues,
+              "INVALID_PARAMETER_SET",
+              `${triggerPath}.workItemTypes`,
+              { expected: "at least one work item type" },
+            );
+          }
+          trigger.workItemTypes.forEach((workItemType, workItemTypeIndex) => {
+            if (!WORK_ITEM_TYPES.includes(workItemType)) {
+              addIssue(
+                issues,
+                "UNKNOWN_VALUE",
+                `${triggerPath}.workItemTypes.${workItemTypeIndex}`,
+                { actual: workItemType },
+              );
+            }
+          });
+          break;
+        case "RISK_FACTOR":
+          if (trigger.factorIds.length === 0) {
+            addIssue(
+              issues,
+              "INVALID_PARAMETER_SET",
+              `${triggerPath}.factorIds`,
+              { expected: "at least one risk factor" },
+            );
+          }
+          trigger.factorIds.forEach((factorId, factorIndex) => {
+            if (!RISK_FACTOR_IDS.includes(factorId)) {
+              addIssue(
+                issues,
+                "UNKNOWN_VALUE",
+                `${triggerPath}.factorIds.${factorIndex}`,
+                { actual: factorId },
+              );
+            }
+          });
+          if (!RISK_LEVELS.includes(trigger.minimumLevel)) {
+            addIssue(issues, "UNKNOWN_VALUE", `${triggerPath}.minimumLevel`, {
+              actual: trigger.minimumLevel,
+            });
+          }
+          break;
+      }
+    });
   });
 }
 
@@ -595,13 +719,21 @@ function validateInput(
     commercialTerms.hoursPerPersonDay,
     "input.commercialTerms.hoursPerPersonDay",
     issues,
-    { minimum: "0", minimumExclusive: true },
+    {
+      minimum: "0",
+      minimumExclusive: true,
+      maximum: parameters.constraints.maximumHoursPerPersonDay,
+    },
   );
   validateDecimal(
     commercialTerms.daysPerPersonMonth,
     "input.commercialTerms.daysPerPersonMonth",
     issues,
-    { minimum: "0", minimumExclusive: true },
+    {
+      minimum: "0",
+      minimumExclusive: true,
+      maximum: parameters.constraints.maximumDaysPerPersonMonth,
+    },
   );
 
   if (input.vendorQuote !== null) {

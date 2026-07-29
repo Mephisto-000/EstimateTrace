@@ -7,17 +7,24 @@ import {
 import type {
   CalculationTraceNode,
   CalculationOutcome,
+  CalculationPrecisionPolicy,
   CalculationRequest,
   CalculationUnit,
   CalculationWarning,
+  CostWaterfall,
   EstimateDriver,
   TraceOperand,
   TraceSource,
   VendorComparison,
+  VendorComparisonBand,
+  VendorQuestion,
+  VendorQuestionEvidence,
 } from "./types";
 import {
   CROSS_CUTTING_PHASES,
   RISK_FACTOR_IDS,
+  RISK_LEVELS,
+  WORK_ITEM_TYPES,
   validateCalculationRequest,
 } from "./validation";
 
@@ -60,6 +67,15 @@ export function calculateEstimate(
   const canonical = (value: DecimalJs) => {
     const serialized = value.toFixed();
     return serialized === "-0" ? "0" : serialized;
+  };
+  const precisionPolicy: CalculationPrecisionPolicy = {
+    decimalPrecision:
+      request.parameterSnapshot.calculationPolicy.decimalPrecision,
+    roundingMode: request.parameterSnapshot.calculationPolicy.roundingMode,
+    intermediateRounding:
+      request.parameterSnapshot.calculationPolicy.intermediateRounding,
+    presentationRounding:
+      request.parameterSnapshot.calculationPolicy.presentationRounding,
   };
   const source = (
     kind: TraceSource["kind"],
@@ -115,6 +131,7 @@ export function calculateEstimate(
       result: canonical(result),
       unit,
       sources,
+      precisionPolicy,
     });
   };
 
@@ -180,10 +197,19 @@ export function calculateEstimate(
     (total, item) => total.plus(item.baseEffort),
     zero,
   );
+  const complexityAdjustedEffort = calculatedItems.reduce(
+    (total, item) => total.plus(item.complexityAdjustedEffort),
+    zero,
+  );
+  const complexityAdjustment = complexityAdjustedEffort.minus(baseEffort);
+  const effectiveComplexityMultiplier = baseEffort.greaterThan(0)
+    ? complexityAdjustedEffort.dividedBy(baseEffort)
+    : zero;
   const adjustedEffort = calculatedItems.reduce(
     (total, item) => total.plus(item.adjustedEffort),
     zero,
   );
+  const riskAdjustment = adjustedEffort.minus(complexityAdjustedEffort);
 
   const phaseEfforts = CROSS_CUTTING_PHASES.map((phase) => {
     const eligibleEffort = calculatedItems.reduce(
@@ -237,32 +263,52 @@ export function calculateEstimate(
   const p80PersonMonths = p80Effort.dividedBy(hoursPerPersonMonth);
 
   const directCost = decimal(commercialTerms.directCost);
-  const overheadMultiplier = new Decimal(1).plus(commercialTerms.overheadRate);
   const warrantyCost = decimal(commercialTerms.warrantyCost);
-  const markupMultiplier = new Decimal(1).plus(
-    commercialTerms.vendorMarkupRate,
-  );
   const taxMultiplier = new Decimal(1).plus(commercialTerms.taxRate);
 
   const calculateCost = (effort: DecimalJs) => {
-    const engineeringCost = effort
-      .times(commercialTerms.hourlyRate)
-      .plus(directCost);
-    const fullCost = engineeringCost
-      .times(overheadMultiplier)
-      .plus(warrantyCost);
-    const quoteExTax = fullCost.times(markupMultiplier);
-    const quoteIncTax = quoteExTax.times(taxMultiplier);
+    const laborCost = effort.times(commercialTerms.hourlyRate);
+    const deliveryCost = laborCost.plus(directCost);
+    const overheadAmount = deliveryCost.times(commercialTerms.overheadRate);
+    const costAfterOverhead = deliveryCost.plus(overheadAmount);
+    const fullCost = costAfterOverhead.plus(warrantyCost);
+    const vendorMarkupAmount = fullCost.times(commercialTerms.vendorMarkupRate);
+    const quoteExTax = fullCost.plus(vendorMarkupAmount);
+    const taxAmount = quoteExTax.times(commercialTerms.taxRate);
+    const quoteIncTax = quoteExTax.plus(taxAmount);
 
     return {
-      engineeringCost,
+      laborCost,
+      directCost,
+      deliveryCost,
+      overheadAmount,
+      costAfterOverhead,
+      warrantyCost,
+      fullCost,
+      vendorMarkupAmount,
       quoteExTax,
+      taxAmount,
       quoteIncTax,
     };
   };
 
   const p50Cost = calculateCost(p50Effort);
   const p80Cost = calculateCost(p80Effort);
+  const serializeCost = (
+    cost: ReturnType<typeof calculateCost>,
+  ): CostWaterfall => ({
+    laborCost: canonical(cost.laborCost),
+    directCost: canonical(cost.directCost),
+    deliveryCost: canonical(cost.deliveryCost),
+    overheadAmount: canonical(cost.overheadAmount),
+    costAfterOverhead: canonical(cost.costAfterOverhead),
+    warrantyCost: canonical(cost.warrantyCost),
+    fullCost: canonical(cost.fullCost),
+    vendorMarkupAmount: canonical(cost.vendorMarkupAmount),
+    quoteExTax: canonical(cost.quoteExTax),
+    taxAmount: canonical(cost.taxAmount),
+    quoteIncTax: canonical(cost.quoteIncTax),
+  });
 
   calculatedItems.forEach(
     ({
@@ -395,6 +441,67 @@ export function calculateEstimate(
     unit: "person-hour",
   });
   addTrace({
+    id: "estimate:complexity-adjusted",
+    metric: "complexityAdjustedEffortHours",
+    formulaId: "complexity-adjustment",
+    formula: "H_complex = Σ H_i,complex",
+    operands: calculatedItems.map(
+      ({ item, complexityAdjustedEffort: itemComplexityAdjustedEffort }) =>
+        operand(
+          item.id,
+          itemComplexityAdjustedEffort,
+          "person-hour",
+          source("derived", `work-item:${item.id}:complexity`, item.id),
+        ),
+    ),
+    result: complexityAdjustedEffort,
+    unit: "person-hour",
+  });
+  addTrace({
+    id: "estimate:complexity-adjustment",
+    metric: "complexityAdjustmentHours",
+    formulaId: "complexity-adjustment",
+    formula: "ΔH_complex = H_complex − H_base",
+    operands: [
+      operand(
+        "complexityAdjustedEffort",
+        complexityAdjustedEffort,
+        "person-hour",
+        source("derived", "estimate:complexity-adjusted"),
+      ),
+      operand(
+        "baseEffort",
+        baseEffort,
+        "person-hour",
+        source("derived", "estimate:base"),
+      ),
+    ],
+    result: complexityAdjustment,
+    unit: "person-hour",
+  });
+  addTrace({
+    id: "estimate:effective-complexity-multiplier",
+    metric: "effectiveComplexityMultiplier",
+    formulaId: "complexity-adjustment",
+    formula: "c_effective = H_complex ÷ H_base",
+    operands: [
+      operand(
+        "complexityAdjustedEffort",
+        complexityAdjustedEffort,
+        "person-hour",
+        source("derived", "estimate:complexity-adjusted"),
+      ),
+      operand(
+        "baseEffort",
+        baseEffort,
+        "person-hour",
+        source("derived", "estimate:base"),
+      ),
+    ],
+    result: effectiveComplexityMultiplier,
+    unit: "ratio",
+  });
+  addTrace({
     id: "estimate:adjusted",
     metric: "adjustedEffortHours",
     formulaId: "risk-factor-adjustment",
@@ -409,6 +516,28 @@ export function calculateEstimate(
         ),
     ),
     result: adjustedEffort,
+    unit: "person-hour",
+  });
+  addTrace({
+    id: "estimate:risk-adjustment",
+    metric: "riskAdjustmentHours",
+    formulaId: "risk-factor-adjustment",
+    formula: "ΔH_risk = H_adj − H_complex",
+    operands: [
+      operand(
+        "adjustedEffort",
+        adjustedEffort,
+        "person-hour",
+        source("derived", "estimate:adjusted"),
+      ),
+      operand(
+        "complexityAdjustedEffort",
+        complexityAdjustedEffort,
+        "person-hour",
+        source("derived", "estimate:complexity-adjusted"),
+      ),
+    ],
+    result: riskAdjustment,
     unit: "person-hour",
   });
   phaseEfforts.forEach(({ phase, effort }) => {
@@ -671,10 +800,10 @@ export function calculateEstimate(
     cost: ReturnType<typeof calculateCost>,
   ) => {
     addTrace({
-      id: `estimate:${percentile}:engineering-cost`,
-      metric: `${percentile}EngineeringCost`,
+      id: `estimate:${percentile}:labor-cost`,
+      metric: `${percentile}LaborCost`,
       formulaId: "engineering-cost",
-      formula: "C_delivery,x = (H_Px × R_h) + D",
+      formula: "C_labor,x = H_Px × R_h",
       operands: [
         operand(
           "effort",
@@ -688,6 +817,16 @@ export function calculateEstimate(
           "TWD/person-hour",
           source("commercial-term", "input.commercialTerms.hourlyRate"),
         ),
+      ],
+      result: cost.laborCost,
+      unit: "TWD",
+    });
+    addTrace({
+      id: `estimate:${percentile}:direct-cost`,
+      metric: `${percentile}DirectCost`,
+      formulaId: "engineering-cost",
+      formula: "D_x = D",
+      operands: [
         operand(
           "directCost",
           directCost,
@@ -695,20 +834,58 @@ export function calculateEstimate(
           source("commercial-term", "input.commercialTerms.directCost"),
         ),
       ],
-      result: cost.engineeringCost,
+      result: cost.directCost,
       unit: "TWD",
     });
     addTrace({
-      id: `estimate:${percentile}:quote-ex-tax`,
-      metric: `${percentile}QuoteExTax`,
-      formulaId: "commercial-loadings",
-      formula: "Q_exTax,x = (C_delivery,x × (1 + o) + W) × (1 + m)",
+      id: `estimate:${percentile}:delivery-cost`,
+      metric: `${percentile}DeliveryCost`,
+      formulaId: "engineering-cost",
+      formula: "C_delivery,x = C_labor,x + D",
       operands: [
         operand(
-          "engineeringCost",
-          cost.engineeringCost,
+          "laborCost",
+          cost.laborCost,
           "TWD",
-          source("derived", `estimate:${percentile}:engineering-cost`),
+          source("derived", `estimate:${percentile}:labor-cost`),
+        ),
+        operand(
+          "directCost",
+          cost.directCost,
+          "TWD",
+          source("derived", `estimate:${percentile}:direct-cost`),
+        ),
+      ],
+      result: cost.deliveryCost,
+      unit: "TWD",
+    });
+    addTrace({
+      id: `estimate:${percentile}:engineering-cost`,
+      metric: `${percentile}EngineeringCost`,
+      formulaId: "engineering-cost",
+      formula: "C_engineering,x = C_delivery,x",
+      operands: [
+        operand(
+          "deliveryCost",
+          cost.deliveryCost,
+          "TWD",
+          source("derived", `estimate:${percentile}:delivery-cost`),
+        ),
+      ],
+      result: cost.deliveryCost,
+      unit: "TWD",
+    });
+    addTrace({
+      id: `estimate:${percentile}:overhead-amount`,
+      metric: `${percentile}OverheadAmount`,
+      formulaId: "commercial-loadings",
+      formula: "C_overhead,x = C_delivery,x × o",
+      operands: [
+        operand(
+          "deliveryCost",
+          cost.deliveryCost,
+          "TWD",
+          source("derived", `estimate:${percentile}:delivery-cost`),
         ),
         operand(
           "overheadRate",
@@ -716,11 +893,81 @@ export function calculateEstimate(
           "ratio",
           source("commercial-term", "input.commercialTerms.overheadRate"),
         ),
+      ],
+      result: cost.overheadAmount,
+      unit: "TWD",
+    });
+    addTrace({
+      id: `estimate:${percentile}:cost-after-overhead`,
+      metric: `${percentile}CostAfterOverhead`,
+      formulaId: "commercial-loadings",
+      formula: "C_afterOverhead,x = C_delivery,x + C_overhead,x",
+      operands: [
+        operand(
+          "deliveryCost",
+          cost.deliveryCost,
+          "TWD",
+          source("derived", `estimate:${percentile}:delivery-cost`),
+        ),
+        operand(
+          "overheadAmount",
+          cost.overheadAmount,
+          "TWD",
+          source("derived", `estimate:${percentile}:overhead-amount`),
+        ),
+      ],
+      result: cost.costAfterOverhead,
+      unit: "TWD",
+    });
+    addTrace({
+      id: `estimate:${percentile}:warranty-cost`,
+      metric: `${percentile}WarrantyCost`,
+      formulaId: "commercial-loadings",
+      formula: "W_x = W",
+      operands: [
         operand(
           "warrantyCost",
           warrantyCost,
           "TWD",
           source("commercial-term", "input.commercialTerms.warrantyCost"),
+        ),
+      ],
+      result: cost.warrantyCost,
+      unit: "TWD",
+    });
+    addTrace({
+      id: `estimate:${percentile}:full-cost`,
+      metric: `${percentile}FullCost`,
+      formulaId: "commercial-loadings",
+      formula: "C_full,x = C_afterOverhead,x + W",
+      operands: [
+        operand(
+          "costAfterOverhead",
+          cost.costAfterOverhead,
+          "TWD",
+          source("derived", `estimate:${percentile}:cost-after-overhead`),
+        ),
+        operand(
+          "warrantyCost",
+          cost.warrantyCost,
+          "TWD",
+          source("derived", `estimate:${percentile}:warranty-cost`),
+        ),
+      ],
+      result: cost.fullCost,
+      unit: "TWD",
+    });
+    addTrace({
+      id: `estimate:${percentile}:vendor-markup-amount`,
+      metric: `${percentile}VendorMarkupAmount`,
+      formulaId: "commercial-loadings",
+      formula: "C_markup,x = C_full,x × m",
+      operands: [
+        operand(
+          "fullCost",
+          cost.fullCost,
+          "TWD",
+          source("derived", `estimate:${percentile}:full-cost`),
         ),
         operand(
           "vendorMarkupRate",
@@ -729,14 +976,36 @@ export function calculateEstimate(
           source("commercial-term", "input.commercialTerms.vendorMarkupRate"),
         ),
       ],
+      result: cost.vendorMarkupAmount,
+      unit: "TWD",
+    });
+    addTrace({
+      id: `estimate:${percentile}:quote-ex-tax`,
+      metric: `${percentile}QuoteExTax`,
+      formulaId: "commercial-loadings",
+      formula: "Q_exTax,x = C_full,x + C_markup,x",
+      operands: [
+        operand(
+          "fullCost",
+          cost.fullCost,
+          "TWD",
+          source("derived", `estimate:${percentile}:full-cost`),
+        ),
+        operand(
+          "vendorMarkupAmount",
+          cost.vendorMarkupAmount,
+          "TWD",
+          source("derived", `estimate:${percentile}:vendor-markup-amount`),
+        ),
+      ],
       result: cost.quoteExTax,
       unit: "TWD",
     });
     addTrace({
-      id: `estimate:${percentile}:quote-inc-tax`,
-      metric: `${percentile}QuoteIncTax`,
+      id: `estimate:${percentile}:tax-amount`,
+      metric: `${percentile}TaxAmount`,
       formulaId: "commercial-loadings",
-      formula: "Q_incTax,x = Q_exTax,x × (1 + t)",
+      formula: "C_tax,x = Q_exTax,x × t",
       operands: [
         operand(
           "quoteExTax",
@@ -751,12 +1020,133 @@ export function calculateEstimate(
           source("commercial-term", "input.commercialTerms.taxRate"),
         ),
       ],
+      result: cost.taxAmount,
+      unit: "TWD",
+    });
+    addTrace({
+      id: `estimate:${percentile}:quote-inc-tax`,
+      metric: `${percentile}QuoteIncTax`,
+      formulaId: "commercial-loadings",
+      formula: "Q_incTax,x = Q_exTax,x + C_tax,x",
+      operands: [
+        operand(
+          "quoteExTax",
+          cost.quoteExTax,
+          "TWD",
+          source("derived", `estimate:${percentile}:quote-ex-tax`),
+        ),
+        operand(
+          "taxAmount",
+          cost.taxAmount,
+          "TWD",
+          source("derived", `estimate:${percentile}:tax-amount`),
+        ),
+      ],
       result: cost.quoteIncTax,
       unit: "TWD",
     });
   };
   addCostTrace("p50", p50Effort, p50Cost);
   addCostTrace("p80", p80Effort, p80Cost);
+
+  const selectVendorQuestions = (
+    band: VendorComparisonBand,
+  ): readonly VendorQuestion[] => {
+    const evidenceKey = (evidence: VendorQuestionEvidence): string => {
+      switch (evidence.kind) {
+        case "BAND":
+          return `0:${evidence.band}`;
+        case "WORK_ITEM_TYPE":
+          return `1:${evidence.workItemType}:${evidence.workItemIds.join(",")}`;
+        case "RISK_FACTOR":
+          return `2:${evidence.factorId}:${evidence.level}:${evidence.workItemIds.join(",")}`;
+      }
+    };
+    const questions = request.parameterSnapshot.vendorQuestions
+      .map((question) => {
+        const evidence: VendorQuestionEvidence[] = [];
+        for (const trigger of question.triggers) {
+          switch (trigger.kind) {
+            case "BAND":
+              if (trigger.bands.includes(band)) {
+                evidence.push({ kind: "BAND", band });
+              }
+              break;
+            case "WORK_ITEM_TYPE":
+              for (const workItemType of WORK_ITEM_TYPES) {
+                if (!trigger.workItemTypes.includes(workItemType)) {
+                  continue;
+                }
+                const workItemIds = calculatedItems
+                  .filter(({ item }) => item.type === workItemType)
+                  .map(({ item }) => item.id);
+                if (workItemIds.length > 0) {
+                  evidence.push({
+                    kind: "WORK_ITEM_TYPE",
+                    workItemType,
+                    workItemIds,
+                  });
+                }
+              }
+              break;
+            case "RISK_FACTOR":
+              for (const factorId of RISK_FACTOR_IDS) {
+                if (!trigger.factorIds.includes(factorId)) {
+                  continue;
+                }
+                const selection = request.input.riskProfile[factorId];
+                if (
+                  RISK_LEVELS.indexOf(selection.level) <
+                  RISK_LEVELS.indexOf(trigger.minimumLevel)
+                ) {
+                  continue;
+                }
+                const workItemIds = calculatedItems
+                  .filter(({ item }) =>
+                    item.applicableRiskFactorIds.includes(factorId),
+                  )
+                  .map(({ item }) => item.id);
+                if (workItemIds.length > 0) {
+                  evidence.push({
+                    kind: "RISK_FACTOR",
+                    factorId,
+                    level: selection.level,
+                    workItemIds,
+                  });
+                }
+              }
+              break;
+          }
+        }
+
+        const deduplicatedEvidence = [
+          ...new Map(
+            evidence.map((item) => [evidenceKey(item), item] as const),
+          ).entries(),
+        ]
+          .sort(([left], [right]) => compareStableText(left, right))
+          .map(([, item]) => item);
+
+        return {
+          id: question.id,
+          priority: question.priority,
+          text: question.text,
+          evidence: deduplicatedEvidence,
+        };
+      })
+      .filter(({ evidence }) => evidence.length > 0)
+      .sort(
+        (left, right) =>
+          left.priority - right.priority ||
+          compareStableText(left.id, right.id),
+      );
+
+    return [
+      ...new Map(
+        questions.map((question) => [question.id, question] as const),
+      ).values(),
+    ].map(({ id, text, evidence }) => ({ id, text, evidence }));
+  };
 
   let vendorComparison: VendorComparison | null = null;
   if (request.input.vendorQuote !== null) {
@@ -932,13 +1322,7 @@ export function calculateEstimate(
       quoteToP80Ratio:
         quoteToP80Ratio === null ? null : canonical(quoteToP80Ratio),
       band,
-      questions: [...request.parameterSnapshot.vendorQuestions]
-        .sort(
-          (left, right) =>
-            left.priority - right.priority ||
-            compareStableText(left.id, right.id),
-        )
-        .map(({ id, text }) => ({ id, text })),
+      questions: selectVendorQuestions(band),
     };
   }
 
@@ -992,12 +1376,23 @@ export function calculateEstimate(
       p80PersonDays: canonical(p80PersonDays),
       p50PersonMonths: canonical(p50PersonMonths),
       p80PersonMonths: canonical(p80PersonMonths),
-      p50EngineeringCost: canonical(p50Cost.engineeringCost),
-      p80EngineeringCost: canonical(p80Cost.engineeringCost),
+      p50EngineeringCost: canonical(p50Cost.deliveryCost),
+      p80EngineeringCost: canonical(p80Cost.deliveryCost),
       p50QuoteExTax: canonical(p50Cost.quoteExTax),
       p80QuoteExTax: canonical(p80Cost.quoteExTax),
       p50QuoteIncTax: canonical(p50Cost.quoteIncTax),
       p80QuoteIncTax: canonical(p80Cost.quoteIncTax),
+      complexityAggregate: {
+        baseEffortHours: canonical(baseEffort),
+        complexityAdjustedEffortHours: canonical(complexityAdjustedEffort),
+        complexityAdjustmentHours: canonical(complexityAdjustment),
+        riskAdjustmentHours: canonical(riskAdjustment),
+        effectiveMultiplier: canonical(effectiveComplexityMultiplier),
+      },
+      costWaterfall: {
+        p50: serializeCost(p50Cost),
+        p80: serializeCost(p80Cost),
+      },
       vendorComparison,
       drivers,
       warnings,

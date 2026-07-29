@@ -163,6 +163,33 @@ describe("calculateEstimate", () => {
     ).toBe("0");
   });
 
+  it("aggregates heterogeneous complexity before applying risk multipliers", () => {
+    const request = workedExampleRequest();
+    const [template] = request.input.workItems;
+    if (template === undefined) {
+      throw new Error("worked example must contain one work item");
+    }
+
+    const result = expectResult(
+      calculateEstimate(
+        withInput(request, {
+          workItems: [
+            { ...template, id: "high-item", complexity: "HIGH" },
+            { ...template, id: "low-item", complexity: "LOW" },
+          ],
+        }),
+      ),
+    );
+
+    expect(result.complexityAggregate).toEqual({
+      baseEffortHours: "64",
+      complexityAdjustedEffortHours: "68.8",
+      complexityAdjustmentHours: "4.8",
+      riskAdjustmentHours: "13.76",
+      effectiveMultiplier: "1.075",
+    });
+  });
+
   it("applies direct cost, overhead, warranty, markup, and tax in the specified order", () => {
     const request = workedExampleRequest();
     const result = expectResult(
@@ -184,6 +211,61 @@ describe("calculateEstimate", () => {
     expect(result.p50EngineeringCost).toBe("75390.4");
     expect(result.p50QuoteExTax).toBe("100115.328");
     expect(result.p50QuoteIncTax).toBe("105121.0944");
+    expect(result.complexityAggregate).toEqual({
+      baseEffortHours: "32",
+      complexityAdjustedEffortHours: "43.2",
+      complexityAdjustmentHours: "11.2",
+      riskAdjustmentHours: "8.64",
+      effectiveMultiplier: "1.35",
+    });
+    expect(result.costWaterfall.p50).toEqual({
+      laborCost: "74390.4",
+      directCost: "1000",
+      deliveryCost: "75390.4",
+      overheadAmount: "7539.04",
+      costAfterOverhead: "82929.44",
+      warrantyCost: "500",
+      fullCost: "83429.44",
+      vendorMarkupAmount: "16685.888",
+      quoteExTax: "100115.328",
+      taxAmount: "5005.7664",
+      quoteIncTax: "105121.0944",
+    });
+    expect(result.costWaterfall.p80).toEqual({
+      laborCost: "78971.39712",
+      directCost: "1000",
+      deliveryCost: "79971.39712",
+      overheadAmount: "7997.139712",
+      costAfterOverhead: "87968.536832",
+      warrantyCost: "500",
+      fullCost: "88468.536832",
+      vendorMarkupAmount: "17693.7073664",
+      quoteExTax: "106162.2441984",
+      taxAmount: "5308.11220992",
+      quoteIncTax: "111470.35640832",
+    });
+    expect(result.calculationTrace.map(({ metric }) => metric)).toEqual(
+      expect.arrayContaining([
+        "complexityAdjustedEffortHours",
+        "complexityAdjustmentHours",
+        "effectiveComplexityMultiplier",
+        "riskAdjustmentHours",
+        "p50LaborCost",
+        "p50DeliveryCost",
+        "p50OverheadAmount",
+        "p50CostAfterOverhead",
+        "p50FullCost",
+        "p50VendorMarkupAmount",
+        "p50TaxAmount",
+        "p80LaborCost",
+        "p80DeliveryCost",
+        "p80OverheadAmount",
+        "p80CostAfterOverhead",
+        "p80FullCost",
+        "p80VendorMarkupAmount",
+        "p80TaxAmount",
+      ]),
+    );
   });
 
   it("normalizes a tax-inclusive vendor quote and orders questions deterministically", () => {
@@ -199,9 +281,27 @@ describe("calculateEstimate", () => {
         parameterSnapshot: {
           ...request.parameterSnapshot,
           vendorQuestions: [
-            { id: "z-last", priority: 20, text: "最後。" },
-            { id: "b-second", priority: 10, text: "第二。" },
-            { id: "a-first", priority: 10, text: "第一。" },
+            {
+              id: "z-last",
+              priority: 20,
+              text: "最後。",
+              triggers: [{ kind: "BAND", bands: ["ABOVE_MODEL_P80"] }],
+            },
+            {
+              id: "b-second",
+              priority: 10,
+              text: "第二。",
+              triggers: [{ kind: "BAND", bands: ["ABOVE_MODEL_P80"] }],
+            },
+            {
+              id: "a-first",
+              priority: 10,
+              text: "第一。",
+              triggers: [
+                { kind: "BAND", bands: ["ABOVE_MODEL_P80"] },
+                { kind: "BAND", bands: ["ABOVE_MODEL_P80"] },
+              ],
+            },
           ],
         },
       }),
@@ -212,6 +312,48 @@ describe("calculateEstimate", () => {
       "a-first",
       "b-second",
       "z-last",
+    ]);
+    expect(result.vendorComparison?.questions[0]?.evidence).toEqual([
+      { kind: "BAND", band: "ABOVE_MODEL_P80" },
+    ]);
+  });
+
+  it("selects, deduplicates, and sorts vendor questions from quote, work-item, and risk evidence", () => {
+    const result = expectResult(
+      calculateEstimate(
+        withInput(workedExampleRequest(), {
+          vendorQuote: {
+            amount: "105",
+            taxBasis: "TAX_INCLUSIVE",
+          },
+        }),
+      ),
+    );
+
+    expect(result.vendorComparison?.band).toBe("ABOVE_MODEL_P80");
+    expect(result.vendorComparison?.questions.map(({ id }) => id)).toEqual([
+      "impact-analysis",
+      "release-rollback",
+      "warranty-sla",
+      "role-rate",
+      "quote-inclusions",
+    ]);
+    expect(
+      result.vendorComparison?.questions.find(
+        ({ id }) => id === "impact-analysis",
+      )?.evidence,
+    ).toEqual([
+      {
+        kind: "WORK_ITEM_TYPE",
+        workItemType: "INTEGRATION",
+        workItemIds: ["integration-1"],
+      },
+      {
+        kind: "RISK_FACTOR",
+        factorId: "INTEGRATION_DEPENDENCY",
+        level: "HIGH",
+        workItemIds: ["integration-1"],
+      },
     ]);
   });
 
@@ -346,6 +488,70 @@ describe("calculateEstimate", () => {
       path: "parameterSnapshot.calculationPolicy.decimalPrecision",
     },
     {
+      name: "non-canonical P80 z-score for model 1.0.0",
+      mutate: (request: CalculationRequest) => ({
+        ...request,
+        parameterSnapshot: {
+          ...request.parameterSnapshot,
+          calculationPolicy: {
+            ...request.parameterSnapshot.calculationPolicy,
+            p80ZScore: "0.84",
+          },
+        },
+      }),
+      code: "INVALID_PARAMETER_SET",
+      path: "parameterSnapshot.calculationPolicy.p80ZScore",
+    },
+    {
+      name: "parameter snapshot raises maximum hours per person day above 24",
+      mutate: (request: CalculationRequest) => ({
+        ...request,
+        parameterSnapshot: {
+          ...request.parameterSnapshot,
+          constraints: {
+            ...request.parameterSnapshot.constraints,
+            maximumHoursPerPersonDay: "25",
+          },
+        },
+      }),
+      code: "OUT_OF_RANGE",
+      path: "parameterSnapshot.constraints.maximumHoursPerPersonDay",
+    },
+    {
+      name: "parameter snapshot raises maximum days per person month above 31",
+      mutate: (request: CalculationRequest) => ({
+        ...request,
+        parameterSnapshot: {
+          ...request.parameterSnapshot,
+          constraints: {
+            ...request.parameterSnapshot.constraints,
+            maximumDaysPerPersonMonth: "32",
+          },
+        },
+      }),
+      code: "OUT_OF_RANGE",
+      path: "parameterSnapshot.constraints.maximumDaysPerPersonMonth",
+    },
+    {
+      name: "vendor question without evidence trigger",
+      mutate: (request: CalculationRequest) => {
+        const [question, ...remainingQuestions] =
+          request.parameterSnapshot.vendorQuestions;
+        return {
+          ...request,
+          parameterSnapshot: {
+            ...request.parameterSnapshot,
+            vendorQuestions:
+              question === undefined
+                ? []
+                : [{ ...question, triggers: [] }, ...remainingQuestions],
+          },
+        };
+      },
+      code: "INVALID_PARAMETER_SET",
+      path: "parameterSnapshot.vendorQuestions.0.triggers",
+    },
+    {
       name: "empty work item collection",
       mutate: (request: CalculationRequest) =>
         withInput(request, { workItems: [] }),
@@ -410,6 +616,30 @@ describe("calculateEstimate", () => {
       path: "input.commercialTerms.hoursPerPersonDay",
     },
     {
+      name: "more than 24 hours per person day",
+      mutate: (request: CalculationRequest) =>
+        withInput(request, {
+          commercialTerms: {
+            ...request.input.commercialTerms,
+            hoursPerPersonDay: "24.1",
+          },
+        }),
+      code: "OUT_OF_RANGE",
+      path: "input.commercialTerms.hoursPerPersonDay",
+    },
+    {
+      name: "more than 31 days per person month",
+      mutate: (request: CalculationRequest) =>
+        withInput(request, {
+          commercialTerms: {
+            ...request.input.commercialTerms,
+            daysPerPersonMonth: "32",
+          },
+        }),
+      code: "OUT_OF_RANGE",
+      path: "input.commercialTerms.daysPerPersonMonth",
+    },
+    {
       name: "duplicate applicable risk factor",
       mutate: (request: CalculationRequest) => {
         const [item] = request.input.workItems;
@@ -456,6 +686,11 @@ describe("calculateEstimate", () => {
           uncertainty: {
             downsideRate: "0.5",
             upsideRate: "2",
+          },
+          commercialTerms: {
+            ...request.input.commercialTerms,
+            hoursPerPersonDay: "24",
+            daysPerPersonMonth: "31",
           },
         }),
       ),
@@ -531,6 +766,12 @@ describe("calculateEstimate", () => {
       expect(node.formula).not.toBe("");
       expect(node.formulaId).not.toBe("");
       expect(node.sources.length).toBeGreaterThan(0);
+      expect(node.precisionPolicy).toEqual({
+        decimalPrecision: 48,
+        roundingMode: "ROUND_HALF_UP",
+        intermediateRounding: "NONE",
+        presentationRounding: "PRESENTATION_ONLY",
+      });
     }
   });
 

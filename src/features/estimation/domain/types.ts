@@ -141,12 +141,16 @@ export interface ParameterConstraints {
   readonly maximumCommercialRate: DecimalString;
   readonly maximumPhaseLoadingRate: DecimalString;
   readonly maximumTotalPhaseLoadingRate: DecimalString;
+  readonly maximumHoursPerPersonDay: DecimalString;
+  readonly maximumDaysPerPersonMonth: DecimalString;
   readonly riskProductSafetyCap: DecimalString;
 }
 
 export interface CalculationPolicy {
   readonly decimalPrecision: number;
   readonly roundingMode: "ROUND_HALF_UP";
+  readonly intermediateRounding: "NONE";
+  readonly presentationRounding: "PRESENTATION_ONLY";
   readonly p80ZScore: DecimalString;
 }
 
@@ -154,10 +158,32 @@ export interface ComparisonParameters {
   readonly clearlyBelowP50Ratio: DecimalString;
 }
 
+export type VendorComparisonBand =
+  | "CLEARLY_BELOW_MODEL_RANGE"
+  | "NEAR_MODEL_REFERENCE_RANGE"
+  | "ABOVE_MODEL_P50"
+  | "ABOVE_MODEL_P80";
+
+export type VendorQuestionTrigger =
+  | {
+      readonly kind: "BAND";
+      readonly bands: readonly VendorComparisonBand[];
+    }
+  | {
+      readonly kind: "WORK_ITEM_TYPE";
+      readonly workItemTypes: readonly WorkItemType[];
+    }
+  | {
+      readonly kind: "RISK_FACTOR";
+      readonly factorIds: readonly RiskFactorId[];
+      readonly minimumLevel: RiskLevel;
+    };
+
 export interface VendorQuestionParameter {
   readonly id: string;
   readonly priority: number;
   readonly text: string;
+  readonly triggers: readonly VendorQuestionTrigger[];
 }
 
 export interface ParameterSnapshot {
@@ -249,6 +275,14 @@ export interface CalculationTraceNode {
   readonly result: DecimalString;
   readonly unit: CalculationUnit;
   readonly sources: readonly TraceSource[];
+  readonly precisionPolicy: CalculationPrecisionPolicy;
+}
+
+export interface CalculationPrecisionPolicy {
+  readonly decimalPrecision: number;
+  readonly roundingMode: "ROUND_HALF_UP";
+  readonly intermediateRounding: "NONE";
+  readonly presentationRounding: "PRESENTATION_ONLY";
 }
 
 export type DriverKind = "WORK_ITEM" | "CROSS_CUTTING_PHASE";
@@ -259,15 +293,27 @@ export interface EstimateDriver {
   readonly contributionHours: DecimalString;
 }
 
-export type VendorComparisonBand =
-  | "CLEARLY_BELOW_MODEL_RANGE"
-  | "NEAR_MODEL_REFERENCE_RANGE"
-  | "ABOVE_MODEL_P50"
-  | "ABOVE_MODEL_P80";
+export type VendorQuestionEvidence =
+  | {
+      readonly kind: "BAND";
+      readonly band: VendorComparisonBand;
+    }
+  | {
+      readonly kind: "WORK_ITEM_TYPE";
+      readonly workItemType: WorkItemType;
+      readonly workItemIds: readonly string[];
+    }
+  | {
+      readonly kind: "RISK_FACTOR";
+      readonly factorId: RiskFactorId;
+      readonly level: RiskLevel;
+      readonly workItemIds: readonly string[];
+    };
 
 export interface VendorQuestion {
   readonly id: string;
   readonly text: string;
+  readonly evidence: readonly VendorQuestionEvidence[];
 }
 
 export interface VendorComparison {
@@ -280,6 +326,33 @@ export interface VendorComparison {
   readonly quoteToP80Ratio: DecimalString | null;
   readonly band: VendorComparisonBand;
   readonly questions: readonly VendorQuestion[];
+}
+
+export interface ComplexityAggregate {
+  readonly baseEffortHours: DecimalString;
+  readonly complexityAdjustedEffortHours: DecimalString;
+  readonly complexityAdjustmentHours: DecimalString;
+  readonly riskAdjustmentHours: DecimalString;
+  readonly effectiveMultiplier: DecimalString;
+}
+
+export interface CostWaterfall {
+  readonly laborCost: DecimalString;
+  readonly directCost: DecimalString;
+  readonly deliveryCost: DecimalString;
+  readonly overheadAmount: DecimalString;
+  readonly costAfterOverhead: DecimalString;
+  readonly warrantyCost: DecimalString;
+  readonly fullCost: DecimalString;
+  readonly vendorMarkupAmount: DecimalString;
+  readonly quoteExTax: DecimalString;
+  readonly taxAmount: DecimalString;
+  readonly quoteIncTax: DecimalString;
+}
+
+export interface CostWaterfalls {
+  readonly p50: CostWaterfall;
+  readonly p80: CostWaterfall;
 }
 
 export interface EstimateResult {
@@ -304,6 +377,8 @@ export interface EstimateResult {
   readonly p80QuoteExTax: DecimalString;
   readonly p50QuoteIncTax: DecimalString;
   readonly p80QuoteIncTax: DecimalString;
+  readonly complexityAggregate: ComplexityAggregate;
+  readonly costWaterfall: CostWaterfalls;
   readonly vendorComparison: VendorComparison | null;
   readonly drivers: readonly EstimateDriver[];
   readonly warnings: readonly CalculationWarning[];

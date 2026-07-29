@@ -1,0 +1,10 @@
+.next
+.corepack
+.pnpm-store
+node_modules
+coverage
+playwright-report
+test-results
+blob-report
+pnpm-lock.yaml
+estimate-trace-project-spec.md

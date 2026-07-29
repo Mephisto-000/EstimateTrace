@@ -1,0 +1,80 @@
+name: Bug report
+description: 回報可重現的功能、計算、accessibility 或相容性問題
+title: "bug: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感謝協助改善 EstimateTrace。請勿貼上 exploit、secret、真實公司／乙方名稱、個人資料、未公開報價或完整匯入檔；安全問題請依 `SECURITY.md` 私下回報。
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: 問題範圍
+      options:
+        - Estimation engine／formula
+        - Import／export／local storage
+        - Vendor quote comparison
+        - UI／responsive
+        - Accessibility
+        - Documentation
+        - Build／CI／deployment
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 結論與影響
+      description: 實際發生什麼、影響誰；不要包含敏感資料。
+      placeholder: 使用完全虛構的最小案例描述問題。
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 重現步驟
+      placeholder: |
+        1. 前往…
+        2. 使用虛構資料輸入…
+        3. 觀察…
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 預期與實際結果
+      description: 計算問題請附公式、model version、parameter set version 與最小輸入，不要附真實案件。
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version／commit／deployment
+      description: 可提供 release tag、commit SHA 或公開 deployment URL。
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 執行環境
+      description: Browser、版本、OS、viewport；請移除帳號、路徑或其他識別資訊。
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: 證據
+      description: 可附虛構資料的截圖或精簡錯誤訊息；不得貼 raw sensitive payload。
+
+  - type: checkboxes
+    id: hygiene
+    attributes:
+      label: 資料安全確認
+      options:
+        - label: 我已確認內容不含 secret、個資、公司機密、真實乙方或未公開報價。
+          required: true
+        - label: 這不是需要私下回報的安全漏洞。
+          required: true
