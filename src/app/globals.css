@@ -766,6 +766,49 @@ a {
   color: var(--color-ink-muted);
 }
 
+.math-formula {
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.math-formula--inline {
+  display: inline-flex;
+  max-width: 100%;
+  vertical-align: -0.08em;
+}
+
+.math-formula--inline .katex {
+  font-size: 1em;
+}
+
+.math-formula--display {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-gutter: stable;
+}
+
+.math-formula--display:focus-visible {
+  outline-offset: 0.2rem;
+}
+
+.math-formula--display .math-formula__rendered,
+.math-formula--display .katex-display {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+}
+
+.math-formula--display .katex-display {
+  margin: 0;
+  text-align: left;
+}
+
+.math-formula--fallback code {
+  color: inherit;
+  white-space: pre-wrap;
+}
+
 .formula-block {
   min-width: 0;
   padding: 1rem 1.15rem;
@@ -780,9 +823,8 @@ a {
   white-space: normal;
 }
 
-.formula-block > span {
-  display: block;
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+.formula-block .katex {
+  font-size: 1.12em;
 }
 
 .table-scroll {

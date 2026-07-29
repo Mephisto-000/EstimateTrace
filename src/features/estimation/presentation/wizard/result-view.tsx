@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { MathFormula } from "@/components/content/math-formula";
 import type { EstimateCaseDocument } from "@/features/estimation/application/estimate-case";
 import type {
   CalculationUnit,
@@ -210,10 +211,15 @@ function TraceSection({ result }: { result: EstimateResult }) {
                     <code>{node.formulaId}</code>
                   )}
                 </p>
-                <p>
+                <div className="trace-formula-row">
                   <strong>Formula：</strong>
-                  <code>{node.formula}</code>
-                </p>
+                  <MathFormula
+                    className="trace-formula"
+                    display
+                    expression={node.formula}
+                    label={`${node.metric} 的計算公式`}
+                  />
+                </div>
                 <p>
                   <strong>Precision：</strong>
                   {node.precisionPolicy.decimalPrecision} significant digits；

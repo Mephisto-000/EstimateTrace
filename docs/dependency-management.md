@@ -8,21 +8,22 @@ EstimateTrace 使用 Node.js `24.18.0`、pnpm `10.34.5`、單一 `package.json` 
 
 ## 版本與實際安裝位置
 
-| 項目                           | 專案設定／查證結果                                      |
-| ------------------------------ | ------------------------------------------------------- |
-| Node.js target                 | `24.18.0`：`.node-version`、`.nvmrc`、CI                |
-| Node.js compatibility          | `package.json#engines.node`：`>=24.0.0 <25`             |
-| 查證時本機 Node.js             | `v24.15.0`                                              |
-| 查證時 Node executable         | 既有 NVM-managed binary；本專案未安裝或修改 system Node |
-| pnpm exact version             | `10.34.5`：`package.json#packageManager`                |
-| Corepack version               | `0.34.6`                                                |
-| Dependency root                | `$REPOSITORY_ROOT/node_modules`                         |
-| pnpm content-addressable store | `$REPOSITORY_ROOT/.pnpm-store/v10`                      |
-| pnpm virtual store             | `$REPOSITORY_ROOT/node_modules/.pnpm`                   |
-| Corepack cache／shim           | `$REPOSITORY_ROOT/.corepack`                            |
-| Playwright browsers            | `$REPOSITORY_ROOT/.playwright-browsers`                 |
-| Manifest                       | `$REPOSITORY_ROOT/package.json`                         |
-| Lock file                      | `$REPOSITORY_ROOT/pnpm-lock.yaml`                       |
+| 項目                           | 專案設定／查證結果                                                    |
+| ------------------------------ | --------------------------------------------------------------------- |
+| Node.js target                 | `24.18.0`：`.node-version`、`.nvmrc`、CI                              |
+| Node.js compatibility          | `package.json#engines.node`：`>=24.0.0 <25`                           |
+| 查證時本機 Node.js             | `v24.15.0`                                                            |
+| 查證時 Node executable         | 既有 NVM-managed binary；本專案未安裝或修改 system Node               |
+| pnpm exact version             | `10.34.5`：`package.json#packageManager`                              |
+| Corepack version               | `0.34.6`                                                              |
+| Dependency root                | `$REPOSITORY_ROOT/node_modules`                                       |
+| pnpm content-addressable store | `$REPOSITORY_ROOT/.pnpm-store/v10`                                    |
+| pnpm virtual store             | `$REPOSITORY_ROOT/node_modules/.pnpm`                                 |
+| KaTeX resolved package         | `$REPOSITORY_ROOT/node_modules/.pnpm/katex@0.18.1/node_modules/katex` |
+| Corepack cache／shim           | `$REPOSITORY_ROOT/.corepack`                                          |
+| Playwright browsers            | `$REPOSITORY_ROOT/.playwright-browsers`                               |
+| Manifest                       | `$REPOSITORY_ROOT/package.json`                                       |
+| Lock file                      | `$REPOSITORY_ROOT/pnpm-lock.yaml`                                     |
 
 `$REPOSITORY_ROOT` 代表執行 `pwd -P` 查得的目前 repository 絕對路徑。Public
 文件不提交開發者的 home directory 或 OS username；上表仍對應本次實際命令解析
@@ -99,6 +100,7 @@ Remediation 將 `next` 與 `eslint-config-next` 升至 `16.2.12`，並在 `packa
 | Package      |   Version | License | Purpose                                                  |
 | ------------ | --------: | ------- | -------------------------------------------------------- |
 | `decimal.js` |  `10.6.0` | MIT     | Decimal-safe effort、ratio 與 money calculation          |
+| `katex`      |  `0.18.1` | MIT     | Source-controlled LaTeX 的同源 HTML／CSS 數學排版        |
 | `next`       | `16.2.12` | MIT     | App Router、static rendering、Vercel runtime integration |
 | `react`      |  `19.2.8` | MIT     | Client UI                                                |
 | `react-dom`  |  `19.2.8` | MIT     | Browser／server rendering                                |
@@ -126,7 +128,16 @@ Remediation 將 `next` 與 `eslint-config-next` 升至 `16.2.12`，並在 `packa
 | `typescript`                  |   `6.0.3` | Apache-2.0 | Strict type checking                 |
 | `vitest`                      |  `4.1.10` | MIT        | Unit／integration test runner        |
 
-License compatibility must be reviewed again on every upgrade，especially transitive dependencies and any future asset、font、icon or formula renderer。
+License compatibility must be reviewed again on every upgrade，especially transitive dependencies and any future asset、font or icon。
+
+KaTeX 由 `pnpm list katex --depth 0`、`pnpm why katex`、`realpath
+node_modules/katex` 與已安裝的 package metadata 實際查證。它只處理
+source-controlled LaTeX，`trust=false`，不接受 form、localStorage 或 JSON
+import 的 expression；CSS 與 font 由 Next.js 打包為 same-origin assets，
+不使用 CDN，也不需要放寬 CSP。移除時執行
+`./scripts/pnpm-local.sh remove katex`，並同步移除 `/methodology` page 與
+`/estimates` layout 的 route-scoped KaTeX CSS import、`MathFormula`
+component 與公式 rendering tests。
 
 ## 建立與還原環境
 

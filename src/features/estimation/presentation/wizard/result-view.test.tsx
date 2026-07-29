@@ -187,6 +187,17 @@ describe("ResultView", () => {
         name: "work-item-base-effort",
       }),
     ).toHaveAttribute("href", "/methodology#base-effort");
+    const renderedFormula = within(baseEffortDetails!).getByRole("math", {
+      name: "workItemBaseEffortHours 的計算公式",
+    });
+    expect(renderedFormula).toHaveAttribute("data-math-renderer", "katex");
+    expect(renderedFormula.querySelector(".katex")).not.toBeNull();
+    expect(
+      trace!.querySelectorAll('[data-math-renderer="katex"]'),
+    ).toHaveLength(outcome.result.calculationTrace.length);
+    expect(trace!.querySelectorAll('[data-math-renderer="text"]')).toHaveLength(
+      0,
+    );
 
     await user.click(screen.getByRole("button", { name: "匯出可重算 JSON" }));
     expect(onExport).toHaveBeenCalledOnce();

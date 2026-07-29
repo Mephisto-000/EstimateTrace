@@ -350,6 +350,23 @@ fieldset {
   gap: 0.65rem;
 }
 
+.trace-formula-row {
+  display: grid;
+  min-width: 0;
+  gap: 0.45rem;
+}
+
+.trace-formula {
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-muted);
+}
+
+.trace-formula .katex {
+  font-size: 1.02em;
+}
+
 .empty-state {
   display: grid;
   padding: clamp(2rem, 6vw, 4rem);

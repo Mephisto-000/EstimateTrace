@@ -830,10 +830,15 @@ MVP 參數限制：
 
 ### 10.5 Cross-cutting Effort
 
-以調整後 implementation effort 為分母：
+對每個 phase \(p\)，令 \(E_p\) 為尚未在 work item 內涵蓋該 phase 的
+eligible item 集合。先分別計算各 phase，再加總：
 
 \[
-H_{cross}=H_{adj}\times\sum_{p=1}^{j}\alpha_p
+H_{cross,p}=\alpha_p\times\sum_{i\in E_p}H_{i,adj}
+\]
+
+\[
+H_{cross}=\sum_{p=1}^{j}H_{cross,p}
 \]
 
 固定額外工作，例如正式上線值班，可另以 \(H_{fixed}\) 表示：
@@ -1099,7 +1104,7 @@ H_{P50}=\frac{61.6896+4(72.576)+94.3488}{6}=74.3904
 \]
 
 \[
-H_{P80}=74.3904+0.8416(5.4432)\approx78.9716
+H_{P80}=74.3904+0.8416(5.4432)\approx78.9714
 \]
 
 畫面最後才格式化，例如顯示 P50 `74.4 小時`、P80 `79.0 小時`。

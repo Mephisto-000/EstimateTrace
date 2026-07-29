@@ -74,6 +74,16 @@ test.describe("公開內容", () => {
     page,
   }) => {
     test.setTimeout(60_000);
+    const consoleErrors: string[] = [];
+    const pageErrors: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") {
+        consoleErrors.push(message.text());
+      }
+    });
+    page.on("pageerror", (error) => {
+      pageErrors.push(error.message);
+    });
 
     const homeResponse = await page.goto("/");
     expect(homeResponse).not.toBeNull();
@@ -121,10 +131,44 @@ test.describe("公開內容", () => {
     await expect(
       page.getByRole("table", { name: "估算模型主要變數" }),
     ).toBeVisible();
-    await expect(page.getByRole("math").first()).toBeVisible();
+    const methodologyMath = page.locator('[role="math"]');
+    expect(await methodologyMath.count()).toBeGreaterThanOrEqual(50);
+    await expect(methodologyMath.first()).toBeVisible();
+    await expect(methodologyMath.first().locator(".katex")).toBeVisible();
+    await expect(page.locator('[data-math-renderer="text"]')).toHaveCount(0);
+    const missingMathLabels = await methodologyMath.evaluateAll(
+      (elements) =>
+        elements.filter(
+          (element) => !(element.getAttribute("aria-label") ?? "").trim(),
+        ).length,
+    );
+    expect(missingMathLabels).toBe(0);
     await expect(
       page.getByRole("heading", { name: "常見 double counting" }),
     ).toBeVisible();
+    await expectNoSeriousAccessibilityIssues(page);
+    expect(consoleErrors).toEqual([]);
+    expect(pageErrors).toEqual([]);
+  });
+
+  test("方法論公式在 200% reflow 等效寬度內局部捲動且可鍵盤操作", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 640, height: 900 });
+    await page.goto("/methodology");
+
+    const firstFormula = page.locator(".formula-block").first();
+    await expect(firstFormula).toBeVisible();
+    await firstFormula.focus();
+    await expect(firstFormula).toBeFocused();
+
+    const hasDocumentOverflow = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth >
+        document.documentElement.clientWidth,
+    );
+    expect(hasDocumentOverflow).toBe(false);
+    await expect(page.locator('[data-math-renderer="text"]')).toHaveCount(0);
     await expectNoSeriousAccessibilityIssues(page);
   });
 
@@ -188,6 +232,14 @@ test.describe("估算核心流程", () => {
     await expect(
       page.getByRole("heading", { name: "Calculation trace", exact: true }),
     ).toBeVisible();
+    const firstTrace = page.locator(".trace-list details").first();
+    await firstTrace.locator("summary").click();
+    const traceFormula = firstTrace.getByRole("math");
+    await expect(traceFormula).toHaveAttribute("data-math-renderer", "katex");
+    await expect(traceFormula.locator(".katex")).toBeVisible();
+    await expect(
+      page.locator('.trace-list [data-math-renderer="text"]'),
+    ).toHaveCount(0);
     await expectNoSeriousAccessibilityIssues(page);
 
     const transmittedContent = requests
