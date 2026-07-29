@@ -380,34 +380,60 @@ test.describe("估算核心流程", () => {
     ).toHaveCount(0);
     const overflowDiagnostics = await page.evaluate(() => {
       const viewportWidth = document.documentElement.clientWidth;
+      const containingOverflowValues = new Set([
+        "auto",
+        "clip",
+        "hidden",
+        "scroll",
+      ]);
+      const getSelector = (element: HTMLElement) =>
+        [
+          element.tagName.toLowerCase(),
+          element.id ? `#${element.id}` : "",
+          ...Array.from(element.classList, (name) => `.${name}`),
+        ].join("");
       const overflowingElements = Array.from(
         document.querySelectorAll<HTMLElement>("body *"),
       )
         .map((element) => {
           const rect = element.getBoundingClientRect();
           const style = window.getComputedStyle(element);
+          let clippingAncestor: string | null = null;
+          let ancestor = element.parentElement;
+
+          while (ancestor && ancestor !== document.body) {
+            const ancestorStyle = window.getComputedStyle(ancestor);
+            if (containingOverflowValues.has(ancestorStyle.overflowX)) {
+              clippingAncestor = getSelector(ancestor);
+              break;
+            }
+            ancestor = ancestor.parentElement;
+          }
 
           return {
-            selector: [
-              element.tagName.toLowerCase(),
-              element.id ? `#${element.id}` : "",
-              ...Array.from(element.classList, (name) => `.${name}`),
-            ].join(""),
+            selector: getSelector(element),
             clientWidth: element.clientWidth,
             scrollWidth: element.scrollWidth,
             left: Math.round(rect.left),
             right: Math.round(rect.right),
             overflowX: style.overflowX,
             minWidth: style.minWidth,
+            clippingAncestor,
+            text: (element.textContent ?? "")
+              .trim()
+              .replace(/\s+/gu, " ")
+              .slice(0, 120),
           };
         })
         .filter(
           (element) =>
-            element.right > viewportWidth + 1 ||
-            element.left < -1 ||
-            element.scrollWidth > element.clientWidth + 1,
+            !element.clippingAncestor &&
+            (element.right > viewportWidth + 1 ||
+              element.left < -1 ||
+              (element.scrollWidth > element.clientWidth + 1 &&
+                !containingOverflowValues.has(element.overflowX))),
         )
-        .slice(0, 20);
+        .slice(0, 50);
 
       return {
         clientWidth: viewportWidth,
