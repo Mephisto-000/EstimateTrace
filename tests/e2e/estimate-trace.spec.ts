@@ -240,7 +240,7 @@ test.describe("公開內容", () => {
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "讓每一筆估算，都能被檢查、重算與說明。",
+        name: "軟體需求估算參考",
       }),
     ).toBeVisible();
     await expect(page.locator(".hero__privacy-note")).toHaveText(

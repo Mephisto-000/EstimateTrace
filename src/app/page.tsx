@@ -56,7 +56,7 @@ export default function HomePage() {
       <section className="hero">
         <div className="hero__inner">
           <div className="hero__copy">
-            <h1>讓每一筆估算，都能被檢查、重算與說明。</h1>
+            <h1>軟體需求估算參考</h1>
             <p className="hero__lead">
               EstimateTrace 協助甲方資訊科技商業分析師將需求拆成工作項目，產生
               P50、P80 工作量與價格區間，再用一致的成本口徑比較乙方報價。
