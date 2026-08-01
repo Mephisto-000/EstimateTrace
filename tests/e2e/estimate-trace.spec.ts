@@ -474,9 +474,11 @@ test.describe("表格排版", () => {
     await createEstimateWithOneItem(page);
     await expectAllTableCellsLeftAligned(page);
 
-    await page
-      .getByRole("link", { name: "閱讀完整方法論、公式與限制" })
-      .click();
+    const methodologyLink = page.locator('main a[href="/methodology"]');
+    await expect(methodologyLink).toHaveCount(1);
+    await expect(methodologyLink).toBeVisible();
+    await methodologyLink.focus();
+    await methodologyLink.press("Enter");
     await expect(page).toHaveURL(/\/methodology$/);
     await expectAllTableCellsLeftAligned(page);
   });
