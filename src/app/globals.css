@@ -543,11 +543,12 @@ a {
   color: #ffffff;
 }
 
-.closing-panel h2 {
+.closing-panel h2,
+.closing-panel .eyebrow {
   color: #ffffff;
 }
 
-.closing-panel p {
+.closing-panel p:not(.eyebrow) {
   max-width: 42rem;
   margin-top: 0.8rem;
   color: #dbe2de;
@@ -1177,7 +1178,8 @@ a {
   }
 
   .closing-panel h2,
-  .closing-panel p {
+  .closing-panel p,
+  .closing-panel .eyebrow {
     color: #000000 !important;
   }
 

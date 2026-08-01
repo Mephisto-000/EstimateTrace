@@ -243,9 +243,9 @@ test.describe("公開內容", () => {
         name: "讓每一筆估算，都能被檢查、重算與說明。",
       }),
     ).toBeVisible();
-    await expect(
-      page.getByText("資料留在瀏覽器", { exact: true }),
-    ).toBeVisible();
+    await expect(page.locator(".hero__privacy-note")).toHaveText(
+      "無需登入 · 資料只留在瀏覽器",
+    );
     for (const removedCopy of [
       "可追溯的軟體估算",
       "不啟用使用分析",
