@@ -60,16 +60,16 @@ export function NewEstimateClient() {
     event.preventDefault();
     const nextIssues: string[] = [];
     if (name.trim().length === 0) {
-      nextIssues.push("案件名稱為必填。");
+      nextIssues.push("請填寫案件名稱。");
     }
     if (name.length > 200) {
-      nextIssues.push("案件名稱不可超過 200 字。");
+      nextIssues.push("案件名稱最多 200 字。");
     }
     if (description.length > 1000) {
-      nextIssues.push("背景摘要不可超過 1,000 字。");
+      nextIssues.push("背景摘要最多 1,000 字。");
     }
     if (description.trim().length === 0) {
-      nextIssues.push("背景摘要與範圍為必填。");
+      nextIssues.push("請填寫背景摘要與範圍。");
     }
     if (nextIssues.length > 0) {
       setIssues(nextIssues);
@@ -90,7 +90,7 @@ export function NewEstimateClient() {
     setIssues([]);
 
     if (!saved.ok) {
-      setIssues(["案件未通過資料驗證，請檢查必要欄位。"]);
+      setIssues(["案件資料有問題，請檢查必填欄位。"]);
       return;
     }
     if (saved.persisted) {
@@ -123,15 +123,13 @@ export function NewEstimateClient() {
       <header className="wizard-heading">
         <p className="eyebrow">步驟 1／5</p>
         <h1>建立估算範圍</h1>
-        <p>
-          先用去識別化方式描述案件；建立後可繼續拆工作項目、設定風險與成本。
-        </p>
+        <p>先用去識別化的方式描述案件；建立後再拆工作項目、設定風險和成本。</p>
       </header>
 
       <div className="privacy-banner">
         <strong>EstimateTrace 是公開網站。</strong>
         <p>
-          請勿輸入公司機密、個人資料、真實乙方名稱、受保密協議保護的內容或未公開報價。案件只儲存在目前瀏覽器。
+          請不要輸入公司機密、個人資料、真實乙方名稱、受保密協議（NDA）保護的內容或未公開報價。案件只會存到目前瀏覽器。
         </p>
       </div>
 
@@ -185,7 +183,7 @@ export function NewEstimateClient() {
             }}
           />
           <span className="field__help" id="estimate-name-help">
-            使用中性、去識別化名稱；不要填真實客戶或乙方名稱。
+            請用中性、去識別化的名稱，不要填真實客戶或乙方名稱。
           </span>
           {nameIssue ? (
             <span className="field__error" id="estimate-name-error">
@@ -216,7 +214,7 @@ export function NewEstimateClient() {
             }}
           />
           <span className="field__meta" id="estimate-description-help">
-            {description.length} / 1,000 字；請勿貼上需求書或保密協議內容。
+            {description.length} / 1,000 字；不要貼上需求書或保密協議內容。
           </span>
           {descriptionIssue ? (
             <span className="field__error" id="estimate-description-error">

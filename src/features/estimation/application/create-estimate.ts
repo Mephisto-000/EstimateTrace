@@ -23,7 +23,7 @@ export const fictionalExampleDescriptors = [
     id: "member-profile-query-export",
     title: "會員資料查詢與匯出",
     summary:
-      "一般新增、查詢、修改與刪除、角色權限及報表匯出的教學情境，用來示範畫面、授權與報表工作如何拆解。",
+      "用新增、查詢、修改、刪除、角色權限和報表匯出，示範怎麼拆出畫面、權限和報表工作。",
     scope: ["查詢與維護畫面", "角色與功能權限", "資料匯出報表"],
     workItemTypes: ["UI", "REPORT", "AUTHORIZATION"],
   },
@@ -32,7 +32,7 @@ export const fictionalExampleDescriptors = [
     id: "public-market-price-batch",
     title: "公開市場價格批次介接",
     summary:
-      "公開資料介面、排程批次、資料核對與回復的教學情境，用來示範整合依賴與資料品質風險。",
+      "用公開資料介接、排程批次、資料核對和復原，示範系統相依和資料品質的風險。",
     scope: [
       "公開資料介接",
       "排程與冪等重試",
@@ -129,7 +129,7 @@ function workItem(
     id: runtime.createId(),
     type,
     title,
-    description: `${defaults.displayName}的虛構示意工作項目。`,
+    description: `這是虛構的${defaults.displayName}工作項目。`,
     quantity,
     unit: defaults.unit,
     unitHours: defaults.defaultUnitHours,
@@ -145,7 +145,7 @@ function memberLookupExample(runtime: RuntimeServices): EstimateCaseDocument {
   const estimate = createEmptyEstimateCase(
     {
       name: `${descriptor.title}（虛構）`,
-      description: `虛構示意：${descriptor.summary}不對應任何真實組織或系統。`,
+      description: `虛構示範：${descriptor.summary}不對應任何真實組織或系統。`,
     },
     runtime,
   );
@@ -171,7 +171,7 @@ function memberLookupExample(runtime: RuntimeServices): EstimateCaseDocument {
           "1",
           "MEDIUM",
           ["REQUIREMENT_CLARITY", "SECURITY_COMPLIANCE"],
-          "輸出格式與欄位在開發前確認。",
+          "開發前先確認輸出格式和欄位。",
         ),
         workItem(
           runtime,
@@ -180,7 +180,7 @@ function memberLookupExample(runtime: RuntimeServices): EstimateCaseDocument {
           "2",
           "HIGH",
           ["SECURITY_COMPLIANCE"],
-          "示範角色權限，不代表真實權限模型。",
+          "這是角色權限示範，不代表真實權限設定。",
         ),
       ],
       vendorQuote: {
@@ -198,7 +198,7 @@ function marketBatchExample(runtime: RuntimeServices): EstimateCaseDocument {
   const estimate = createEmptyEstimateCase(
     {
       name: `${descriptor.title}（虛構）`,
-      description: `虛構示意：${descriptor.summary}不對應真實金融系統。`,
+      description: `虛構示範：${descriptor.summary}不對應真實金融系統。`,
     },
     runtime,
   );
@@ -207,15 +207,15 @@ function marketBatchExample(runtime: RuntimeServices): EstimateCaseDocument {
     ...estimate.input.riskProfile,
     INTEGRATION_DEPENDENCY: {
       level: "HIGH",
-      rationale: "示範外部公開介面的可用性與契約變更。",
+      rationale: "示範外部公開介面的可用性和規格變更。",
     },
     DATA_MIGRATION_QUALITY: {
       level: "HIGH",
-      rationale: "示範資料缺漏、重送與核對。",
+      rationale: "示範資料缺漏、重送和核對。",
     },
     SCHEDULE_COMPRESSION: {
       level: "NOMINAL",
-      rationale: "未假設壓縮交期。",
+      rationale: "不假設壓縮交期。",
     },
   };
 
@@ -232,7 +232,7 @@ function marketBatchExample(runtime: RuntimeServices): EstimateCaseDocument {
           "3",
           "HIGH",
           ["INTEGRATION_DEPENDENCY", "SECURITY_COMPLIANCE"],
-          "使用 example.com 等保留網域描述，不連到正式環境端點。",
+          "使用 example.com 等保留網域說明，不連到正式環境端點。",
         ),
         workItem(
           runtime,
@@ -241,7 +241,7 @@ function marketBatchExample(runtime: RuntimeServices): EstimateCaseDocument {
           "2",
           "HIGH",
           ["INTEGRATION_DEPENDENCY", "DATA_MIGRATION_QUALITY"],
-          "需保留重跑、對帳與回復策略。",
+          "需要有重跑、對帳和復原方式。",
         ),
         workItem(
           runtime,
@@ -250,7 +250,7 @@ function marketBatchExample(runtime: RuntimeServices): EstimateCaseDocument {
           "2",
           "HIGH",
           ["DATA_MIGRATION_QUALITY"],
-          "額外測試項目已包含品質保證工時，避免跨階段工作量重複計入。",
+          "額外測試項目已包含品質保證工時，避免額外工作重複計算。",
         ),
         workItem(
           runtime,
@@ -259,7 +259,7 @@ function marketBatchExample(runtime: RuntimeServices): EstimateCaseDocument {
           "1",
           "MEDIUM",
           ["INTEGRATION_DEPENDENCY"],
-          "示範部署、回復與上線後密集支援。",
+          "示範部署、復原和上線後密集支援。",
         ),
       ],
       vendorQuote: {

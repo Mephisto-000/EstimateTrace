@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const siteConfig = {
   name: "EstimateTrace",
   description:
-    "可追溯的軟體需求成本估算與乙方報價差異分析工具，協助資訊科技商業分析師說明估算來源與假設。",
+    "軟體需求估算參考工具，協助你看懂工時、成本和乙方報價的來源與假設。",
   locale: "zh-TW",
   navigation: [
     { href: "/", label: "首頁" },

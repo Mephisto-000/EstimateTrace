@@ -12,7 +12,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: getSiteUrl(),
   title: {
-    default: "EstimateTrace｜可追溯的軟體需求成本估算",
+    default: "EstimateTrace｜軟體需求估算參考",
     template: `%s｜${siteConfig.name}`,
   },
   description: siteConfig.description,
@@ -29,13 +29,13 @@ export const metadata: Metadata = {
     type: "website",
     locale: "zh_TW",
     siteName: siteConfig.name,
-    title: "EstimateTrace｜可追溯的軟體需求成本估算",
+    title: "EstimateTrace｜軟體需求估算參考",
     description: siteConfig.description,
     url: "/",
   },
   twitter: {
     card: "summary",
-    title: "EstimateTrace｜可追溯的軟體需求成本估算",
+    title: "EstimateTrace｜軟體需求估算參考",
     description: siteConfig.description,
   },
   referrer: "strict-origin-when-cross-origin",

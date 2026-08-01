@@ -37,11 +37,10 @@ const steps = [
 type StepId = (typeof steps)[number]["id"];
 
 const storageMessages: Partial<Record<StorageWarning, string>> = {
-  STORAGE_UNAVAILABLE:
-    "瀏覽器本機儲存不可用；本次操作仍可繼續計算，離開前請匯出備份。",
-  STORAGE_READ_FAILED: "本機資料無法讀取；原始內容沒有被覆寫。",
-  STORAGE_WRITE_FAILED: "自動儲存失敗；本次操作仍保留內容，離開前請匯出備份。",
-  STORAGE_DATA_CORRUPTED: "本機資料無法通過驗證；原始內容沒有被覆寫。",
+  STORAGE_UNAVAILABLE: "瀏覽器無法儲存資料；這次仍可試算，離開前請下載備份。",
+  STORAGE_READ_FAILED: "無法讀取瀏覽器裡的資料；原始內容沒有被覆寫。",
+  STORAGE_WRITE_FAILED: "自動儲存失敗；這次操作仍保留內容，離開前請下載備份。",
+  STORAGE_DATA_CORRUPTED: "本機資料無法安全讀取；原始內容沒有被覆寫。",
 };
 
 function parseStep(value: string | null): StepId {
@@ -83,16 +82,16 @@ function validateStep(
 
   if (step === "scope") {
     return [
-      ...(estimate.name.trim() ? [] : [issue("case-name", "案件名稱為必填。")]),
+      ...(estimate.name.trim() ? [] : [issue("case-name", "請填寫案件名稱。")]),
       ...(estimate.name.length <= 200
         ? []
-        : [issue("case-name", "案件名稱不可超過 200 字。")]),
+        : [issue("case-name", "案件名稱最多 200 字。")]),
       ...(estimate.description.trim()
         ? []
-        : [issue("case-description", "背景摘要與範圍為必填。")]),
+        : [issue("case-description", "請填寫背景摘要與範圍。")]),
       ...(estimate.description.length <= 1000
         ? []
-        : [issue("case-description", "背景摘要不可超過 1,000 字。")]),
+        : [issue("case-description", "背景摘要最多 1,000 字。")]),
       ...(decimalInRange(
         estimate.input.commercialTerms.hoursPerPersonDay,
         "0",
@@ -103,7 +102,7 @@ function validateStep(
         : [
             issue(
               "hours-per-day",
-              `每人日小時必須大於 0 且不超過 ${estimate.parameterSnapshot.constraints.maximumHoursPerPersonDay}。`,
+              `每人日小時要大於 0，且不超過 ${estimate.parameterSnapshot.constraints.maximumHoursPerPersonDay}。`,
             ),
           ]),
       ...(decimalInRange(
@@ -116,25 +115,30 @@ function validateStep(
         : [
             issue(
               "days-per-month",
-              `每人月工作日必須大於 0 且不超過 ${estimate.parameterSnapshot.constraints.maximumDaysPerPersonMonth}。`,
+              `每人月工作日要大於 0，且不超過 ${estimate.parameterSnapshot.constraints.maximumDaysPerPersonMonth}。`,
             ),
           ]),
     ];
   }
   if (step === "items") {
     if (estimate.input.workItems.length === 0) {
-      return [issue("work-items", "至少新增一筆合法工作項目。")];
+      return [issue("work-items", "至少要新增一筆工作項目。")];
     }
     return estimate.input.workItems.flatMap((item, index) => [
       ...(item.title.trim()
         ? []
-        : [issue(`item-title-${item.id}`, `工作項目 ${index + 1} 缺少標題。`)]),
+        : [
+            issue(
+              `item-title-${item.id}`,
+              `請填寫工作項目 ${index + 1} 的標題。`,
+            ),
+          ]),
       ...(item.description.trim()
         ? []
         : [
             issue(
               `item-description-${item.id}`,
-              `工作項目 ${index + 1} 缺少工作內容。`,
+              `請填寫工作項目 ${index + 1} 的內容。`,
             ),
           ]),
       ...(decimalInRange(
@@ -147,7 +151,7 @@ function validateStep(
         : [
             issue(
               `item-quantity-${item.id}`,
-              `工作項目 ${index + 1} 的數量必須大於 0 且未超過上限。`,
+              `工作項目 ${index + 1} 的數量要大於 0，且不能超過上限。`,
             ),
           ]),
       ...(decimalInRange(
@@ -159,7 +163,7 @@ function validateStep(
         : [
             issue(
               `item-unit-hours-${item.id}`,
-              `工作項目 ${index + 1} 的每單位工時必須介於 0.25 與參數上限之間。`,
+              `工作項目 ${index + 1} 的每單位工時要介於 0.25 和參數上限之間。`,
             ),
           ]),
     ]);
@@ -179,7 +183,7 @@ function validateStep(
         issues.push(
           issue(
             `phase-${phase.phase}`,
-            `${CROSS_CUTTING_PHASE_LABELS[phase.phase]} 必須介於 0% 與允許上限之間。`,
+            `${CROSS_CUTTING_PHASE_LABELS[phase.phase]} 要介於 0% 和允許上限之間。`,
           ),
         );
       } else {
@@ -191,7 +195,7 @@ function validateStep(
         estimate.parameterSnapshot.constraints.maximumTotalPhaseLoadingRate,
       )
     ) {
-      issues.push(issue("phase-loading", "跨階段工時比例合計超過參數上限。"));
+      issues.push(issue("phase-loading", "跨階段工時比例的總和超過上限。"));
     }
     if (
       !decimalInRange(
@@ -201,14 +205,14 @@ function validateStep(
       )
     ) {
       issues.push(
-        issue("fixed-effort", "固定額外工時必須為非負值且未超過參數上限。"),
+        issue("fixed-effort", "固定額外工時不能小於 0，也不能超過上限。"),
       );
     }
     if (!decimalInRange(estimate.input.uncertainty.downsideRate, "0", "0.5")) {
-      issues.push(issue("downside-rate", "樂觀下修率必須介於 0% 與 50%。"));
+      issues.push(issue("downside-rate", "樂觀下修率要介於 0% 和 50%。"));
     }
     if (!decimalInRange(estimate.input.uncertainty.upsideRate, "0", "2")) {
-      issues.push(issue("upside-rate", "悲觀上修率必須介於 0% 與 200%。"));
+      issues.push(issue("upside-rate", "悲觀上修率要介於 0% 和 200%。"));
     }
     return issues;
   }
@@ -231,10 +235,7 @@ function validateStep(
         !decimalInRange(commercialTerms[field], "0", constraints.maximumMoney)
       ) {
         issues.push(
-          issue(
-            `commercial-${field}`,
-            `${label} 必須為非負值且未超過參數上限。`,
-          ),
+          issue(`commercial-${field}`, `${label} 不能小於 0，也不能超過上限。`),
         );
       }
     }
@@ -247,10 +248,7 @@ function validateStep(
         )
       ) {
         issues.push(
-          issue(
-            `commercial-${field}`,
-            `${label} 必須為非負比例且未超過參數上限。`,
-          ),
+          issue(`commercial-${field}`, `${label} 不能小於 0，也不能超過上限。`),
         );
       }
     }
@@ -265,7 +263,7 @@ function validateStep(
       issues.push(
         issue(
           "commercial-hours-per-day",
-          `每人日小時必須大於 0 且不超過 ${constraints.maximumHoursPerPersonDay}。`,
+          `每人日小時要大於 0，且不超過 ${constraints.maximumHoursPerPersonDay}。`,
         ),
       );
     }
@@ -280,7 +278,7 @@ function validateStep(
       issues.push(
         issue(
           "commercial-days-per-month",
-          `每人月工作日必須大於 0 且不超過 ${constraints.maximumDaysPerPersonMonth}。`,
+          `每人月工作日要大於 0，且不超過 ${constraints.maximumDaysPerPersonMonth}。`,
         ),
       );
     }
@@ -305,7 +303,7 @@ export function EstimateWorkspace({
   const [storageWarning, setStorageWarning] = useState<StorageWarning | null>(
     initialStorageWarning,
   );
-  const [saveMessage, setSaveMessage] = useState("已載入本機案件。");
+  const [saveMessage, setSaveMessage] = useState("已載入瀏覽器裡的案件。");
   const [stepIssues, setStepIssues] = useState<
     readonly WizardValidationIssue[]
   >([]);
@@ -325,16 +323,16 @@ export function EstimateWorkspace({
     }
     const result = repository.save(updated);
     if (!result.ok) {
-      setSaveMessage("尚未儲存：請先修正不合法欄位。");
+      setSaveMessage("尚未儲存：請先修正有問題的欄位。");
       return;
     }
     if (!result.persisted) {
       setStorageWarning(result.warning);
-      setSaveMessage("目前只保留在本次操作。");
+      setSaveMessage("內容只會保留到這次操作結束。");
       return;
     }
     setStorageWarning(null);
-    setSaveMessage("已自動儲存在此瀏覽器。");
+    setSaveMessage("已自動儲存到這個瀏覽器。");
   };
 
   function goTo(step: StepId) {

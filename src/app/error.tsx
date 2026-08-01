@@ -13,7 +13,7 @@ export default function ErrorPage({
       <p className="eyebrow">發生錯誤</p>
       <h1>目前無法顯示這個頁面</h1>
       <p>
-        你的估算內容不會因此傳送到外部服務。請先重新嘗試；若問題持續發生，可返回首頁。
+        你的估算內容不會因為這個錯誤傳到外部服務。請再試一次；若問題持續，可回到首頁。
       </p>
       <div className="button-group">
         <button

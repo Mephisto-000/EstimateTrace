@@ -74,9 +74,9 @@ describe("createFictionalExamples", () => {
     expect(examples.every((item) => item.input.workItems.length > 0)).toBe(
       true,
     );
-    expect(
-      examples.every((item) => item.description.includes("虛構示意")),
-    ).toBe(true);
+    expect(examples.every((item) => item.description.includes("虛構"))).toBe(
+      true,
+    );
     expect(
       examples[1]?.input.workItems.find(({ type }) => type === "TESTING")
         ?.includedCrossCuttingPhases,

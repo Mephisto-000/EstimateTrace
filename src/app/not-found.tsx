@@ -6,7 +6,7 @@ export default function NotFoundPage() {
       <p className="eyebrow">404</p>
       <h1>找不到這個頁面</h1>
       <p>
-        網址可能已變更，或這筆本機估算不存在於目前瀏覽器。案件資料不會從伺服器載入。
+        網址可能已變更，或這筆估算不在目前瀏覽器裡。案件資料不會從伺服器載入。
       </p>
       <div className="button-group">
         <Link className="button button--primary" href="/">

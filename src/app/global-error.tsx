@@ -16,7 +16,7 @@ export default function GlobalError({
             <p className="eyebrow">系統錯誤</p>
             <h1>EstimateTrace 暫時無法使用</h1>
             <p>
-              請重新嘗試或稍後再回來。此錯誤畫面不會把案件名稱、描述、金額或匯入內容送往外部服務。
+              請再試一次，或稍後再回來。這個錯誤畫面不會把案件名稱、描述、金額或匯入內容傳到外部服務。
             </p>
             <div className="button-group">
               <button

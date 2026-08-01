@@ -60,7 +60,7 @@ export function EstimateEditorClient() {
     return (
       <EstimateUnavailableState
         title="案件網址無效"
-        description="案件網址必須包含有效的識別碼，且不應放入案件內容。"
+        description="案件網址需要有效的識別碼，請不要把案件內容放進網址。"
       />
     );
   }
@@ -70,7 +70,7 @@ export function EstimateEditorClient() {
     return (
       <EstimateUnavailableState
         title="這個瀏覽器找不到案件"
-        description="案件可能已刪除、位於另一個瀏覽器，或本機資料無法通過安全驗證。"
+        description="案件可能已刪除、存在其他瀏覽器，或本機資料無法安全讀取。"
       />
     );
   }

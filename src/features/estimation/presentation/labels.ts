@@ -81,17 +81,20 @@ const LEGACY_PARAMETER_TEXT_REPLACEMENTS: readonly (readonly [
 ])[] = [
   [
     "是否包含完整 SIT、UAT 與 Regression Test？",
-    "是否包含完整的系統整合測試、使用者驗收測試與回歸測試？",
+    "報價是否包含完整的系統整合測試、使用者驗收測試和回歸測試？",
   ],
   [
     "是否包含 Production deployment、rollback 與 hypercare？",
-    "是否包含正式環境部署、回復與上線後密集支援？",
+    "報價是否包含正式環境部署、復原和上線後密集支援？",
   ],
-  ["Warranty 範圍、期間與 SLA 為何？", "保固範圍、期間與服務水準為何？"],
-  ["是否因需求未明而加入 contingency？", "是否因需求未明而加入預備金或緩衝？"],
+  ["Warranty 範圍、期間與 SLA 為何？", "保固範圍、期間和服務水準是什麼？"],
+  [
+    "是否因需求未明而加入 contingency？",
+    "需求還不清楚的部分，是否已加入預備金或緩衝？",
+  ],
   [
     "乙方是否能提供角色別人日與 blended rate？",
-    "乙方是否能提供角色別人日與綜合費率？",
+    "乙方能否提供各角色的人日和綜合費率？",
   ],
   ["Regression Test", "回歸測試"],
   ["Production deployment", "正式環境部署"],
@@ -142,7 +145,7 @@ const TRACE_METRIC_LABELS: Readonly<Record<string, string>> = {
   p50EffortHours: "P50 工時",
   standardDeviationHours: "工時標準差",
   p80EffortHours: "P80 工時",
-  normalizedQuoteExTax: "正規化未稅乙方報價",
+  normalizedQuoteExTax: "換算後未稅乙方報價",
 };
 
 const PERCENTILE_TRACE_METRIC_LABELS = {

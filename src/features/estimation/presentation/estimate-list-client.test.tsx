@@ -139,7 +139,7 @@ describe("EstimateListClient", () => {
     await user.click(clearButton);
 
     expect(confirm).toHaveBeenLastCalledWith(
-      "確定清除目前瀏覽器的所有案件與自訂內容？這項操作無法復原。",
+      "確定要清除目前瀏覽器的所有案件和自訂內容嗎？這個動作無法復原。",
     );
     expect(estimateHeading).toBeVisible();
     expect(storage.getItem(ESTIMATE_STORAGE_KEY)).toContain(estimate.id);
@@ -151,10 +151,10 @@ describe("EstimateListClient", () => {
       screen.queryByRole("heading", { name: estimate.name }),
     ).not.toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "目前瀏覽器還沒有估算案件" }),
+      screen.getByRole("heading", { name: "這個瀏覽器還沒有估算案件" }),
     ).toBeVisible();
     expect(
-      screen.getByText("本機案件已全部清除；內建範例仍可重新載入。"),
+      screen.getByText("已清除所有本機案件；仍可重新載入內建範例。"),
     ).toBeVisible();
     expect(storage.getItem(ESTIMATE_STORAGE_KEY)).toBe("[]");
   });
@@ -173,7 +173,7 @@ describe("EstimateListClient", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.getByText(
-        "案件僅從本次操作移除；本機儲存失敗，重新開啟後可能恢復。",
+        "案件只從這次操作移除；因瀏覽器無法儲存，重新開啟後可能還會出現。",
       ),
     ).toBeVisible();
     expect(storage.getItem(ESTIMATE_STORAGE_KEY)).toContain(estimate.id);
@@ -193,7 +193,7 @@ describe("EstimateListClient", () => {
     ).not.toBeInTheDocument();
     expect(
       screen.getByText(
-        "案件僅從本次操作清除；本機儲存失敗，重新開啟後可能恢復。",
+        "案件只從這次操作清除；因瀏覽器無法儲存，重新開啟後可能還會出現。",
       ),
     ).toBeVisible();
     expect(storage.getItem(ESTIMATE_STORAGE_KEY)).toContain(estimate.id);
@@ -223,10 +223,10 @@ describe("EstimateListClient", () => {
     );
 
     expect(confirm).toHaveBeenCalledWith(
-      `匯入檔的案件識別碼與「${estimate.name}」相同。是否以匯入內容取代既有案件？`,
+      `匯入檔和「${estimate.name}」使用相同案件識別碼。要用匯入內容取代原本的案件嗎？`,
     );
     expect(
-      await screen.findByText("匯入已取消，既有案件未變更。"),
+      await screen.findByText("已取消匯入，原本的案件沒有變更。"),
     ).toBeVisible();
     expect(repository.getById(estimate.id)?.name).toBe(estimate.name);
     expect(
@@ -277,7 +277,7 @@ describe("EstimateListClient", () => {
 
     expect(
       await screen.findByText(
-        "匯入失敗（MALFORMED_JSON，$），既有案件未變更。",
+        "匯入失敗（MALFORMED_JSON，$），原本的案件沒有變更。",
       ),
     ).toBeVisible();
     expect(testState.calculateCalls).toBe(calculationCountAfterInitialRender);

@@ -19,7 +19,7 @@ import {
 } from "@/features/estimation/domain";
 
 const illustrativeSource =
-  "公開教學示範值，非市場標準；使用者應以經授權的歷史資料校準。";
+  "公開示範值，不是市場標準；請在私有環境使用經授權的組織歷史資料調整。";
 
 const commonRiskMultipliers = {
   LOW: "0.9",
@@ -116,7 +116,7 @@ export const publicDemoParameterSet = {
   version: "1.0.1",
   displayName: "公開示範參數（繁體中文）",
   description:
-    "供 EstimateTrace 教學與方法展示使用；不代表任何產業、公司或市場的標準工時與價格。",
+    "供 EstimateTrace 示範使用；不代表任何產業、公司或市場的標準工時和價格。",
   workItemCatalog: [
     {
       code: "UI",
@@ -231,7 +231,7 @@ export const publicDemoParameterSet = {
     {
       code: "CUSTOM",
       displayName: ZH_TW_WORK_ITEM_TYPE_LABELS.CUSTOM,
-      description: "由使用者明確定義的其他可估算工作。",
+      description: "由你自行定義的其他可估算工作。",
       defaultUnitHours: "8",
       unit: "item",
       includedActivities:
@@ -244,57 +244,57 @@ export const publicDemoParameterSet = {
       level: "LOW",
       displayName: ZH_TW_COMPLEXITY_LEVEL_LABELS.LOW,
       multiplier: "0.8",
-      description: "單一路徑、規則明確、低整合依賴。",
+      description: "流程單純、規則清楚、很少依賴其他系統。",
     },
     {
       level: "MEDIUM",
       displayName: ZH_TW_COMPLEXITY_LEVEL_LABELS.MEDIUM,
       multiplier: "1",
-      description: "一般企業功能、少量例外與驗證。",
+      description: "一般功能，只有少量例外和驗證。",
     },
     {
       level: "HIGH",
       displayName: ZH_TW_COMPLEXITY_LEVEL_LABELS.HIGH,
       multiplier: "1.35",
-      description: "多路徑、多角色、多例外或高整合依賴。",
+      description: "流程、角色或例外很多，或高度依賴其他系統。",
     },
     {
       level: "VERY_HIGH",
       displayName: ZH_TW_COMPLEXITY_LEVEL_LABELS.VERY_HIGH,
       multiplier: "1.7",
-      description: "核心交易、複雜狀態、嚴格效能或高度法遵。",
+      description: "核心交易、狀態複雜，或有嚴格的效能與法遵要求。",
     },
   ],
   riskFactors: [
     riskFactor(
       "REQUIREMENT_CLARITY",
       ZH_TW_RISK_FACTOR_LABELS.REQUIREMENT_CLARITY,
-      "需求完整度、例外與驗收條件的不確定性。",
+      "需求是否完整、例外情況和驗收條件是否清楚。",
     ),
     riskFactor(
       "LEGACY_TECHNICAL_DEBT",
       ZH_TW_RISK_FACTOR_LABELS.LEGACY_TECHNICAL_DEBT,
-      "既有設計限制、歷史相依與技術債造成的額外工作量。",
+      "既有設計限制、舊系統相依和技術債可能增加的工作量。",
     ),
     riskFactor(
       "INTEGRATION_DEPENDENCY",
       ZH_TW_RISK_FACTOR_LABELS.INTEGRATION_DEPENDENCY,
-      "外部介接、協調、測試環境與契約穩定性的風險。",
+      "外部系統介接、協調、測試環境和介面規格是否穩定。",
     ),
     riskFactor(
       "SECURITY_COMPLIANCE",
       ZH_TW_RISK_FACTOR_LABELS.SECURITY_COMPLIANCE,
-      "資安、權限、稽核與法遵要求造成的額外工作量。",
+      "資安、權限、稽核和法遵要求可能增加的工作量。",
     ),
     riskFactor(
       "DATA_MIGRATION_QUALITY",
       ZH_TW_RISK_FACTOR_LABELS.DATA_MIGRATION_QUALITY,
-      "來源資料品質、轉換與核對的不確定性。",
+      "來源資料品質、轉換和核對工作是否有不確定性。",
     ),
     riskFactor(
       "SCHEDULE_COMPRESSION",
       ZH_TW_RISK_FACTOR_LABELS.SCHEDULE_COMPRESSION,
-      "平行作業、協調、返工或加班造成的額外工作量。",
+      "平行作業、協調、返工或加班可能增加的工作量。",
     ),
   ],
   phaseLoadingParameters: [
@@ -302,13 +302,13 @@ export const publicDemoParameterSet = {
       "BUSINESS_ANALYSIS",
       ZH_TW_CROSS_CUTTING_PHASE_LABELS.BUSINESS_ANALYSIS,
       "0.12",
-      "以尚未包含此活動的調整後實作工時為計算基礎。",
+      "以尚未包含這項工作的調整後實作工時為基礎。",
     ),
     phase(
       "ARCHITECTURE_DESIGN",
       ZH_TW_CROSS_CUTTING_PHASE_LABELS.ARCHITECTURE_DESIGN,
       "0.08",
-      "跨工作項目的架構與技術設計。",
+      "跨工作項目的架構和技術設計工作。",
     ),
     phase(
       "PROJECT_MANAGEMENT",
@@ -320,13 +320,13 @@ export const publicDemoParameterSet = {
       "QUALITY_ASSURANCE",
       ZH_TW_CROSS_CUTTING_PHASE_LABELS.QUALITY_ASSURANCE,
       "0.18",
-      "額外的整合、回歸與品質保證活動。",
+      "額外的整合、回歸和品質保證工作。",
     ),
     phase(
       "DEPLOYMENT_RELEASE",
       ZH_TW_CROSS_CUTTING_PHASE_LABELS.DEPLOYMENT_RELEASE,
       "0.05",
-      "跨環境部署、發布與上線協調。",
+      "不同環境的部署、發布和上線協調。",
     ),
     phase(
       "DOCUMENTATION_TRAINING",
@@ -358,7 +358,7 @@ export const publicDemoParameterSet = {
       level: "VERY_HIGH",
       downsideRate: "0.25",
       upsideRate: "0.9",
-      description: "核心系統、轉置或重大法遵不確定性。",
+      description: "核心系統、資料轉置，或有重大法遵不確定性。",
     },
   ],
   comparison: {
@@ -387,7 +387,7 @@ export const publicDemoParameterSet = {
     {
       id: "testing-scope",
       priority: 10,
-      text: "是否包含完整的系統整合測試、使用者驗收測試與回歸測試？",
+      text: "報價是否包含完整的系統整合測試、使用者驗收測試和回歸測試？",
       triggers: [
         {
           kind: "BAND",
@@ -398,7 +398,7 @@ export const publicDemoParameterSet = {
     {
       id: "impact-analysis",
       priority: 20,
-      text: "是否包含既有系統影響分析與資料核對？",
+      text: "報價是否包含舊系統影響分析和資料核對？",
       triggers: [
         {
           kind: "WORK_ITEM_TYPE",
@@ -418,7 +418,7 @@ export const publicDemoParameterSet = {
     {
       id: "release-rollback",
       priority: 30,
-      text: "是否包含正式環境部署、回復與上線後密集支援？",
+      text: "報價是否包含正式環境部署、復原和上線後密集支援？",
       triggers: [
         {
           kind: "WORK_ITEM_TYPE",
@@ -434,7 +434,7 @@ export const publicDemoParameterSet = {
     {
       id: "warranty-sla",
       priority: 40,
-      text: "保固範圍、期間與服務水準為何？",
+      text: "保固範圍、期間和服務水準是什麼？",
       triggers: [
         {
           kind: "BAND",
@@ -445,7 +445,7 @@ export const publicDemoParameterSet = {
     {
       id: "contingency",
       priority: 50,
-      text: "是否因需求未明而加入預備金或緩衝？",
+      text: "需求還不清楚的部分，是否已加入預備金或緩衝？",
       triggers: [
         {
           kind: "RISK_FACTOR",
@@ -457,7 +457,7 @@ export const publicDemoParameterSet = {
     {
       id: "role-rate",
       priority: 60,
-      text: "乙方是否能提供角色別人日與綜合費率？",
+      text: "乙方能否提供各角色的人日和綜合費率？",
       triggers: [
         {
           kind: "BAND",
@@ -468,7 +468,7 @@ export const publicDemoParameterSet = {
     {
       id: "quote-inclusions",
       priority: 70,
-      text: "報價是否包含稅、授權、第三方服務與差旅？",
+      text: "報價是否已包含稅、授權、第三方服務和差旅？",
       triggers: [
         {
           kind: "BAND",

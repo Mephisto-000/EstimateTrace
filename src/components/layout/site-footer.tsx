@@ -7,7 +7,7 @@ export function SiteFooter() {
         <div>
           <p className="site-footer__brand">EstimateTrace</p>
           <p className="site-footer__summary">
-            公開、免費、可重算的軟體需求成本估算方法展示。
+            公開、免費、可重算的軟體需求估算工具。
           </p>
         </div>
         <nav aria-label="頁尾導覽">
@@ -30,7 +30,7 @@ export function SiteFooter() {
           </ul>
         </nav>
         <p className="site-footer__legal">
-          本工具僅供決策輔助，不構成正式報價、採購或法律意見。
+          本工具只供參考，不是正式報價、採購或法律意見。
         </p>
       </div>
     </footer>

@@ -361,7 +361,7 @@ test.describe("公開內容", () => {
     );
     expect(missingMathLabels).toBe(0);
     await expect(
-      page.getByRole("heading", { name: "常見重複計入" }),
+      page.getByRole("heading", { name: "常見重複計算" }),
     ).toBeVisible();
     await expectNoSeriousAccessibilityIssues(page);
     expect(consoleErrors).toEqual([]);
@@ -440,8 +440,8 @@ test.describe("公開內容", () => {
 
     const errorSummary = page.locator("#new-estimate-errors");
     await expect(errorSummary).toBeFocused();
-    await expect(errorSummary).toContainText("案件名稱為必填。");
-    await expect(errorSummary).toContainText("背景摘要與範圍為必填。");
+    await expect(errorSummary).toContainText("請填寫案件名稱。");
+    await expect(errorSummary).toContainText("請填寫背景摘要與範圍。");
     await expect(page.getByLabel("案件名稱")).toHaveAttribute(
       "aria-invalid",
       "true",
@@ -452,7 +452,7 @@ test.describe("公開內容", () => {
     );
 
     const nameErrorLink = page.getByRole("link", {
-      name: "案件名稱為必填。",
+      name: "請填寫案件名稱。",
     });
     await nameErrorLink.focus();
     await page.keyboard.press("Enter");
@@ -589,10 +589,10 @@ test.describe("估算核心流程", () => {
 
     await expect(
       page.getByRole("heading", {
-        name: /^(明顯低於模型區間，請檢查漏項或追加風險。|接近模型參考區間。|高於模型 P50，請確認成本來源。|高於模型 P80，建議要求工作量與風險明細。)$/,
+        name: /^(明顯低於模型區間，請確認是否漏算項目或風險。|接近模型參考區間。|高於模型 P50，請確認成本來源。|高於模型 P80，建議確認工作量和風險明細。)$/,
       }),
     ).toBeVisible();
-    await expect(page.getByText(/乙方報價正規化為未稅/)).toBeVisible();
+    await expect(page.getByText(/乙方報價換算為未稅後是/)).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "計算軌跡", exact: true }),
     ).toBeVisible();
@@ -733,12 +733,12 @@ test.describe("估算核心流程", () => {
     page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "清除本機所有資料" }).click();
     await expect(
-      page.getByRole("heading", { name: "目前瀏覽器還沒有估算案件" }),
+      page.getByRole("heading", { name: "這個瀏覽器還沒有估算案件" }),
     ).toBeVisible();
 
     await page.locator('input[type="file"]').setInputFiles(downloadPath!);
     await expect(
-      page.getByText("匯入成功，重算結果與快照一致。"),
+      page.getByText("匯入成功，重新計算的結果和儲存結果一致。"),
     ).toBeVisible();
     await page
       .getByRole("heading", { name: estimateName })
@@ -758,7 +758,7 @@ test.describe("估算核心流程", () => {
     await page.goto("/estimates");
     await page.getByRole("button", { name: "載入兩筆虛構範例" }).click();
 
-    await expect(page.getByText("已載入兩筆虛構教學範例。")).toBeVisible();
+    await expect(page.getByText("已載入兩筆虛構範例。")).toBeVisible();
     await expect(
       page.getByRole("heading", {
         name: "會員資料查詢與匯出（虛構）",
@@ -806,7 +806,7 @@ test.describe("估算核心流程", () => {
       .getByRole("alert")
       .filter({ hasText: "本機儲存提醒" });
     await expect(storageAlert).toContainText("本機儲存提醒");
-    await expect(storageAlert).toContainText("本次操作");
+    await expect(storageAlert).toContainText("這次");
 
     await page.getByRole("button", { name: /加入第一筆/ }).click();
     await page.getByRole("button", { name: "繼續：風險與交付" }).click();

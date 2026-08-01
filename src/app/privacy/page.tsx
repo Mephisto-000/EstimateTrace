@@ -8,36 +8,36 @@ import { createPublicPageMetadata } from "@/config/site";
 export const metadata: Metadata = createPublicPageMetadata({
   title: "資料與隱私",
   description:
-    "了解 EstimateTrace 如何在瀏覽器本機保存估算、哪些資料不會被收集，以及共享裝置的注意事項。",
+    "了解 EstimateTrace 的資料會存在哪裡、網站不會收集什麼，以及共用裝置的注意事項。",
   path: "/privacy",
 });
 
 export default function PrivacyPage() {
   return (
     <div className="page-shell content-page">
-      <PageHeader eyebrow="隱私優先設計" title="資料與隱私">
+      <PageHeader eyebrow="資料留在你的瀏覽器" title="資料與隱私">
         <p>
-          EstimateTrace 的公開版
-          不提供帳號或遠端案件儲存。估算內容由目前瀏覽器處理，不會因計算、儲存、匯入或匯出而送到
+          EstimateTrace
+          公開版沒有帳號，也不會把案件存到遠端。計算、儲存、匯入和匯出都在目前瀏覽器完成，內容不會傳給
           Vercel 函式或第三方服務。
         </p>
       </PageHeader>
 
       <Callout title="輸入前請先去識別化" tone="warning">
         <p>
-          請勿輸入公司機密、個人資料、真實乙方名稱、受保密協議保護的內容、內部系統名稱或未公開報價。資料只留在瀏覽器，不代表共享裝置上的其他使用者無法看見資料。
+          請不要輸入公司機密、個人資料、真實乙方名稱、受保密協議（NDA）保護的內容、內部系統名稱或未公開報價。資料雖然只留在瀏覽器，但共用裝置上的其他人仍可能看得到。
         </p>
       </Callout>
 
       <section className="prose-section" aria-labelledby="stored-title">
         <h2 id="stored-title">資料儲存在哪裡</h2>
         <p>
-          使用者建立的案件預設儲存在瀏覽器本機儲存(localStorage)。網站不把案件同步到
-          瀏覽器小型文字檔(Cookie)、網址、伺服器動作、資料庫或第三方應用程式介面。若瀏覽器儲存空間不可用，單次估算仍可在本次操作中進行，但重新整理或離開後可能遺失。
+          你建立的案件預設存在瀏覽器本機儲存（localStorage）。網站不會把案件寫進
+          Cookie、網址、資料庫或第三方服務。若瀏覽器無法儲存資料，這次仍可試算，但重新整理或離開後內容可能消失。
         </p>
         <p>
           JSON
-          匯出檔由使用者自行保存與分享。匯出檔會包含輸入、參數快照、模型版本與結果快照，因此分享前仍應再次檢查內容。
+          匯出檔由你自行保存和分享。檔案包含輸入內容、參數快照、模型版本和結果快照，分享前請再檢查一次。
         </p>
       </section>
 
@@ -48,24 +48,24 @@ export default function PrivacyPage() {
           <li>工時、費率、成本與乙方報價。</li>
           <li>匯入 JSON 的內容或匯出檔案。</li>
           <li>個人帳號、瀏覽器識別碼或操作歷程重播。</li>
-          <li>表單內容相關的使用分析事件。</li>
+          <li>和表單內容有關的使用分析資料。</li>
         </ul>
       </section>
 
       <section className="prose-section" aria-labelledby="operational-title">
         <h2 id="operational-title">網站運作資料</h2>
         <p>
-          託管平台可能保留不含估算內容的建置、部署與基礎網頁請求記錄，以維護網站可用性。公開版不啟用網站使用分析、效能分析、聊天元件或操作歷程重播。
+          為了讓網站正常運作，託管平台可能保留不含估算內容的建置、部署和基本網頁請求紀錄。公開版沒有使用分析、效能分析、聊天元件或操作歷程重播。
         </p>
       </section>
 
       <section className="prose-section" aria-labelledby="control-title">
         <h2 id="control-title">你可以如何管理資料</h2>
         <ol className="numbered-list">
-          <li>使用 JSON 匯出保留需要的版本。</li>
-          <li>在「我的估算」刪除單一案件或清除本機所有資料。</li>
-          <li>使用共享裝置後，確認已清除資料並移除下載的 JSON。</li>
-          <li>瀏覽器清除網站資料也會移除本機案件，且無法復原。</li>
+          <li>用 JSON 匯出保留需要的版本。</li>
+          <li>在「我的估算」刪除單一案件，或清除所有本機資料。</li>
+          <li>使用共用裝置後，請清除資料並移除下載的 JSON。</li>
+          <li>瀏覽器清除網站資料時，本機案件也會一併刪除，無法復原。</li>
         </ol>
         <div className="button-group">
           <Link
@@ -88,8 +88,7 @@ export default function PrivacyPage() {
       <section className="prose-section" aria-labelledby="future-title">
         <h2 id="future-title">未來功能的隱私邊界</h2>
         <p>
-          若未來加入
-          遙測、帳號或遠端儲存，必須另行提出變更、更新本頁、說明保存期間與用途，並在需要時取得明確同意；不得無聲改變目前僅限瀏覽器的資料邊界。
+          未來若加入遙測、帳號或遠端儲存，會先說明變更、更新本頁並交代保存時間和用途，也會先取得明確同意（opt-in）。不會悄悄改變資料只留在瀏覽器的原則。
         </p>
       </section>
     </div>

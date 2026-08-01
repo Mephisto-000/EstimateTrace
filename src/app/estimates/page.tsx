@@ -7,11 +7,11 @@ export default function EstimatesPage() {
     <div className="page-shell estimate-page">
       <header className="estimate-page__header">
         <div>
-          <p className="eyebrow">僅限瀏覽器的工作區</p>
+          <p className="eyebrow">資料只留在這個瀏覽器</p>
           <h1>我的估算</h1>
           <p>
-            案件只儲存在目前瀏覽器。請定期匯出 JSON
-            備份，並避免在共享裝置保存敏感內容。
+            案件只會存到目前瀏覽器。請定期下載 JSON
+            備份，也不要在共用裝置留下敏感內容。
           </p>
         </div>
         <Link className="button button--primary" href="/estimates/new">

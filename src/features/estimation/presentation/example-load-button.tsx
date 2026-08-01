@@ -27,12 +27,12 @@ export function ExampleLoadButton({ exampleIndex }: ExampleLoadButtonProps) {
     }
     const saved = repository.save(estimate);
     if (!saved.ok) {
-      setMessage("範例未通過驗證，沒有寫入本機資料。");
+      setMessage("範例資料有問題，沒有存到瀏覽器。");
       return;
     }
     if (!saved.persisted) {
       setMessage(
-        "目前無法使用瀏覽器本機儲存，未開啟範例；請到「建立估算」進行單次估算。",
+        "目前無法使用瀏覽器本機儲存，無法開啟範例；請到「建立估算」進行單次試算。",
       );
       return;
     }

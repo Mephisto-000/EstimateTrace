@@ -22,13 +22,13 @@ import { useBrowserEstimateRepository } from "./use-browser-estimate-repository"
 
 const storageWarningText: Record<StorageWarning, string> = {
   STORAGE_UNAVAILABLE:
-    "這個瀏覽器目前無法使用本機儲存；你仍可在本次操作中計算，請匯出 JSON 備份。",
+    "這個瀏覽器目前無法儲存資料；這次仍可試算，離開前請下載 JSON 備份。",
   STORAGE_READ_FAILED:
-    "無法讀取本機案件；原始資料未被覆寫。請檢查瀏覽器儲存權限。",
+    "無法讀取瀏覽器裡的案件；原始資料沒有被覆寫。請檢查瀏覽器儲存權限。",
   STORAGE_WRITE_FAILED:
-    "本機儲存失敗；本次操作仍保留資料，離開前請匯出 JSON 備份。",
+    "資料沒有存到瀏覽器；這次操作仍保留內容，離開前請下載 JSON 備份。",
   STORAGE_DATA_CORRUPTED:
-    "偵測到無法驗證的本機資料；原始內容未被覆寫，清單暫不載入。",
+    "發現無法安全讀取的本機資料；原始內容沒有被覆寫，暫時不會載入清單。",
 };
 
 export function EstimateListClient() {
@@ -72,7 +72,7 @@ export function EstimateListClient() {
 
   function loadExamples() {
     persistAll(createFictionalExamples(browserRuntimeServices));
-    setMessage("已載入兩筆虛構教學範例。");
+    setMessage("已載入兩筆虛構範例。");
   }
 
   function duplicateEstimate(source: EstimateCaseDocument) {
@@ -92,13 +92,13 @@ export function EstimateListClient() {
       },
     };
     persistAll([duplicate]);
-    setMessage("案件副本已建立。");
+    setMessage("已建立案件副本。");
   }
 
   function deleteEstimate(estimate: EstimateCaseDocument) {
     if (
       !window.confirm(
-        `確定刪除「${estimate.name}」？這只影響目前瀏覽器，且無法復原。`,
+        `確定要刪除「${estimate.name}」嗎？這只會影響目前瀏覽器，而且無法復原。`,
       )
     ) {
       return;
@@ -107,15 +107,15 @@ export function EstimateListClient() {
     refresh();
     setMessage(
       result.persisted
-        ? "案件已從目前瀏覽器刪除。"
-        : "案件僅從本次操作移除；本機儲存失敗，重新開啟後可能恢復。",
+        ? "已從目前瀏覽器刪除案件。"
+        : "案件只從這次操作移除；因瀏覽器無法儲存，重新開啟後可能還會出現。",
     );
   }
 
   function clearAll() {
     if (
       !window.confirm(
-        "確定清除目前瀏覽器的所有案件與自訂內容？這項操作無法復原。",
+        "確定要清除目前瀏覽器的所有案件和自訂內容嗎？這個動作無法復原。",
       )
     ) {
       return;
@@ -124,26 +124,26 @@ export function EstimateListClient() {
     refresh();
     setMessage(
       result.persisted
-        ? "本機案件已全部清除；內建範例仍可重新載入。"
-        : "案件僅從本次操作清除；本機儲存失敗，重新開啟後可能恢復。",
+        ? "已清除所有本機案件；仍可重新載入內建範例。"
+        : "案件只從這次操作清除；因瀏覽器無法儲存，重新開啟後可能還會出現。",
     );
   }
 
   function exportEstimate(estimate: EstimateCaseDocument) {
     if (
       !window.confirm(
-        "匯出檔可能含有你輸入的內容。請確認不含公司機密、個人資料、真實乙方名稱或受保密協議保護的資訊。",
+        "EstimateTrace 是公開網站。匯出檔可能包含案件內容，請確認沒有公司機密、個人資料、真實乙方名稱、受保密協議（NDA）保護的內容或未公開報價。",
       )
     ) {
       return;
     }
     const result = exportEstimateJson(estimate, browserRuntimeServices.now());
     if (!result.ok) {
-      setMessage("案件輸入尚未通過驗證，暫時無法匯出。");
+      setMessage("案件資料還有問題，暫時無法匯出。");
       return;
     }
     downloadJson(result.filename, result.text);
-    setMessage("JSON 備份已建立；檔案只在你的瀏覽器中下載。");
+    setMessage("已下載 JSON 備份；檔案只會下載到你的裝置。");
   }
 
   async function importFile(file: File | undefined) {
@@ -151,14 +151,14 @@ export function EstimateListClient() {
       return;
     }
     if (file.size > MAX_IMPORT_BYTES) {
-      setMessage("匯入失敗：檔案超過 1 MiB 上限，既有案件未變更。");
+      setMessage("匯入失敗：檔案超過 1 MiB 上限，原本的案件沒有變更。");
       return;
     }
 
     const result = importEstimateJson(await file.text());
     if (!result.ok) {
       setMessage(
-        `匯入失敗（${result.code}，${result.path}），既有案件未變更。`,
+        `匯入失敗（${result.code}，${result.path}），原本的案件沒有變更。`,
       );
       return;
     }
@@ -167,10 +167,10 @@ export function EstimateListClient() {
     if (
       existing &&
       !window.confirm(
-        `匯入檔的案件識別碼與「${existing.name}」相同。是否以匯入內容取代既有案件？`,
+        `匯入檔和「${existing.name}」使用相同案件識別碼。要用匯入內容取代原本的案件嗎？`,
       )
     ) {
-      setMessage("匯入已取消，既有案件未變更。");
+      setMessage("已取消匯入，原本的案件沒有變更。");
       return;
     }
 
@@ -178,17 +178,17 @@ export function EstimateListClient() {
     refresh();
     setMessage(
       result.warnings.length > 0
-        ? "已匯入並重新計算，但結果快照與目前重算結果不同，請檢查版本與參數。"
+        ? "已匯入並重新計算，但儲存的結果和現在算出的結果不同，請檢查版本和參數。"
         : saveResult?.persisted === false
-          ? "匯入成功，但無法持久化；請立即匯出備份。"
-          : "匯入成功，重算結果與快照一致。",
+          ? "匯入成功，但無法存到瀏覽器；請立刻下載備份。"
+          : "匯入成功，重新計算的結果和儲存結果一致。",
     );
   }
 
   if (!hydrated) {
     return (
       <section className="workspace-card" aria-busy="true">
-        <p>正在讀取目前瀏覽器的本機案件…</p>
+        <p>正在讀取目前瀏覽器裡的案件…</p>
       </section>
     );
   }
@@ -196,17 +196,17 @@ export function EstimateListClient() {
   return (
     <section className="workspace-stack" aria-label="本機估算案件">
       <div className="privacy-banner">
-        <strong>EstimateTrace 是公開網站；資料只儲存在此瀏覽器。</strong>
+        <strong>EstimateTrace 是公開網站，資料只會存到這個瀏覽器。</strong>
         <p>
-          請勿建立或匯入公司機密、個人資料、真實乙方名稱、受保密協議保護的內容或未公開報價。不會上傳到
-          Vercel 函式
-          或第三方；共享裝置上的其他使用者可能看見本機資料，清除後本站也無法復原。
+          請不要建立或匯入公司機密、個人資料、真實乙方名稱、受保密協議（NDA）保護的內容或未公開報價。資料不會上傳到
+          Vercel
+          函式或第三方服務。共用裝置上的其他人可能看得到本機資料；清除後也無法復原。
         </p>
       </div>
 
       {storageWarning ? (
         <div className="storage-banner" role="alert">
-          <strong>本機儲存不可用</strong>
+          <strong>瀏覽器無法儲存資料</strong>
           <p>{storageWarningText[storageWarning]}</p>
         </div>
       ) : null}
@@ -247,8 +247,8 @@ export function EstimateListClient() {
       {summaries.length === 0 ? (
         <div className="empty-state">
           <div>
-            <h2>目前瀏覽器還沒有估算案件</h2>
-            <p>從空白案件開始，或先載入虛構範例熟悉流程。</p>
+            <h2>這個瀏覽器還沒有估算案件</h2>
+            <p>可以從空白案件開始，或先載入虛構範例熟悉流程。</p>
           </div>
           <div className="button-group">
             <Link className="button button--primary" href="/estimates/new">
@@ -314,7 +314,7 @@ export function EstimateListClient() {
                   </div>
                 </div>
               ) : (
-                <p>案件尚未完成：{outcome.issues.length} 個欄位需要修正。</p>
+                <p>案件還沒完成：有 {outcome.issues.length} 個欄位需要修正。</p>
               )}
 
               <div className="estimate-card__actions" data-screen-only="true">

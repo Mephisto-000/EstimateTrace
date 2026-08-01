@@ -28,10 +28,10 @@ import {
 } from "../labels";
 
 const comparisonLabels: Record<VendorComparisonBand, string> = {
-  CLEARLY_BELOW_MODEL_RANGE: "明顯低於模型區間，請檢查漏項或追加風險。",
+  CLEARLY_BELOW_MODEL_RANGE: "明顯低於模型區間，請確認是否漏算項目或風險。",
   NEAR_MODEL_REFERENCE_RANGE: "接近模型參考區間。",
   ABOVE_MODEL_P50: "高於模型 P50，請確認成本來源。",
-  ABOVE_MODEL_P80: "高於模型 P80，建議要求工作量與風險明細。",
+  ABOVE_MODEL_P80: "高於模型 P80，建議確認工作量和風險明細。",
 };
 
 const formulaLinks: Readonly<Record<string, string>> = {
@@ -66,7 +66,7 @@ function VendorComparisonSection({
     return (
       <section className="result-card">
         <h2>尚未加入乙方報價</h2>
-        <p>目前只顯示模型參考值；若要比較，請在本頁上方加入未稅或含稅金額。</p>
+        <p>目前只顯示模型參考值；若要比較，請在本頁上方填入未稅或含稅金額。</p>
       </section>
     );
   }
@@ -82,15 +82,15 @@ function VendorComparisonSection({
           {comparisonLabels[comparison.band]}
         </h2>
         <p>
-          乙方報價正規化為未稅 {formatMoney(comparison.normalizedQuoteExTax)}
-          。此分類只描述模型差異，不代表高低價是否合理。
+          乙方報價換算為未稅後是 {formatMoney(comparison.normalizedQuoteExTax)}
+          。這個分類只說明和模型的差異，不代表這個價格能不能接受。
         </p>
         <p className="field__meta">
-          公開示範門檻：正規化報價／P50 小於{" "}
+          公開示範門檻：未稅報價／P50 小於{" "}
           {formatRatio(
             estimate.parameterSnapshot.comparison.clearlyBelowP50Ratio,
           )}{" "}
-          時列為明顯低於；不是產業標準。
+          時會列為明顯低於；這不是產業標準。
         </p>
         {estimate.input.vendorQuote ? (
           <p>
@@ -127,7 +127,7 @@ function VendorComparisonSection({
         </div>
       </div>
       <div>
-        <h3>向乙方確認</h3>
+        <h3>建議向乙方確認</h3>
         <ol>
           {comparison.questions.map((question) => (
             <li key={question.id}>
@@ -138,13 +138,13 @@ function VendorComparisonSection({
                     case "BAND":
                       return (
                         <li key={`band:${evidence.band}`}>
-                          觸發依據：比較區間 <code>{evidence.band}</code>
+                          判斷依據：比較區間 <code>{evidence.band}</code>
                         </li>
                       );
                     case "WORK_ITEM_TYPE":
                       return (
                         <li key={`work-item:${evidence.workItemType}`}>
-                          觸發依據：
+                          判斷依據：
                           {WORK_ITEM_TYPE_LABELS[evidence.workItemType]}
                           類型的工作項目（
                           {evidence.workItemIds.length} 筆）
@@ -153,7 +153,7 @@ function VendorComparisonSection({
                     case "RISK_FACTOR":
                       return (
                         <li key={`risk:${evidence.factorId}`}>
-                          觸發依據：{RISK_FACTOR_LABELS[evidence.factorId]} ={" "}
+                          判斷依據：{RISK_FACTOR_LABELS[evidence.factorId]} ={" "}
                           {RISK_LEVEL_LABELS[evidence.level]}
                         </li>
                       );
@@ -174,12 +174,12 @@ function TraceSection({ result }: { result: EstimateResult }) {
       <div>
         <h2 id="trace-title">計算軌跡</h2>
         <p>
-          每一節列出公式、運算元、來源路徑、結果與單位；順序固定，可供稽核與重算。
+          每一節都列出公式、代入的數字、資料來源、結果和單位。順序固定，方便檢查和重算。
         </p>
         <p className="calculation-warning">
-          重複計入提醒：已列入工作項目的階段會由{" "}
-          <code>includedCrossCuttingPhases</code> 排除；請特別檢查
-          額外測試、部署與文件項目。
+          避免重複計算：工作項目已包含的階段會由{" "}
+          <code>includedCrossCuttingPhases</code>{" "}
+          排除；請特別檢查額外測試、部署和文件項目。
         </p>
       </div>
       <div className="trace-list">
@@ -197,7 +197,7 @@ function TraceSection({ result }: { result: EstimateResult }) {
               </summary>
               <div className="trace-detail">
                 <p>
-                  <strong>公式識別碼：</strong>
+                  <strong>公式代號：</strong>
                   {formulaHref ? (
                     <Link href={formulaHref} prefetch={false}>
                       <code>{node.formulaId}</code>
@@ -219,12 +219,12 @@ function TraceSection({ result }: { result: EstimateResult }) {
                   />
                 </div>
                 <p>
-                  <strong>精度：</strong>
+                  <strong>計算精度：</strong>
                   {node.precisionPolicy.decimalPrecision} 位有效數字；
                   <code>{node.precisionPolicy.roundingMode}</code>
-                  ；中間計算{" "}
+                  ；中間計算
                   <code>{node.precisionPolicy.intermediateRounding}</code>
-                  ；只在顯示時依{" "}
+                  ；只在顯示時依
                   <code>{node.precisionPolicy.presentationRounding}</code>
                   捨入。
                 </p>
@@ -320,7 +320,7 @@ export function ResultView({ estimate, result, onExport }: ResultViewProps) {
         <div>
           <p className="eyebrow">估算參考</p>
           <h2 id="headline-result-title">{estimate.name}</h2>
-          <p>估算最後更新：{formatDate(estimate.updatedAt)}</p>
+          <p>最後更新：{formatDate(estimate.updatedAt)}</p>
         </div>
         <div className="metric-grid">
           <div className="metric metric--primary">
@@ -378,10 +378,10 @@ export function ResultView({ estimate, result, onExport }: ResultViewProps) {
           role="alert"
           key={`${warning.code}:${warning.path}`}
         >
-          <strong>風險乘積超過安全警戒值，請人工檢視</strong>
+          <strong>風險乘積超過安全警戒值，請人工確認</strong>
           <p>
-            {warning.path} 的乘積為 {warning.details.actual}，參數集警戒值為{" "}
-            {warning.details.safetyCap}。模型沒有靜默截斷此值。
+            {warning.path} 的乘積是 {warning.details.actual}，參數集警戒值是{" "}
+            {warning.details.safetyCap}。模型沒有悄悄截斷這個值。
           </p>
         </div>
       ))}
@@ -389,7 +389,7 @@ export function ResultView({ estimate, result, onExport }: ResultViewProps) {
       <section className="form-stack" aria-labelledby="breakdown-title">
         <div>
           <h2 id="breakdown-title">工作量與成本分解</h2>
-          <p>下表保留每一層結果，便於檢視範圍、重複計入與商務條件。</p>
+          <p>下表保留每一層結果，方便檢查範圍、是否重複計算和成本條件。</p>
         </div>
         <div className="metric-grid">
           <div className="metric">
@@ -428,8 +428,8 @@ export function ResultView({ estimate, result, onExport }: ResultViewProps) {
             <thead>
               <tr>
                 <th scope="col">層級</th>
-                <th scope="col">P50／目前值</th>
-                <th scope="col">P80／比較值</th>
+                <th scope="col">P50／數值</th>
+                <th scope="col">P80／數值</th>
               </tr>
             </thead>
             <tbody>
@@ -449,8 +449,10 @@ export function ResultView({ estimate, result, onExport }: ResultViewProps) {
 
       <section className="form-stack" aria-labelledby="drivers-title">
         <div>
-          <h2 id="drivers-title">主要成本驅動因素</h2>
-          <p>P50 模型參考報價的前三大可加總成本構成；全部以新臺幣比較。</p>
+          <h2 id="drivers-title">主要成本來源</h2>
+          <p>
+            這裡列出 P50 參考報價中金額最高的三個成本項目，全部以新臺幣呈現。
+          </p>
         </div>
         <div
           className="table-region"
@@ -459,12 +461,12 @@ export function ResultView({ estimate, result, onExport }: ResultViewProps) {
           tabIndex={0}
         >
           <table className="data-table">
-            <caption>主要估算驅動因子</caption>
+            <caption>主要成本來源</caption>
             <thead>
               <tr>
                 <th scope="col">成本構成</th>
-                <th scope="col">計算軌跡來源</th>
-                <th scope="col">P50 成本貢獻</th>
+                <th scope="col">計算來源</th>
+                <th scope="col">P50 成本金額</th>
               </tr>
             </thead>
             <tbody>
@@ -504,7 +506,7 @@ export function ResultView({ estimate, result, onExport }: ResultViewProps) {
       <section className="form-stack" aria-labelledby="work-item-review-title">
         <div>
           <h2 id="work-item-review-title">工作項目分解</h2>
-          <p>列印與檢視使用的原始拆解；計算結果仍以計算軌跡為準。</p>
+          <p>這裡保留輸入時的拆解內容；實際計算結果請以計算過程為準。</p>
         </div>
         <div
           className="table-region"
@@ -554,7 +556,7 @@ export function ResultView({ estimate, result, onExport }: ResultViewProps) {
       <section className="form-stack" aria-labelledby="risk-review-title">
         <div>
           <h2 id="risk-review-title">風險因子與選擇理由</h2>
-          <p>案件層級選擇；只套用到各工作項目明確勾選的風險因子。</p>
+          <p>這是案件層級的設定；只會套用到各工作項目明確勾選的風險。</p>
         </div>
         <div
           className="table-region"
@@ -610,16 +612,14 @@ export function ResultView({ estimate, result, onExport }: ResultViewProps) {
           </div>
         </dl>
         <p>
-          這是透明、可重算的示範估算，不是統計保證、正式報價、法律、稅務或採購建議。
-          正式使用前應以已核准的範圍、歷史資料與組織參數校準。
+          這是透明、可重算的示範估算，不能保證結果一定會發生，也不是正式報價、法律、稅務或採購建議。正式使用前，請在私有環境使用經授權的範圍、歷史資料和公司參數調整。
         </p>
         <p>
-          敏感資料提醒：這份報告可能包含案件內容與商業數字；儲存或分享前應完成
-          資料分級與去識別化檢查。
+          資料提醒：這份報告可能包含案件內容和成本數字。匯出、列印或分享前，請確認已去識別化，且不含公司機密、個人資料、真實乙方名稱、受保密協議（NDA）保護的內容或未公開報價。
         </p>
         <p>
           <Link href="/methodology" prefetch={false}>
-            閱讀完整方法論、公式與限制
+            查看完整公式、說明和限制
           </Link>
           <span className="print-only">（{methodologyPrintUrl}）</span>
         </p>

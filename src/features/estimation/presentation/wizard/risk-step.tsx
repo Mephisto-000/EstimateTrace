@@ -88,7 +88,7 @@ export function RiskStep({
           風險與交付
         </h1>
         <p>
-          風險等級是案件層級的選擇；只有工作項目明確勾選的風險因子才會套用對應乘數。
+          先為案件選擇風險等級；只有工作項目明確勾選的風險，才會影響該項目的工時。
         </p>
       </header>
 
@@ -96,7 +96,7 @@ export function RiskStep({
         <div>
           <h2 id="risk-profile-title">風險因子問卷</h2>
           <p className="field__help">
-            所有係數都是公開示範值，請記錄選擇理由，不要只選乘數。
+            所有係數都是公開示範值。請寫下選擇原因，不要只看乘數大小。
           </p>
         </div>
         <div className="result-grid">
@@ -158,14 +158,14 @@ export function RiskStep({
         <div>
           <h2 id="phase-title">跨階段工作量</h2>
           <p>
-            每個階段以未標記「已包含」的調整後實作工時為計算基礎。示範比例合計：
+            每個階段會用尚未標記為「已包含」的調整後工時來計算。示範比例合計：
             {formatRatio(totalPhaseLoading.toString())}。
           </p>
         </div>
         <div className="calculation-warning">
           <strong>避免重複計入</strong>
           <p>
-            額外測試、部署與文件工作項目預設排除對應階段；若單位工時已含其他階段，請回工作項目勾選。
+            額外測試、部署和文件工作項目，預設不會再套用同一階段。若單位工時已含其他階段，請回工作項目勾選。
           </p>
         </div>
         {errorFor("phase-loading") ? (
@@ -239,7 +239,7 @@ export function RiskStep({
             }}
           />
           <span className="field__help" id="fixed-effort-help">
-            只加入不隨調整後工時變動，且未在工作項目或階段中計入的工作。
+            只填不會隨調整後工時改變，而且尚未算進工作項目或階段的工作。
           </span>
           {errorFor("fixed-effort") ? (
             <span className="field__error" id="fixed-effort-error">
@@ -255,11 +255,11 @@ export function RiskStep({
         aria-labelledby="uncertainty-title"
       >
         <div>
-          <h2 id="uncertainty-title">三點估算的不確定性</h2>
-          <p>以樂觀下修率與悲觀上修率建立兩端情境；P80 不是固定緩衝。</p>
+          <h2 id="uncertainty-title">三點估算與不確定性</h2>
+          <p>用樂觀下修率和悲觀上修率建立兩端情境；P80 不是固定加成。</p>
         </div>
         <div className="field">
-          <label htmlFor="uncertainty-preset">敘述式預設</label>
+          <label htmlFor="uncertainty-preset">建議情境</label>
           <select
             id="uncertainty-preset"
             value={uncertaintyPreset}

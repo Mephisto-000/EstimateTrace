@@ -71,7 +71,7 @@ export function ResultStep({ estimate, updateEstimate }: WizardStepProps) {
   function handleExport(): void {
     if (
       !window.confirm(
-        "JSON 可能包含案件名稱、範圍、假設與商業數字。請先確認沒有敏感資料，再儲存或分享。",
+        "EstimateTrace 是公開網站。JSON 可能包含案件名稱、範圍、假設和成本數字。請確認沒有公司機密、個人資料、真實乙方名稱、受保密協議（NDA）保護的內容或未公開報價，再儲存或分享。",
       )
     ) {
       return;
@@ -92,13 +92,12 @@ export function ResultStep({ estimate, updateEstimate }: WizardStepProps) {
           結果與報價比較
         </h1>
         <p>
-          結果由目前的範圍、工作項目、風險、不確定性與商務參數即時計算。
-          模型提供可追溯參考，不構成正式報價或採購建議。
+          結果會依目前的範圍、工作項目、風險、不確定性和成本條件即時計算。這是可回頭查看的參考值，不是正式報價或採購建議。
         </p>
       </header>
       <p className="visually-hidden" aria-live="polite">
         {outcome.ok
-          ? "估算結果已產生，可檢視 P50、P80 與計算軌跡。"
+          ? "估算結果已產生，可以查看 P50、P80 和計算過程。"
           : "目前無法產生估算，請依錯誤摘要修正。"}
       </p>
 
@@ -111,7 +110,7 @@ export function ResultStep({ estimate, updateEstimate }: WizardStepProps) {
         <div>
           <h2 id="vendor-quote-title">乙方報價（選填）</h2>
           <p className="field__help">
-            不輸入乙方名稱；只比較金額與模型參考區間，避免品牌背書或採購建議。
+            不要輸入乙方名稱；這裡只比較金額和模型參考區間，不替任何品牌背書，也不提供採購建議。
           </p>
         </div>
         {estimate.input.vendorQuote === null ? (
@@ -211,7 +210,7 @@ export function ResultStep({ estimate, updateEstimate }: WizardStepProps) {
           aria-labelledby="calculation-errors-title"
         >
           <h2 id="calculation-errors-title">目前無法產生估算</h2>
-          <p>為避免顯示誤導數字，請先回到對應步驟修正：</p>
+          <p>為了避免顯示不可靠的數字，請先回到對應步驟修正：</p>
           <ul>
             {outcome.issues.map((issue) => (
               <li key={`${issue.code}:${issue.path}`}>

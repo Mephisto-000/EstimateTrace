@@ -242,7 +242,7 @@ function WorkItemCard({
             }}
           />
           <span className="field__help" id={`item-unit-hours-${item.id}-help`}>
-            示範值，非市場標準；預設只包含{" "}
+            這是示範值，不是市場標準；預設只包含{" "}
             {selectedCatalogEntry?.includedActivities
               .map(formatIncludedActivity)
               .join("、") || "未指定活動"}
@@ -284,10 +284,10 @@ function WorkItemCard({
       </div>
 
       <details>
-        <summary>適用風險與重複計入設定</summary>
+        <summary>風險與避免重複計算</summary>
         <div className="form-stack">
           <fieldset id={`risk-factors-${item.id}`}>
-            <legend>只選擇真正影響這個項目的風險因子</legend>
+            <legend>只勾選真的會影響這個項目的風險</legend>
             <div className="choice-grid">
               {risks.map((risk) => (
                 <label className="choice-row" key={risk.id}>
@@ -311,9 +311,9 @@ function WorkItemCard({
           </fieldset>
 
           <fieldset>
-            <legend>此單位工時已包含的跨階段活動</legend>
+            <legend>每單位工時已包含的額外工作</legend>
             <p className="field__help">
-              勾選後，該工作項目不再列入同一階段的工時計算基礎，避免重複計入。
+              勾選後，這個工作項目不會再算進同一階段，避免重複計算。
             </p>
             <div className="choice-grid">
               {Object.entries(CROSS_CUTTING_PHASE_LABELS).map(
@@ -386,7 +386,9 @@ export function WorkItemsStep({
       complexity: "MEDIUM",
       applicableRiskFactorIds: [],
       includedCrossCuttingPhases: defaults.includedCrossCuttingPhases,
-      assumptions: ["示範單位工時，需依實際範圍與歷史資料校準。"],
+      assumptions: [
+        "這是示範工時，請依實際範圍調整；私有環境才可用經授權的歷史資料校準。",
+      ],
     };
     updateEstimate((current) => ({
       ...current,
@@ -405,7 +407,7 @@ export function WorkItemsStep({
           工作項目
         </h1>
         <p>
-          把需求拆成可數量化的交付項目。單位工時是公開教學起點，請依範圍與歷史資料調整。
+          把需求拆成可以計數的工作項目。單位工時只是公開示範的起點，請依範圍調整；私有環境才可用經授權的歷史資料校準。
         </p>
       </header>
 
@@ -440,7 +442,7 @@ export function WorkItemsStep({
         <div className="empty-state">
           <div>
             <h2>尚未加入工作項目</h2>
-            <p>至少加入一筆工作項目才能產生不具誤導性的結果。</p>
+            <p>至少加入一筆工作項目，才能得到有意義的結果。</p>
           </div>
           <button
             className="button button--primary"

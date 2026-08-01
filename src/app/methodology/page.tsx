@@ -13,7 +13,7 @@ import { COMPLEXITY_LEVEL_LABELS } from "@/features/estimation/presentation/labe
 export const metadata: Metadata = createPublicPageMetadata({
   title: "公式與定義",
   description:
-    "完整說明 EstimateTrace 的由下而上參數估算模型、P50、P80、風險、成本、乙方成本加成與報價差異公式。",
+    "用白話說明 EstimateTrace 怎麼計算工時、成本、P50、P80 和乙方報價差異。",
   path: "/methodology",
 });
 
@@ -36,105 +36,105 @@ type TerminologyRow = {
 };
 
 const tableOfContents = [
-  { id: "range", label: "為什麼輸出區間" },
-  { id: "terms", label: "名詞與計量單位" },
-  { id: "base-effort", label: "工作項目基礎工時" },
-  { id: "complexity", label: "複雜度乘數" },
-  { id: "risk", label: "風險因子調整" },
-  { id: "cross-cutting", label: "跨階段工作量" },
+  { id: "range", label: "為什麼要看區間" },
+  { id: "terms", label: "名詞與單位" },
+  { id: "base-effort", label: "工作項目的基本工時" },
+  { id: "complexity", label: "複雜度" },
+  { id: "risk", label: "風險調整" },
+  { id: "cross-cutting", label: "額外工作" },
   { id: "three-point", label: "三點估算" },
   { id: "percentiles", label: "P50 與 P80" },
   { id: "engineering-cost", label: "工程成本" },
   {
     id: "commercial-adjustments",
-    label: "管銷、保固與成本加成",
+    label: "管理費、保固與成本加成",
   },
-  { id: "tax-normalization", label: "稅基正規化" },
+  { id: "tax-normalization", label: "統一未稅基準" },
   { id: "variance", label: "乙方報價差異" },
   { id: "interpretation", label: "結果如何解讀" },
-  { id: "double-counting", label: "常見重複計入" },
-  { id: "limitations", label: "模型限制與適用邊界" },
+  { id: "double-counting", label: "常見重複計算" },
+  { id: "limitations", label: "模型的限制與適用範圍" },
   { id: "future-methods", label: "其他估算方法與後續" },
 ] as const;
 
 const terminologyRows: readonly TerminologyRow[] = [
   {
     term: "估算(Estimate)",
-    definition: "依現有資訊與假設推算工作量或成本，不是承諾價格。",
+    definition: "依目前資訊和假設推算工作量或成本，不是承諾價格。",
   },
   {
     term: "工作量(Effort)",
-    definition: "完成交付所需的人力投入，通常以人時、人日或人月計量。",
+    definition: "完成交付需要投入多少人力，通常用人時、人日或人月表示。",
   },
   {
     term: "工期(Duration)",
-    definition: "從開始到完成的日曆經過時間，不等於工作量。",
+    definition: "從開始到完成經過的日曆時間，不等於投入的工作量。",
   },
   {
     term: "由下而上參數估算模型(Bottom-up Parametric Model)",
-    definition: "先估算各工作項目的數量、單位工時與調整係數，再逐項加總。",
+    definition: "先估每個工作項目的數量、單位工時和調整係數，再一項一項加總。",
   },
   {
     term: "資訊科技商業分析師(IT Business Analyst)",
     definition:
-      "協助釐清需求、流程、規則與交付範圍，並向利害關係人說明估算依據的角色。",
+      "協助釐清需求、流程、規則和交付範圍，並向相關人員說明估算依據的角色。",
   },
   {
     term: "工作項目(Work Item)",
-    definition: "可明確描述、計量並追溯到交付範圍的估算單位。",
+    definition: "可以清楚描述、計數，也能對應到交付範圍的估算單位。",
   },
   {
     term: "複雜度乘數(Complexity Multiplier)",
-    definition: "依規則、角色、狀態、例外與整合難度調整單一工作項目的係數。",
+    definition: "依規則、角色、狀態、例外和整合難度，調整單一工作項目的係數。",
   },
   {
     term: "風險因子(Risk Factor)",
-    definition: "只套用到實際受影響工作項目的可追溯風險來源。",
+    definition: "只套用到真的受影響工作項目的風險來源。",
   },
   {
     term: "跨階段工作量(Cross-cutting Effort)",
     definition:
-      "商業分析、架構、專案管理、品質保證、部署與文件等橫跨多個項目的工作量。",
+      "商業分析、架構、專案管理、品質保證、部署和文件等，會橫跨多個項目的工作量。",
   },
   {
     term: "三點估算(Three-point Estimate)",
-    definition: "以樂觀、最可能及悲觀三個值描述估算不確定性。",
+    definition: "用樂觀、最可能和悲觀三個值，呈現估算的不確定性。",
   },
   {
     term: "計畫評核術(PERT)",
-    definition: "以三點估算的加權平均與範圍近似期望工作量及百分位數。",
+    definition: "用三點估算的加權平均和範圍，推算預期工作量及百分位數。",
   },
   {
     term: "管銷間接成本(Overhead)",
-    definition: "無法直接歸屬單一工作項目的供應商間接成本。",
+    definition: "無法直接算到單一工作項目的供應商間接成本。",
   },
   {
     term: "乙方成本加成率(Vendor Markup)",
-    definition: "以成本為分母計算的加成比例。",
+    definition: "加在成本上的比例。",
   },
   {
     term: "毛利率(Gross Margin)",
-    definition: "以售價為分母計算的毛利比例，與成本加成率不同。",
+    definition: "用售價計算的毛利比例，和成本加成率不同。",
   },
   {
     term: "稅基正規化(Tax Normalization)",
-    definition: "將乙方報價與模型結果換算成相同未稅基準後比較。",
+    definition: "先把乙方報價和模型結果換成相同的未稅基準，再比較。",
   },
   {
     term: "報價差異率(Quote Variance)",
-    definition: "乙方未稅報價與模型參考報價的差額，占模型參考報價的比例。",
+    definition: "乙方未稅報價和模型參考報價的差額，占模型參考報價的比例。",
   },
   {
     term: "參數集(Parameter Set)",
-    definition: "一組具版本的單位工時、乘數、比例、限制與計算政策。",
+    definition: "一組有版本的單位工時、乘數、比例、限制和計算規則。",
   },
   {
     term: "參數快照(Parameter Snapshot)",
-    definition: "案件建立或匯出時保存的完整參數副本，用於日後重算。",
+    definition: "建立或匯出案件時保存的完整參數副本，方便之後重算。",
   },
   {
     term: "計算軌跡(Calculation Trace)",
-    definition: "公式、代入值、中間結果、單位及來源的完整紀錄。",
+    definition: "公式、代入數字、中間結果、單位和來源的完整紀錄。",
   },
 ] as const;
 
@@ -149,7 +149,7 @@ const commonVariables: readonly VariableRow[] = [
   {
     symbol: METHODOLOGY_MATH.symbols.unitEffort,
     name: "單位工時(Unit Effort)",
-    definition: "每單位基礎工時。",
+    definition: "每一個單位的基本工時。",
     unit: "人時／單位",
     range: "≥ 0.25",
   },
@@ -174,40 +174,40 @@ const commonVariables: readonly VariableRow[] = [
   {
     symbol: METHODOLOGY_MATH.symbols.mostLikelyEffort,
     name: "最可能工時(Most-likely Effort)",
-    definition: "納入實作、跨階段活動與固定工時後的最可能工作量。",
+    definition: "加上實作、額外工作和固定工時後，最可能的工作量。",
     unit: "人時",
   },
   {
     symbol: METHODOLOGY_MATH.symbols.threePointBounds,
     name: "樂觀／悲觀工時(Optimistic/Pessimistic Effort)",
-    definition: "三點估算中的樂觀與悲觀工作量。",
+    definition: "三點估算中的樂觀和悲觀工作量。",
     unit: "人時",
   },
   {
     symbol: METHODOLOGY_MATH.symbols.hourlyRate,
     name: "綜合每小時成本(Blended Hourly Cost)",
-    definition: "交付人力的基礎綜合每小時成本。",
+    definition: "交付人力每小時的綜合成本。",
     unit: "新臺幣／人時",
     range: "≥ 0",
   },
   {
     symbol: METHODOLOGY_MATH.symbols.directCost,
     name: "直接成本(Direct Cost)",
-    definition: "不隨工時變動的授權、設備、差旅等成本。",
+    definition: "不會隨工時改變的授權、設備、差旅等成本。",
     unit: "新臺幣",
     range: "≥ 0",
   },
   {
     symbol: METHODOLOGY_MATH.symbols.commercialRates,
     name: "管銷／乙方成本加成／稅率",
-    definition: "管銷間接成本、成本加成與稅率。",
+    definition: "管理費、成本加成和稅率。",
     unit: "比率",
     range: "≥ 0",
   },
   {
     symbol: METHODOLOGY_MATH.symbols.vendorQuote,
     name: "乙方報價(Vendor Quote)",
-    definition: "正規化為未稅口徑後的乙方報價。",
+    definition: "換算成未稅基準後的乙方報價。",
     unit: "新臺幣",
     range: "≥ 0",
   },
@@ -217,21 +217,21 @@ const effortConversionVariables: readonly VariableRow[] = [
   {
     symbol: METHODOLOGY_MATH.symbols.percentileEffort,
     name: "指定百分位工作量(Percentile Effort)",
-    definition: "要換算的 P50、P80 或其他指定百分位工作量。",
+    definition: "要換算成其他單位的 P50、P80 或其他百分位工作量。",
     unit: "人時",
     range: "≥ 0",
   },
   {
     symbol: METHODOLOGY_MATH.symbols.hoursPerPersonDay,
     name: "每人日工時(Hours per Person-day)",
-    definition: "一個人日換算成多少人時；公開示範預設為 8。",
+    definition: "一個人日等於多少人時；公開示範預設是 8。",
     unit: "人時／人日",
     range: `> 0 且 ≤ ${publicDemoParameterSet.constraints.maximumHoursPerPersonDay}`,
   },
   {
     symbol: METHODOLOGY_MATH.symbols.daysPerPersonMonth,
     name: "每人月工作日(Days per Person-month)",
-    definition: "一個人月換算成多少工作日；公開示範預設為 20。",
+    definition: "一個人月等於多少工作日；公開示範預設是 20。",
     unit: "工作日／人月",
     range: `> 0 且 ≤ ${publicDemoParameterSet.constraints.maximumDaysPerPersonMonth}`,
   },
@@ -399,8 +399,8 @@ export default function MethodologyPage() {
         title="軟體需求成本估算的公式與定義"
       >
         <p>
-          本頁公開 EstimateTrace
-          如何從工作項目、複雜度、風險與商業參數產生模型參考區間。每個係數都有名稱、單位與限制；相同輸入、參數快照與模型版本應得到相同結果。
+          這一頁說明 EstimateTrace
+          怎麼從工作項目、複雜度、風險和成本條件，算出參考區間。每個係數都有名稱、單位和限制；相同輸入、參數快照和模型版本，會得到相同結果。
         </p>
       </PageHeader>
 
@@ -408,13 +408,13 @@ export default function MethodologyPage() {
         <Callout title="示範參數，不是產業標準" tone="warning">
           <p>
             本頁目前對應參數集 <code>{parameterLabel}</code>
-            。公開預設值只供教學與方法展示，使用者應以經授權、可追溯的組織歷史資料校準。
+            。公開預設值只用來說明工具，請在私有環境使用經授權的組織歷史資料調整。
           </p>
         </Callout>
         <Callout title="如何閱讀 P50 與 P80" tone="info">
           <p>
-            P50 與 P80 是透明情境區間的近似值，不是保證值；P80 也不是在 P50
-            上固定多加一個百分比。
+            P50 和 P80 是依公開規則算出的情境參考，不能保證結果一定會發生；P80
+            也不是在 P50 上固定多加一個百分比。
           </p>
         </Callout>
       </div>
@@ -439,31 +439,27 @@ export default function MethodologyPage() {
         </aside>
 
         <article className="methodology-content">
-          <MethodSection
-            id="range"
-            number="01"
-            title="為什麼成本估算應輸出區間"
-          >
+          <MethodSection id="range" number="01" title="為什麼成本估算要看區間">
             <p>
-              軟體需求在估算時通常仍有資訊缺口、整合依賴與交付風險。只輸出單一數字會隱藏不確定性，也容易讓使用者誤以為結果具保證性。
+              做軟體估算時，需求常有資訊缺口、系統相依和交付風險。只給一個數字會遮住這些不確定性，也容易讓人以為結果一定會發生。
             </p>
             <dl className="definition-grid">
               <div>
                 <dt>P50</dt>
                 <dd>
-                  模型的中央參考情境，用來討論最可能的工作量與成本，不代表「至少有一半機率準時」的保證。
+                  模型的中間參考情境，用來討論最可能的工作量和成本；它不代表「至少有一半機率準時」。
                 </dd>
               </div>
               <div>
                 <dt>P80</dt>
                 <dd>
-                  較保守的規劃參考，反映輸入的不確定性；不是把 P50
-                  任意加上固定緩衝。
+                  較保守的規劃參考，用來反映輸入的不確定性；不是隨意在 P50
+                  上加固定緩衝。
                 </dd>
               </div>
             </dl>
             <p>
-              實務上應同時查看範圍、主要驅動因素、假設、警示與完整計算軌跡，而不是只選一個總價。
+              實務上要一起看範圍、主要成本來源、假設、警示和完整計算過程，不要只看一個總價。
             </p>
             <CalculatorFieldLink href="/estimates/new#uncertainty">
               不確定性設定
@@ -472,8 +468,8 @@ export default function MethodologyPage() {
 
           <MethodSection id="terms" number="02" title="名詞與計量單位">
             <p>
-              本頁集中列出必要的中英名詞對照；其他頁面以中文為主，避免重複標示造成閱讀干擾。EstimateTrace
-              把人時、新臺幣、比率與無量綱乘數視為不同單位。領域計算保留完整精度，格式化與四捨五入只在顯示邊界進行。
+              這裡集中列出必要的中英文名詞；其他頁面以中文為主，閱讀更順。EstimateTrace
+              把人時、新臺幣、比率和無量綱乘數當成不同單位。計算時會保留完整精度，只在畫面顯示時格式化和四捨五入。
             </p>
             <TerminologyTable />
             <VariableTable caption="估算模型主要變數" rows={commonVariables} />
@@ -506,7 +502,7 @@ export default function MethodologyPage() {
             </div>
             <Callout title="人月不是日曆月" tone="neutral">
               <p>
-                人日與人月只是依每人日工時及每人月工作日進行的工作量換算，不直接等於專案曆月。
+                人日和人月只是依每人日工時、每人月工作日換算工作量，不等於專案經過幾個月。
               </p>
             </Callout>
             <CalculatorFieldLink href="/estimates/new#scope">
@@ -514,10 +510,12 @@ export default function MethodologyPage() {
             </CalculatorFieldLink>
           </MethodSection>
 
-          <MethodSection id="base-effort" number="03" title="工作項目基礎工時">
-            <p>
-              先將每個工作項目的數量乘以每單位基礎工時，再加總成基礎實作工時。
-            </p>
+          <MethodSection
+            id="base-effort"
+            number="03"
+            title="工作項目的基本工時"
+          >
+            <p>先用每個工作項目的數量乘上每單位工時，再加總成基本實作工時。</p>
             <Formula
               expression={METHODOLOGY_MATH.formulas.workItemBaseEffort}
               description="第 i 個工作項目的基礎工時，等於數量乘以每單位工時。"
@@ -554,7 +552,7 @@ export default function MethodologyPage() {
             <p>
               <strong>限制：</strong>
               <code>unitHours</code>{" "}
-              是示範起點。若已包含分析、實作與基本測試，後續階段工時比例不得把相同活動完整加入第二次。
+              是示範起點。如果裡面已包含分析、實作和基本測試，後面的階段比例不能再把同樣的工作完整算一次。
             </p>
             <CalculatorFieldLink href="/estimates/new#work-items">
               數量、單位工時與工作項目
@@ -563,7 +561,7 @@ export default function MethodologyPage() {
 
           <MethodSection id="complexity" number="04" title="複雜度乘數">
             <p>
-              複雜度反映單一工作項目的規則、狀態、角色、例外、整合與非功能要求，不等同於整體專案風險。
+              複雜度反映單一工作項目的規則、狀態、角色、例外、整合和非功能需求；它不等於整個專案的風險。
             </p>
             <Formula
               expression={METHODOLOGY_MATH.formulas.workItemComplexity}
@@ -608,7 +606,7 @@ export default function MethodologyPage() {
             </div>
             <p>
               <strong>限制：</strong>
-              選擇應以可觀察條件為理由，不能只為了把結果調到預期價格。
+              請根據看得到的條件選擇，不能只為了把結果調成預期價格。
             </p>
             <CalculatorFieldLink href="/estimates/new#work-items">
               工作項目複雜度
@@ -617,7 +615,7 @@ export default function MethodologyPage() {
 
           <MethodSection id="risk" number="05" title="風險因子調整">
             <p>
-              風險乘數只套用到真正受該風險因子影響的工作項目。多個乘數以乘法組合，讓每個來源仍能獨立追蹤。
+              風險乘數只會套用到真的受影響的工作項目。多個乘數會相乘，方便追查每一個來源。
             </p>
             <Formula
               expression={METHODOLOGY_MATH.formulas.workItemRiskAdjusted}
@@ -668,8 +666,8 @@ export default function MethodologyPage() {
             <div className="worked-example">
               <h3>代入範例</h3>
               <p>
-                43.2 人時套用情境覆寫的介接風險 1.20
-                時（此數值只為對齊代入範例，不是正式的高風險乘數 1.15）：
+                43.2 人時套用範例中的介接風險 1.20
+                時（這個數字只為了示範計算，不是正式的高風險乘數 1.15）：
                 <InlineFormula
                   expression={METHODOLOGY_MATH.examples.risk}
                   description="四十三點二乘以一點二零等於五十一點八四。"
@@ -679,20 +677,20 @@ export default function MethodologyPage() {
             </div>
             <p>
               <strong>安全限制：</strong>
-              風險乘積超過正式安全警戒值{" "}
+              風險乘積超過安全警戒值
               <code>
                 {publicDemoParameterSet.constraints.riskProductSafetyCap}
               </code>{" "}
-              時，系統必須提出警示並要求檢視，不得悄悄截斷。時程壓縮表示協調、平行作業、返工或加班增加的工作量，不只是縮短日曆。
+              時，系統會提出警示並要求檢查，不會悄悄截斷。時程壓縮代表協調、平行作業、返工或加班增加的工作量，不只是日曆天數變少。
             </p>
             <CalculatorFieldLink href="/estimates/new#risk-factors">
               風險因子問卷
             </CalculatorFieldLink>
           </MethodSection>
 
-          <MethodSection id="cross-cutting" number="06" title="跨階段工作量">
+          <MethodSection id="cross-cutting" number="06" title="額外工作">
             <p>
-              商業分析、架構、專案管理、品質保證、部署與文件等活動，以調整後實作工時為基礎計算。對每個階段{" "}
+              商業分析、架構、專案管理、品質保證、部署和文件等額外工作，會以調整後的實作工時為基礎計算。每個階段的
               <InlineFormula
                 expression={METHODOLOGY_MATH.symbols.phase}
                 description="第 p 個階段。"
@@ -702,7 +700,7 @@ export default function MethodologyPage() {
                 expression={METHODOLOGY_MATH.symbols.eligibleItemSet}
                 description="第 p 個階段尚未被工作項目涵蓋的適用項目集合。"
               />{" "}
-              只包含尚未在工作項目內涵蓋該階段的適用項目。
+              ，只會包含尚未在工作項目裡算過這個階段的項目。
             </p>
             <Formula
               expression={METHODOLOGY_MATH.formulas.phaseCrossCutting}
@@ -760,8 +758,8 @@ export default function MethodologyPage() {
             </div>
             <p>
               <strong>限制：</strong>
-              若工作項目已明列額外測試、部署或文件工時，對應比例應降低或設為
-              0，只加入尚未涵蓋的活動。
+              如果工作項目已經列出額外測試、部署或文件工時，對應比例要降低或設為
+              0，只加入還沒算過的工作。
             </p>
             <CalculatorFieldLink href="/estimates/new#phase-loading">
               階段工時比例與固定額外工時
@@ -770,7 +768,7 @@ export default function MethodologyPage() {
 
           <MethodSection id="three-point" number="07" title="三點估算">
             <p>
-              使用樂觀下修率與悲觀上修率，將最可能工作量轉為樂觀、最可能與悲觀三點。介面用風險描述協助選擇，不要求使用者具統計背景。
+              使用樂觀下修率和悲觀上修率，把最可能工作量轉成樂觀、最可能和悲觀三個值。介面會用風險描述幫助選擇，不需要統計背景。
             </p>
             <Formula
               expression={METHODOLOGY_MATH.formulas.optimisticEffort}
@@ -861,7 +859,7 @@ export default function MethodologyPage() {
           <MethodSection id="percentiles" number="08" title="PERT、P50 與 P80">
             <p>
               公開版使用貝塔計畫評核術(Beta-PERT)
-              的常見近似先取得期望值與標準差，再以常態近似產生百分位數。
+              的常見近似，先算出期望值和標準差，再用常態近似得到百分位數。
             </p>
             <Formula
               expression={METHODOLOGY_MATH.formulas.pertMean}
@@ -901,7 +899,7 @@ export default function MethodologyPage() {
             </div>
             <p>
               <strong>限制：</strong>
-              這是近似，不表示真實工作量服從常態分布。若三點輸入沒有歷史資料支持，結果只是透明的情境區間；公開版不執行蒙地卡羅模擬。
+              這是近似算法，不代表真實工作量一定符合常態分布。如果三點輸入沒有歷史資料支持，結果只是公開規則下的情境區間；公開版不做蒙地卡羅模擬。
             </p>
             <CalculatorFieldLink href="/estimates/new#uncertainty">
               P50／P80 的不確定性輸入
@@ -910,7 +908,7 @@ export default function MethodologyPage() {
 
           <MethodSection id="engineering-cost" number="09" title="工程成本">
             <p>
-              先用百分位工作量乘以綜合每小時成本，再加入不隨工時變動的直接成本。
+              先用百分位工作量乘上每小時綜合成本，再加上不會隨工時改變的直接成本。
             </p>
             <Formula
               expression={METHODOLOGY_MATH.formulas.laborCost}
@@ -944,8 +942,8 @@ export default function MethodologyPage() {
             </div>
             <p>
               <strong>限制：</strong>
-              若每小時成本已包含管銷間接成本，管銷間接成本率必須設為
-              0，避免重複計入。
+              如果每小時成本已經包含管理和間接成本，管理和間接成本率要設為
+              0，避免重複計算。
             </p>
             <CalculatorFieldLink href="/estimates/new#commercial-terms">
               每小時成本與直接成本
@@ -955,10 +953,10 @@ export default function MethodologyPage() {
           <MethodSection
             id="commercial-adjustments"
             number="10"
-            title="管銷、保固與乙方成本加成"
+            title="管理費、保固與乙方成本加成"
           >
             <p>
-              管銷間接成本、保固與上線後密集支援，以及乙方成本加成分開呈現，讓使用者能知道模型參考報價如何由工程成本形成。
+              管理和間接成本、保固和上線後支援，以及乙方成本加成會分開列出，讓你看得懂參考報價怎麼從工程成本算出來。
             </p>
             <Formula
               expression={METHODOLOGY_MATH.formulas.fullCost}
@@ -978,7 +976,7 @@ export default function MethodologyPage() {
                 {
                   symbol: METHODOLOGY_MATH.symbols.overheadRatio,
                   name: "管銷間接成本率",
-                  definition: "供應商管銷與間接成本比例。",
+                  definition: "供應商管理和間接成本的比例。",
                   unit: "比率",
                   range: "≥ 0",
                 },
@@ -999,7 +997,7 @@ export default function MethodologyPage() {
                 {
                   symbol: METHODOLOGY_MATH.symbols.taxRate,
                   name: "稅率",
-                  definition: "用於含稅顯示與報價正規化的稅率。",
+                  definition: "用來顯示含稅金額和統一報價基準的稅率。",
                   unit: "比率",
                   range: "≥ 0",
                 },
@@ -1022,8 +1020,8 @@ export default function MethodologyPage() {
                   expression={METHODOLOGY_MATH.formulas.grossMargin}
                   description="成本除以一減毛利率。"
                 />
-                ；公開版不混用兩種定義，也不把 P80
-                不確定性再命名為風險準備金後重複加價。
+                ；公開版不會混用兩種定義，也不會把 P80
+                的不確定性改叫風險準備金後再加價一次。
               </p>
             </Callout>
             <CalculatorFieldLink href="/estimates/new#commercial-terms">
@@ -1031,9 +1029,13 @@ export default function MethodologyPage() {
             </CalculatorFieldLink>
           </MethodSection>
 
-          <MethodSection id="tax-normalization" number="11" title="稅基正規化">
+          <MethodSection
+            id="tax-normalization"
+            number="11"
+            title="統一未稅基準"
+          >
             <p>
-              模型與乙方報價預設都正規化成未稅口徑再比較，避免把含稅與未稅數字直接相減。
+              模型和乙方報價會先換成未稅金額再比較，避免直接拿含稅和未稅數字相減。
             </p>
             <Formula
               expression={METHODOLOGY_MATH.formulas.normalizeTaxInclusiveQuote}
@@ -1047,7 +1049,7 @@ export default function MethodologyPage() {
                 }
                 description="未稅乙方報價等於輸入報價。"
               />
-              。結果可另外顯示含稅數字，但差異率使用相同未稅基準。
+              。結果也可以另外顯示含稅數字，但差異率一律用相同的未稅基準。
             </p>
             <div className="worked-example">
               <h3>代入範例</h3>
@@ -1062,7 +1064,7 @@ export default function MethodologyPage() {
             </div>
             <p>
               <strong>限制：</strong>
-              公開預設稅率只是示範值；使用者必須依案件適用稅制確認。
+              公開預設稅率只是示範值；請依案件適用的稅制確認。
             </p>
             <CalculatorFieldLink href="/estimates/new#vendor-quote">
               報價金額與稅額基礎
@@ -1071,8 +1073,8 @@ export default function MethodologyPage() {
 
           <MethodSection id="variance" number="12" title="乙方報價差異">
             <p>
-              先計算乙方未稅報價與 P50／P80
-              未稅模型參考報價的金額差，再以各參考報價為分母換算差異率與比率。
+              先算出乙方未稅報價和 P50／P80
+              未稅參考報價的金額差，再算出差異率和比率。
             </p>
             <Formula
               expression={METHODOLOGY_MATH.formulas.vendorDifferenceP50}
@@ -1115,8 +1117,8 @@ export default function MethodologyPage() {
             />
             <p>
               <strong>除以零：</strong>
-              模型參考報價為 0
-              時，差異率與比率沒有定義，介面必須顯示「無法計算」，不得顯示無限值、非數值或假裝為
+              模型參考報價是 0
+              時，差異率和比率無法計算。介面會顯示「無法計算」，不會顯示無限值、非數值或假裝是
               0%。
             </p>
             <CalculatorFieldLink href="/estimates/new#vendor-quote">
@@ -1126,61 +1128,61 @@ export default function MethodologyPage() {
 
           <MethodSection id="interpretation" number="13" title="結果如何解讀">
             <p>
-              結果先呈現模型來源與假設，再顯示中性的比較區間。標籤不是採購或法律結論，而是下一輪釐清的提示。
+              結果會先列出模型來源和假設，再顯示中性的比較區間。標籤不是採購或法律結論，只是幫助下一輪確認的提示。
             </p>
             <div className="interpretation-list">
               <article>
                 <h3>明顯低於模型區間</h3>
-                <p>請檢查漏項、交付範圍、追加條件或被低估的風險。</p>
+                <p>請確認是否漏算項目、交付範圍、追加條件或被低估的風險。</p>
               </article>
               <article>
                 <h3>接近模型參考區間</h3>
-                <p>仍需確認假設、稅基、工作量分解與合約範圍一致。</p>
+                <p>仍要確認假設、稅基、工作量拆解和合約範圍是否一致。</p>
               </article>
               <article>
                 <h3>高於模型 P50</h3>
-                <p>請確認管銷間接成本、保固、第三方成本與風險準備金來源。</p>
+                <p>請確認管理費、保固、第三方成本和風險準備金從哪裡來。</p>
               </article>
               <article>
                 <h3>高於模型 P80</h3>
-                <p>建議要求角色別工時、風險明細、交付與保固邊界。</p>
+                <p>建議確認各角色工時、風險明細、交付和保固範圍。</p>
               </article>
             </div>
             <p>
-              應依序查看 P50／P80
-              工作量與報價、乙方報價比較、主要驅動因素、分解明細、假設與警示，以及完整計算軌跡。正負差異不可只靠紅綠色表示。
+              建議依序看 P50／P80
+              的工作量和報價、乙方報價比較、主要成本來源、拆解明細、假設、警示和完整計算過程。差異不能只用紅綠色表示。
             </p>
             <CalculatorFieldLink href="/estimates/new#vendor-quote">
               結果與報價比較
             </CalculatorFieldLink>
           </MethodSection>
 
-          <MethodSection id="double-counting" number="14" title="常見重複計入">
+          <MethodSection id="double-counting" number="14" title="常見重複計算">
             <p>
-              同一成本若同時出現在單位工時、階段工時比例、風險因子、管銷間接成本或
-              P80 不確定性，結果會被重複放大。
+              同一筆成本如果同時算在單位工時、階段工時比例、風險、管理費或 P80
+              不確定性裡，結果就會被重複放大。
             </p>
             <ul className="warning-list">
               <li>
                 <strong>單位工時與階段工時比例：</strong>
-                若每單位工時已含分析與基本測試，不再加入完整的商業分析或品質保證工時。
+                如果每單位工時已含分析和基本測試，就不要再加入完整的商業分析或品質保證工時。
               </li>
               <li>
                 <strong>明列工作項目與跨階段活動：</strong>
-                已建立額外測試、部署或文件工作項目時，對應階段只加入尚未涵蓋的部分。
+                已經建立額外測試、部署或文件工作項目時，對應階段只加入還沒算過的部分。
               </li>
               <li>
                 <strong>每小時成本與管銷間接成本：</strong>
-                綜合費率已含管銷成本時，管銷間接成本率設為 0。
+                綜合費率已含管理成本時，管理和間接成本率請設為 0。
               </li>
               <li>
                 <strong>風險與不確定性：</strong>
-                風險乘數調整可預期的額外工作量；P80
-                描述估算分布，不再另加同義的風險準備金。
+                風險乘數用來調整可預期的額外工作量；P80
+                用來描述估算範圍，不要再加入同樣意思的風險準備金。
               </li>
               <li>
                 <strong>保固與交付：</strong>
-                交付成本已包含上線後密集支援時，不再加入相同保固成本。
+                交付成本已包含上線後密集支援時，不要再加入同一筆保固成本。
               </li>
             </ul>
             <CalculatorFieldLink href="/estimates/new#phase-loading">
@@ -1191,28 +1193,26 @@ export default function MethodologyPage() {
           <MethodSection
             id="limitations"
             number="15"
-            title="模型限制與適用邊界"
+            title="模型的限制與適用範圍"
           >
             <ul className="warning-list">
-              <li>公開參數沒有宣稱跨產業精準，也不是市場費率或採購底價。</li>
+              <li>公開參數不一定適用每個產業，也不是市場費率或採購底價。</li>
               <li>
-                結果品質受需求拆解、單位工時、風險選擇理由與商業假設品質影響。
+                結果好不好，取決於需求拆解、單位工時、選擇風險的理由和成本假設。
               </li>
-              <li>PERT 與常態近似是透明近似，不代表真實工時分布。</li>
+              <li>PERT 和常態近似只是公開的近似方法，不代表真實工時分布。</li>
               <li>
-                模型不處理匯率、自動稅率、通膨、授權行情或第三方報價更新。
-              </li>
-              <li>
-                公開版不建立實際工時回饋迴圈，需由組織另行以合規歷史資料校準。
+                模型不會處理匯率、自動稅率、通膨、授權行情或第三方報價更新。
               </li>
               <li>
-                本工具不作出「報價合理／不合理」的絕對結論，也不取代合約審查。
+                公開版不會用實際工時自動回饋調整；公司應在獨立私有系統使用合規的歷史資料校準。
               </li>
+              <li>本工具不會判定報價能不能接受，也不能取代合約審查。</li>
             </ul>
             <p>
               每次分享結果都應保留 <code>modelVersion</code>、
               <code>parameterSetId</code>、<code>parameterSetVersion</code>
-              、輸入與參數快照，讓後續能重算與解釋版本差異。
+              、輸入和參數快照，方便日後重算和說明版本差異。
             </p>
             <CalculatorFieldLink href="/estimates/new#scope">
               案件範圍與估算假設
@@ -1225,38 +1225,39 @@ export default function MethodologyPage() {
             title="其他估算方法與後續擴充"
           >
             <p>
-              建構性成本模型二代(COCOMO
-              II)提供軟體成本估算的重要背景；功能規模度量法(COSMIC)與功能點(Function
-              Point)則從功能規模切入。它們需要不同輸入、校準資料與模型假設，公開版不把名稱借來包裝目前的由下而上參數估算模型。
+              建構性成本模型二代(COCOMO II)
+              是軟體成本估算的重要背景；功能規模度量法(COSMIC) 和功能點(Function
+              Point)
+              則從功能規模著手。它們需要不同的輸入、校準資料和模型假設；公開版不會借用這些名稱來包裝目前的估算模型。
             </p>
             <dl className="definition-grid">
               <div>
                 <dt>建構性成本模型二代(COCOMO II)</dt>
                 <dd>
-                  適合在具備規模、尺度因子、工作量乘數與組織校準資料時作為獨立估算模型或交叉檢查。
+                  當有規模、尺度因子、工作量乘數和公司校準資料時，適合拿來做獨立估算或交叉檢查。
                 </dd>
               </div>
               <div>
                 <dt>功能規模度量法(COSMIC)／功能點(Function Point)</dt>
                 <dd>
-                  可建立較一致的功能規模基準，但需要明確的計數規則、檢視流程與歷史生產力資料。
+                  可以建立較一致的功能規模基準，但需要明確的計數規則、檢查流程和歷史生產力資料。
                 </dd>
               </div>
               <div>
                 <dt>蒙地卡羅模擬(Monte Carlo simulation)</dt>
                 <dd>
-                  未來可用輸入分布取代單一近似，但必須公開抽樣規則、亂數種子、可重現性與結果解讀方式。
+                  未來可以用輸入分布取代單一近似，但要公開抽樣規則、亂數種子、重現方式和結果說明。
                 </dd>
               </div>
               <div>
                 <dt>組織校準</dt>
                 <dd>
-                  應在獨立私有專案處理實際工時、角色權限控管、不可變更的版本、稽核紀錄與資料保護，不能提交回公開上游專案。
+                  實際工時、角色權限、不可變更版本、稽核紀錄和資料保護，應在獨立的私有系統處理，不能提交回公開專案。
                 </dd>
               </div>
             </dl>
             <p>
-              後續模型若改變公式或結果語意，必須升級模型版本、提供遷移說明，且不得無聲覆寫舊案件快照。
+              未來如果改變公式或結果的意思，必須升級模型版本、提供遷移說明，也不能悄悄覆寫舊案件快照。
             </p>
             <div className="button-group" data-print="hide">
               <Link className="button button--primary" href="/estimates/new">

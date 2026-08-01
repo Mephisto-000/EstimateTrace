@@ -20,14 +20,14 @@ export function ScopeStep({
           範圍與假設
         </h1>
         <p>
-          使用中性描述界定範圍。名稱與背景只會保存在目前瀏覽器，但仍不應包含敏感資料。
+          請用中性、去識別化的文字說明範圍。名稱和背景只會存到目前瀏覽器，但仍不要放敏感資料。
         </p>
       </header>
 
       <div className="privacy-banner">
         <strong>公開網站資料提醒</strong>
         <p>
-          請勿輸入公司機密、個人資料、真實乙方名稱、受保密協議保護的內容或未公開報價；共享裝置上的其他使用者可能看見本機資料。
+          請不要輸入公司機密、個人資料、真實乙方名稱、受保密協議（NDA）保護的內容或未公開報價；共用裝置上的其他人可能看到本機資料。
         </p>
       </div>
 
@@ -38,7 +38,7 @@ export function ScopeStep({
           onClick={() => {
             if (
               window.confirm(
-                "確定重設為公開示範參數？這會重設單位工時、跨階段工作量、不確定性與商業參數，但保留範圍、工作項目內容、風險選擇與乙方報價。",
+                "確定要重設為公開示範參數嗎？這會重設單位工時、額外工作、不確定性和成本條件，但會保留範圍、工作項目、風險選擇和乙方報價。",
               )
             ) {
               updateEstimate(resetToPublicDemoParameters);
@@ -71,7 +71,7 @@ export function ScopeStep({
           }
         />
         <span className="field__help" id="case-name-help">
-          不要使用真實客戶、乙方或內部系統名稱。
+          不要填真實客戶、乙方或內部系統名稱。
         </span>
         {errorFor("case-name") ? (
           <span className="field__error" id="case-name-error">
@@ -102,7 +102,7 @@ export function ScopeStep({
         />
         <span className="field__meta" id="case-description-help">
           {estimate.description.length} / 1,000
-          字；請列出假設，不要貼需求書原文。
+          字；請寫下假設，不要貼上需求書原文。
         </span>
         {errorFor("case-description") ? (
           <span className="field__error" id="case-description-error">
@@ -112,8 +112,8 @@ export function ScopeStep({
       </div>
 
       <fieldset>
-        <legend>工時計量假設</legend>
-        <p className="field__help">只用於工作量換算；人月不等於日曆月。</p>
+        <legend>工時換算方式</legend>
+        <p className="field__help">這只用來換算工作量；人月不等於日曆月。</p>
         <div className="form-grid form-grid--two">
           <div className="field">
             <label htmlFor="hours-per-day">每人日小時</label>

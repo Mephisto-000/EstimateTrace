@@ -127,16 +127,16 @@ describe("ResultView", () => {
 
     const vendorComparison = screen
       .getByRole("heading", {
-        name: "明顯低於模型區間，請檢查漏項或追加風險。",
+        name: "明顯低於模型區間，請確認是否漏算項目或風險。",
       })
       .closest("section");
     expect(vendorComparison).not.toBeNull();
     expect(
-      within(vendorComparison!).getByText(/正規化為未稅 \$47,619/u),
+      within(vendorComparison!).getByText(/換算為未稅後是 \$47,619/u),
     ).toBeVisible();
     expect(
       within(vendorComparison!).getByText(
-        "是否包含完整的系統整合測試、使用者驗收測試與回歸測試？",
+        "報價是否包含完整的系統整合測試、使用者驗收測試和回歸測試？",
       ),
     ).toBeVisible();
     expect(
@@ -144,7 +144,7 @@ describe("ResultView", () => {
     ).toHaveLength(2);
 
     const drivers = screen
-      .getByRole("heading", { name: "主要成本驅動因素" })
+      .getByRole("heading", { name: "主要成本來源" })
       .closest("section");
     expect(drivers).not.toBeNull();
     expect(within(drivers!).getByText("P50 人力成本")).toBeVisible();
@@ -159,7 +159,7 @@ describe("ResultView", () => {
     expect(within(drivers!).getByText("$7,539")).toBeVisible();
     expect(
       within(drivers!).getByText(
-        "P50 模型參考報價的前三大可加總成本構成；全部以新臺幣比較。",
+        "這裡列出 P50 參考報價中金額最高的三個成本項目，全部以新臺幣呈現。",
       ),
     ).toBeVisible();
 

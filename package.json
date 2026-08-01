@@ -1,8 +1,8 @@
 {
   "name": "estimate-trace",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "private": true,
-  "description": "提供可追溯的軟體需求成本估算與乙方報價分析。",
+  "description": "協助看懂工時、成本和乙方報價來源的軟體需求估算工具。",
   "license": "MIT",
   "engines": {
     "node": ">=24.0.0 <25"
