@@ -1,6 +1,6 @@
 {
   "name": "estimate-trace",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "description": "提供可追溯的軟體需求成本估算與乙方報價分析。",
   "license": "MIT",

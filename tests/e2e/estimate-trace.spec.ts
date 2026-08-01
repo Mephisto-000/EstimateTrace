@@ -246,6 +246,15 @@ test.describe("公開內容", () => {
     await expect(
       page.getByText("資料留在瀏覽器", { exact: true }),
     ).toBeVisible();
+    for (const removedCopy of [
+      "可追溯的軟體估算",
+      "不啟用使用分析",
+      "一條清楚的估算路徑",
+      "可說明性優先",
+      "準備開始",
+    ]) {
+      await expect(page.getByText(removedCopy, { exact: true })).toHaveCount(0);
+    }
     await expectNoSeriousAccessibilityIssues(page);
 
     await page.evaluate(() => {

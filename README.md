@@ -120,6 +120,7 @@ Domain engine 不依賴 React、Next.js、Web Storage、clock、UUID 或 network
 - [Dependency management](docs/dependency-management.md)
 - [Privacy and security](docs/privacy-and-security.md)
 - [Sample data policy](docs/sample-data-policy.md)
+- [v0.1.6 發行說明](docs/releases/v0.1.6.md)
 - [v0.1.5 發行說明](docs/releases/v0.1.5.md)
 
 ## Vercel

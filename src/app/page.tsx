@@ -56,7 +56,6 @@ export default function HomePage() {
       <section className="hero">
         <div className="hero__inner">
           <div className="hero__copy">
-            <p className="eyebrow">可追溯的軟體估算</p>
             <h1>讓每一筆估算，都能被檢查、重算與說明。</h1>
             <p className="hero__lead">
               EstimateTrace 協助甲方資訊科技商業分析師將需求拆成工作項目，產生
@@ -74,9 +73,7 @@ export default function HomePage() {
                 查看公式與定義
               </Link>
             </div>
-            <p className="hero__privacy-note">
-              無需登入 · 資料只留在瀏覽器 · 不啟用使用分析
-            </p>
+            <p className="hero__privacy-note">無需登入 · 資料只留在瀏覽器</p>
           </div>
           <aside className="hero__trace" aria-label="估算軌跡示意">
             <p className="hero__trace-label">估算軌跡</p>
@@ -118,7 +115,6 @@ export default function HomePage() {
 
         <section className="content-section" aria-labelledby="workflow-title">
           <div className="section-heading">
-            <p className="eyebrow">一條清楚的估算路徑</p>
             <h2 id="workflow-title">三步驟，把討論從總價帶回成本來源</h2>
           </div>
           <ol className="workflow-grid">
@@ -136,7 +132,6 @@ export default function HomePage() {
 
         <section className="content-section" aria-labelledby="principles-title">
           <div className="section-heading">
-            <p className="eyebrow">可說明性優先</p>
             <h2 id="principles-title">適合拿來說明，不是假裝精準的黑盒子</h2>
           </div>
           <div className="card-grid card-grid--three">
@@ -151,7 +146,6 @@ export default function HomePage() {
 
         <section className="closing-panel" aria-labelledby="closing-title">
           <div>
-            <p className="eyebrow">準備開始</p>
             <h2 id="closing-title">先用虛構或去識別化內容完成一筆估算。</h2>
             <p>
               新使用者可從內建範例理解輸入方式，再依組織歷史資料校準示範參數。
