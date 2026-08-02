@@ -18,6 +18,9 @@ blob-report/
 !.env.example
 .vercel/
 
+# Local Excel workbooks (may include private estimate data)
+/excel/
+
 # Logs and operating-system / editor state
 *.log
 .DS_Store
