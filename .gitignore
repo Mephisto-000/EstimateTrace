@@ -21,6 +21,9 @@ blob-report/
 # Local Excel workbooks (may include private estimate data)
 /excel/
 
+# Local GitHub Ruleset export (upload manually in repository settings)
+/github-main-branch-ruleset.json
+
 # Logs and operating-system / editor state
 *.log
 .DS_Store
